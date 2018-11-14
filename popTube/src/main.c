@@ -1,13 +1,30 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <SDL2/SDL.h>
+#include <windows.h>
+#include <mysql.h>
+#include <winsock.h>
 
 
 int main(int argc, char *argv[]) {
      
+    
     int status =  EXIT_FAILURE;
     SDL_Window *fenetre = NULL;
     SDL_Event event; 
+
+    MYSQL mysql;
+    mysql_init(&mysql);
+    mysql_options(&mysql,MYSQL_READ_DEFAULT_GROUP,"option");
+
+    if(mysql_real_connect(&mysql,"localhost","root","root","sys",0,NULL,0))
+    {
+        mysql_close(&mysql);
+    }
+    else
+    {
+        printf("Une erreur s'est produite lors de la connexion à la BDD!");
+    }
      
     // Initialisation + vérification de la SDL : VIDEO.
     if (SDL_Init(SDL_INIT_VIDEO) != 0 ) {

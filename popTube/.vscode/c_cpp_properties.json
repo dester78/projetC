@@ -4,7 +4,7 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}\\include",
-                "${workspaceRoot}"
+                "C:/Program Files (x86)/MySQL/MySQL Connector C 6.1/include"
             ],
             "defines": [
                 "_DEBUG",

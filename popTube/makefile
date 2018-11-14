@@ -3,7 +3,7 @@ CC=gcc
 
 S_DIR=D:\projetC\popTube\src
 
-CPPFLAGS = -I  D:\projetC\popTube\include
+CPPFLAGS = -I D:\projetC\popTube\include -I 'C:\Program Files (x86)\MySQL\MySQL Connector C 6.1\include'
 
 
 #CFLAGS current variable for compilation options   
@@ -13,9 +13,9 @@ CPPFLAGS = -I  D:\projetC\popTube\include
 CFLAGS=-W -Wall -ansi -pedantic -std=c99 
 
 #LDFLAGS current variable for link editing 
-LDFLAGS = -L D:\projetC\popTube\lib
+LDFLAGS = -L D:\projetC\popTube\lib -L 'C:\Program Files (x86)\MySQL\MySQL Connector C 6.1\lib'
 
-LDLIBS = -lmingw32 -lSDL2main -lSDL2  
+LDLIBS = -lmingw32 -lSDL2main -lSDL2  -lmysql
 # curent variable for executable 
 EXEC=main
 
