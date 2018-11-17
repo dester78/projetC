@@ -5,8 +5,10 @@ CC=gcc
 P_DIR=D:\projetC
 #Source DIR
 S_DIR=popTube\src
+#Header DIR
+H_DIR=popTube\include
 
-CPPFLAGS = -I $(P_DIR)\popTube\include -I 'C:\Program Files (x86)\MySQL\MySQL Connector C 6.1\include'
+CPPFLAGS = -I $(P_DIR)\$(H_DIR) -I 'C:\Program Files (x86)\MySQL\MySQL Connector C 6.1\include'
 
 
 #CFLAGS current variable for compilation options   
@@ -22,20 +24,17 @@ LDLIBS = -lmingw32 -lSDL2main -lSDL2  -lmysql
 # curent variable for executable 
 EXEC=main
 
-all: 
-	$(CC) $(CFLAGS) $(P_DIR)\$(S_DIR)\main.c -o $(EXEC) $(LDFLAGS) $(CPPFLAGS)  $(LDLIBS)
-	
-#hello: main.o main.o
-#	$(CC) -o hello hello.o main.o $(LDFLAGS)
+all: $(EXEC)
 
-#hello.o: hello.c
-#	$(CC) -o hello.o -c hello.c $(CFLAGS)
+$(EXEC): fileReader.o main.o
+	$(CC) $(CFLAGS) -o	$(EXEC) fileReader.o main.o  $(LDFLAGS) $(CPPFLAGS)  $(LDLIBS)
 
-#main.o: main.c hello.h
-#	$(CC) -o main.o -c main.c $(CFLAGS)
+main.o: $(P_DIR)\$(S_DIR)\main.c $(P_DIR)\$(H_DIR)\fileReader.h 
+	$(CC)  -o main.o -c $(P_DIR)\$(S_DIR)\main.c $(CFLAGS) $(CPPFLAGS) 
 
-#clean:
-#	rm -rf *.o
+fileReader.o: $(P_DIR)\$(S_DIR)\fileReader.c 
+	$(CC)   -o fileReader.o -c $(P_DIR)\$(S_DIR)\fileReader.c $(CFLAGS)
 
-mrproper : clean
-	del main
+clean:
+	rm -rf *.o
+
