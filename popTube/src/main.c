@@ -10,15 +10,51 @@ int main(int argc, char *argv[]) {
     char *configFileName="popTube.ini";
     char *openMode="r";
     FILE *configFile;
-    DbConfig newDbConfig;
+    DbConfig *newDbConfig;
 
     configFile=openFile(configFileName,openMode);
-        if((configFile=openFile(configFileName,openMode))!=NULL){
-            
-            printf("OK");
-            initDbConfig(configFile);
 
+    initDbConfig(configFile,newDbConfig);
+
+    printf("%s",(*newDbConfig).host);
+
+    MYSQL *mysql;
+    /* Initialisation bibliotheque mysql */
+    if (mysql_library_init(0, NULL, NULL) == 0)
+    {
+        /* Initialisation du pointeur MYSQL */
+        mysql = mysql_init(NULL);
+        if (mysql != NULL)
+        {
+            fprintf(stdout, "[OK] mysql_init\n");
+ 
+            /* Connexion au serveur mysql */
+            if (mysql_real_connect(mysql, (*newDbConfig).host,(*newDbConfig).user, (*newDbConfig).passwd, (*newDbConfig).db, 0, NULL, 0) != NULL)
+            {
+                fprintf(stdout, "[OK] mysql_real_connect\n");
+            }
+            else
+            {
+                fprintf(stderr, "[ERR] mysql_real_connect : '%s'\n", mysql_error(mysql));
+            }
+ 
+            /* Fermeture de la connexion / Liberation memoire mysql */
+            mysql_close(mysql);
+            mysql = NULL;
         }
+        else
+        {
+            perror("mysql_init");
+        }
+ 
+        /* Fermeture de la bibliotheque */
+        mysql_library_end();
+    }
+    else
+    {
+        fprintf(stderr, "[ERR] mysql_library_init\n");
+    }
+ 
 
     return 0;
 
