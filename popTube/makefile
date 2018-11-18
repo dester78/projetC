@@ -29,11 +29,11 @@ all: $(EXEC)
 $(EXEC): fileReader.o main.o
 	$(CC) $(CFLAGS) -o	$(EXEC) fileReader.o main.o  $(LDFLAGS) $(CPPFLAGS)  $(LDLIBS)
 
-main.o: $(P_DIR)\$(S_DIR)\main.c $(P_DIR)\$(H_DIR)\fileReader.h 
+main.o: $(P_DIR)\$(S_DIR)\main.c $(P_DIR)\$(H_DIR)\fileReader.h $(P_DIR)\$(H_DIR)\structures.h 
 	$(CC)  -o main.o -c $(P_DIR)\$(S_DIR)\main.c $(CFLAGS) $(CPPFLAGS) 
 
-fileReader.o: $(P_DIR)\$(S_DIR)\fileReader.c 
-	$(CC)   -o fileReader.o -c $(P_DIR)\$(S_DIR)\fileReader.c $(CFLAGS)
+fileReader.o: $(P_DIR)\$(S_DIR)\fileReader.c $(P_DIR)\$(H_DIR)\fileReader.h $(P_DIR)\$(H_DIR)\structures.h 
+	$(CC)   -o fileReader.o -c $(P_DIR)\$(S_DIR)\fileReader.c $(CFLAGS) $(CPPFLAGS)
 
 clean:
 	rm -rf *.o
