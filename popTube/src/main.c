@@ -5,16 +5,22 @@
 #include <mysql.h>
 
 
+
 int main(int argc, char *argv[]) {
      
     char *configFileName="popTube.ini";
     char *openMode="r";
     FILE *configFile;
     DbConfig *newDbConfig;
+    int lastRow;
+    int *arrayRowChar;
+
 
     configFile=openFile(configFileName,openMode);
+    arrayRowChar=countFileRowChar(configFile,&lastRow);
+    returnFileParamaters(configFile,arrayRowChar,lastRow);
 
-    initDbConfig(configFile,newDbConfig);
+    printf("tutu");
 
     printf("%s",(*newDbConfig).host);
 

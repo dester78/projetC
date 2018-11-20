@@ -32,6 +32,9 @@ $(EXEC): fileReader.o main.o
 main.o: $(P_DIR)\$(S_DIR)\main.c $(P_DIR)\$(H_DIR)\fileReader.h $(P_DIR)\$(H_DIR)\structures.h 
 	$(CC)  -o main.o -c $(P_DIR)\$(S_DIR)\main.c $(CFLAGS) $(CPPFLAGS) 
 
+#structure.o: $(P_DIR)\$(H_DIR)\structure.h $(P_DIR)\$(S_DIR)\structures.c
+
+
 fileReader.o: $(P_DIR)\$(S_DIR)\fileReader.c $(P_DIR)\$(H_DIR)\fileReader.h $(P_DIR)\$(H_DIR)\structures.h 
 	$(CC)   -o fileReader.o -c $(P_DIR)\$(S_DIR)\fileReader.c $(CFLAGS) $(CPPFLAGS)
 
