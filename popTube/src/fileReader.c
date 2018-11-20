@@ -26,21 +26,12 @@ void initDbConfig(FILE *configFile, DbConfig *newDbConfig){
     char *fileRow; 
     char searchChar[2];
     int counterRow;
-    int p=0;
 
     arrayRowChar=countFileRowChar(configFile,&lastRow);
 
-    // printf("%d",lastRow);
     
     for(counterRow=0;counterRow<lastRow;counterRow++){
 
-        //printf("position : %d",ftell(configFile));
-        // if(counterRow==0){
-        //      int sizeRow=arrayRowChar[counterRow]-ftell(configFile)+1;
-        // }
-        // size_t sizeRow=arrayRowChar[counterRow];
-        //printf("sizeRow : %d ",sizeRow);
-        //printf("%d",arrayRowChar[counterRow]+1);
         fileRow=malloc(sizeof(char)*(arrayRowChar[counterRow]+1));
 
         if(fileRow!=NULL){
@@ -52,7 +43,8 @@ void initDbConfig(FILE *configFile, DbConfig *newDbConfig){
 
 
             //printf("position : %d caractere : %d \n",ftell(configFile),arrayRowChar[counterRow]);
-            deleteEndRow(fileRow);
+            deleteEndRow(&fileRow);
+            printf("%s",fileRow);
             //strncpy(searchChar,fileRow,1);
             // free(fileRow);
             // printf("%s",fileRow[0]);
@@ -88,9 +80,10 @@ void initDbConfig(FILE *configFile, DbConfig *newDbConfig){
             // printf("caractere : %c",searchChar[0]);
             // printf("%d : %d : %s",counterRow,arrayRowChar[counterRow],fileRow);
             //printf("<<<<<<<<<<nbchar:%d nbrow: %d row: %s sizeRow: %d :>>>>>>>>>>>",arrayRowChar[counterRow], counterRow, fileRow,strlen(fileRow));
-            
+            free(fileRow);
+        
         }
-        free(fileRow);
+        
     }
 
     free(arrayRowChar);
@@ -135,93 +128,139 @@ int *countFileRowChar(FILE *file, int *lastRow){
 
 }
 
-void deleteEndRow( char *row){
+void deleteEndRow( char **row){
 
 char *bufferRow;
-char *p;
 int counterChar;
-size_t sizeRow;
-
-// printf("%s",*row);
-//printf("%s",*row+1);
-sizeRow=strlen(row);
+int sizeRow;
 
 
-    if(strcmp((row+strlen(row)-1),"\n")==0){
+sizeRow=strlen(*row);
 
-        printf("too");
-    // counterChar=0;
-    // bufferRow=malloc(sizeof(char));
+    if(*(*row+sizeRow-1)=='\n'){
 
-    //     while(strcmp((*row+counterChar),"\n")!=0){
-
-    //         // p=*row+counterChar;
-    //         // counterChar--;
-    //         // printf("%s",bufferRow);
-    //         bufferRow=realloc(bufferRow,sizeof(char)*(counterChar+1));
-    //         bufferRow[counterChar]=*row+strlen((*row)-(counterChar+1));
-    //         counterChar++;
-
-    //         printf("%s",bufferRow);
-
-
-    //     }
-        //printf("%d\n",sizeRow);
-        // printf("%s \n",*row);
-        // printf("taille %d ",sizeof(char)*strlen(row));
-        //  printf("%s",row+sizeRow-1);
-        //  printf("%s",row);
-        // printf("%d : ",sizeRow);
         bufferRow=malloc(sizeof(char)*(sizeRow+1));
-        // *(bufferRow)=*(row+1);
-       
-        strcpy(bufferRow,row);
-        // printf(" %c \n", *(*(row+1)));
-        // printf(" %c \n",*(bufferRow+2));
-        // printf("%s",*row);
+
+        strcpy(bufferRow,*row);
+
         free(row);
-        // free(row);
-        printf("toto");
 
-        row=malloc(sizeof(char)*(sizeRow+1));
-        // printf("%s",*row);
-        counterChar=0;
-        // row=malloc(sizeof(char));
-        // printf("tutu");
-        strcpy(row,*(bufferRow+1));
-        printf("%c",*(row+1));
-        while(*(bufferRow+counterChar)!='\n'){
-            // printf("%c",*(bufferRow+counterChar));
-            // row=realloc(row,sizeof(char)*counterChar);
-            // strcat(row,*(bufferRow+counterChar));
-            counterChar++;
+        *row=malloc(sizeof(char)*(sizeRow));
+
+        for(counterChar=0;counterChar<sizeRow-1;counterChar++){
+            *(*row+counterChar)=bufferRow[counterChar];
         }
-        // printf("%d",strlen(row));
-
-
-
-        // free(*row);
-        // row=malloc(sizeof(char)*(sizeRow));
-        // strcpy(row,bufferRow);
-
-        // printf("%s",row);
-        // // printf("%d",sizeof(row));
-        // // printf("%d",sizeof(bufferRow));
-        // *row=(char*)malloc(sizeof(char*)*sizeRow);
-        // free(row);
-        // // row=malloc(sizeof(char*)*(sizeRow+1));
-        // printf("%d",strlen(bufferRow));
-        // printf("%s",bufferRow);
-
-        // // strncpy(row,bufferRow,sizeRow+1);
-        
+        *(*row+counterChar)='\0';
         free(bufferRow);
-        // printf("%s",row);
         
     }
     
 
 }
+
+
+
+
+// void deleteEndRow( char *row){
+
+// char *bufferRow;
+// char *p;
+// int counterChar;
+// size_t sizeRow;
+
+// // printf("%s",*row);
+// //printf("%s",*row+1);
+// sizeRow=strlen(row);
+
+
+
+//     if(strcmp((row+strlen(row)-1),"\n")==0){
+
+//         printf("too");
+//     // counterChar=0;
+//     // bufferRow=malloc(sizeof(char));
+
+//     //     while(strcmp((*row+counterChar),"\n")!=0){
+
+//     //         // p=*row+counterChar;
+//     //         // counterChar--;
+//     //         // printf("%s",bufferRow);
+//     //         bufferRow=realloc(bufferRow,sizeof(char)*(counterChar+1));
+//     //         bufferRow[counterChar]=*row+strlen((*row)-(counterChar+1));
+//     //         counterChar++;
+
+//     //         printf("%s",bufferRow);
+
+
+//     //     }
+//         //printf("%d\n",sizeRow);
+//         // printf("%s \n",*row);
+//         // printf("taille %d ",sizeof(char)*strlen(row));
+//         //  printf("%s",row+sizeRow-1);
+//         //  printf("%s",row);
+//         // printf("%d : ",sizeRow);
+//         bufferRow=malloc(sizeof(char)*(sizeRow+1));
+//         // *(bufferRow)=*(row+1);
+//         // *(bufferRow)=*(row+2);
+//         strcpy(bufferRow,row);
+//         free(row);
+
+//         row=malloc(sizeof(char)*(sizeRow+2));
+//         for(counterChar=0;counterChar<sizeRow-1;counterChar++){
+//             row[counterChar]=bufferRow[counterChar];
+//             // printf("%c",bufferRow[counterChar]);
+//             printf("%c",row[counterChar]);
+//         }
+        
+//         // printf(" %c \n", *(*(row+1)));
+//         // printf(" %c \n",*(bufferRow+2));
+//         // printf("%s",*row);
+//         //free(row);
+//         // free(row);
+//         // printf("toto");
+
+//         //row=malloc(sizeof(char)*(sizeRow+1));
+//         // printf("%s",*row);
+//         //counterChar=0;
+//         // row=malloc(sizeof(char));
+//         // printf("tutu");
+//         //strcpy(row,*(bufferRow+1));
+        
+//         // printf("%s",row);
+
+
+//         // while(*(bufferRow+counterChar)!='\n'){
+//         //     // printf("%c",*(bufferRow+counterChar));
+//         //     // row=realloc(row,sizeof(char)*counterChar);
+//         //     // strcat(row,*(bufferRow+counterChar));
+//         //     counterChar++;
+//         // }
+//         // printf("%d",strlen(row));
+
+
+
+//         // free(*row);
+//         // row=malloc(sizeof(char)*(sizeRow));
+//         // strcpy(row,bufferRow);
+
+//         // printf("%s",row);
+//         // // printf("%d",sizeof(row));
+//         // // printf("%d",sizeof(bufferRow));
+//         // *row=(char*)malloc(sizeof(char*)*sizeRow);
+//         // free(row);
+//         // // row=malloc(sizeof(char*)*(sizeRow+1));
+//         // printf("%d",strlen(bufferRow));
+//         // printf("%s",bufferRow);
+
+//         // // strncpy(row,bufferRow,sizeRow+1);
+//         // free(row);
+//         free(bufferRow);
+//         // printf("%s",row);
+        
+//     }
+    
+
+// }
 
 
 

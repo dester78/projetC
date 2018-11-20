@@ -2,7 +2,7 @@
 CC=gcc
 
 #Project DIR 
-P_DIR=D:\projetC
+P_DIR=C:\projetC
 #Source DIR
 S_DIR=popTube\src
 #Header DIR
