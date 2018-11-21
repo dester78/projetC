@@ -6,7 +6,7 @@
 
 
 FILE *openFile(char *fileName, char *openMode);
-void returnFileParamaters(FILE *configFile,int *arrayRowChar, int lastRow);
+void returnFileParameters(FILE *configFile,int *arrayRowChar, char ***arrayParameters, int lastRow);
 int *countFileRowChar(FILE *file, int *lastRow);
 void deleteEndRow( char **row);
 

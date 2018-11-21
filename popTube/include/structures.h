@@ -11,4 +11,7 @@ typedef struct DbConfig{
 
 }DbConfig;
 
+
+void initDbConfig(DbConfig *newDbConfig, char ***arrayParameters);
+
 #endif 

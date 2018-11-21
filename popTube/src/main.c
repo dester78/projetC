@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <fileReader.h>
+#include <structures.h>  
 #include <SDL2/SDL.h>
 #include <mysql.h>
 
@@ -14,15 +15,19 @@ int main(int argc, char *argv[]) {
     DbConfig *newDbConfig;
     int lastRow;
     int *arrayRowChar;
+    char ***arrayParameters;
 
 
+
+    arrayParameters=malloc(sizeof(char***));
+    newDbConfig=malloc(sizeof(DbConfig));
+
+    printf("%x\n",arrayParameters);
     configFile=openFile(configFileName,openMode);
     arrayRowChar=countFileRowChar(configFile,&lastRow);
-    returnFileParamaters(configFile,arrayRowChar,lastRow);
 
-    printf("tutu");
-
-    printf("%s",(*newDbConfig).host);
+    returnFileParameters(configFile,arrayRowChar,arrayParameters ,lastRow);
+    initDbConfig(newDbConfig,arrayParameters);
 
     MYSQL *mysql;
     /* Initialisation bibliotheque mysql */

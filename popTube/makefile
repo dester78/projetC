@@ -26,14 +26,14 @@ EXEC=main
 
 all: $(EXEC)
 
-$(EXEC): fileReader.o main.o
-	$(CC) $(CFLAGS) -o	$(EXEC) fileReader.o main.o  $(LDFLAGS) $(CPPFLAGS)  $(LDLIBS)
+$(EXEC): fileReader.o main.o structures.o
+	$(CC) $(CFLAGS) -o	$(EXEC) fileReader.o main.o structures.o  $(LDFLAGS) $(CPPFLAGS)  $(LDLIBS)
 
 main.o: $(P_DIR)\$(S_DIR)\main.c $(P_DIR)\$(H_DIR)\fileReader.h $(P_DIR)\$(H_DIR)\structures.h 
 	$(CC)  -o main.o -c $(P_DIR)\$(S_DIR)\main.c $(CFLAGS) $(CPPFLAGS) 
 
-#structure.o: $(P_DIR)\$(H_DIR)\structure.h $(P_DIR)\$(S_DIR)\structures.c
-
+structures.o: $(P_DIR)\$(H_DIR)\structures.h $(P_DIR)\$(S_DIR)\structures.c
+	$(CC)   -o structures.o -c $(P_DIR)\$(S_DIR)\structures.c $(CFLAGS) $(CPPFLAGS)
 
 fileReader.o: $(P_DIR)\$(S_DIR)\fileReader.c $(P_DIR)\$(H_DIR)\fileReader.h $(P_DIR)\$(H_DIR)\structures.h 
 	$(CC)   -o fileReader.o -c $(P_DIR)\$(S_DIR)\fileReader.c $(CFLAGS) $(CPPFLAGS)
