@@ -17,17 +17,22 @@ int main(int argc, char *argv[]) {
     int *arrayRowChar;
     char ***arrayParameters;
 
-
-
     arrayParameters=malloc(sizeof(char***));
-    newDbConfig=malloc(sizeof(DbConfig));
 
-    printf("%x\n",arrayParameters);
-    configFile=openFile(configFileName,openMode);
-    arrayRowChar=countFileRowChar(configFile,&lastRow);
+    newDbConfig=malloc(sizeof(DbConfig*));
 
-    returnFileParameters(configFile,arrayRowChar,arrayParameters ,lastRow);
-    initDbConfig(newDbConfig,arrayParameters);
+    if(newDbConfig!=NULL){
+
+        configFile=openFile(configFileName,openMode);
+        arrayRowChar=countFileRowChar(configFile,&lastRow);
+        returnFileParameters(configFile,arrayRowChar,arrayParameters ,lastRow);
+        
+        initDbConfig(newDbConfig,arrayParameters);
+
+        printf("%s",newDbConfig->host);
+
+    }
+
 
     MYSQL *mysql;
     /* Initialisation bibliotheque mysql */
@@ -40,7 +45,7 @@ int main(int argc, char *argv[]) {
             fprintf(stdout, "[OK] mysql_init\n");
  
             /* Connexion au serveur mysql */
-            if (mysql_real_connect(mysql, (*newDbConfig).host,(*newDbConfig).user, (*newDbConfig).passwd, (*newDbConfig).db, 0, NULL, 0) != NULL)
+            if (mysql_real_connect(mysql, newDbConfig->host, newDbConfig->user, newDbConfig->passwd, newDbConfig->db, 0, NULL, 0) != NULL)
             {
                 fprintf(stdout, "[OK] mysql_real_connect\n");
             }
@@ -66,7 +71,7 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "[ERR] mysql_library_init\n");
     }
  
-
+    free(newDbConfig);
     return 0;
 
 }

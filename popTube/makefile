@@ -15,7 +15,7 @@ CPPFLAGS = -I $(P_DIR)\$(H_DIR) -I 'C:\Program Files (x86)\MySQL\MySQL Connector
 #-W et -Wall display front end compiler warnings 
 #-ansi request ansi compilation 
 #-pedantic display compiler warnings 
-CFLAGS=-W -Wall -ansi -pedantic -std=c99 
+CFLAGS=-W -Wall -ansi -pedantic -std=c99 -g
 
 #LDFLAGS current variable for link editing 
 LDFLAGS = -L $(P_DIR)\popTube\lib -L 'C:\Program Files (x86)\MySQL\MySQL Connector C 6.1\lib'
@@ -26,8 +26,8 @@ EXEC=main
 
 all: $(EXEC)
 
-$(EXEC): fileReader.o main.o structures.o
-	$(CC) $(CFLAGS) -o	$(EXEC) fileReader.o main.o structures.o  $(LDFLAGS) $(CPPFLAGS)  $(LDLIBS)
+$(EXEC): fileReader.o structures.o main.o 
+	$(CC) $(CFLAGS) -o	$(EXEC) fileReader.o structures.o  main.o  $(LDFLAGS) $(CPPFLAGS)  $(LDLIBS)
 
 main.o: $(P_DIR)\$(S_DIR)\main.c $(P_DIR)\$(H_DIR)\fileReader.h $(P_DIR)\$(H_DIR)\structures.h 
 	$(CC)  -o main.o -c $(P_DIR)\$(S_DIR)\main.c $(CFLAGS) $(CPPFLAGS) 

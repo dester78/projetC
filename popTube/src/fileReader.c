@@ -18,7 +18,7 @@ FILE *openFile(char *fileName, char *openMode){
 
 }
 
-
+//Extrait d'un fichier des lignes correspondant à des paramètres et les stock dans un tableau 
 void returnFileParameters(FILE *configFile,int *arrayRowChar, char ***arrayParameters, int lastRow){
 
     char *fileRow; 
@@ -32,45 +32,48 @@ void returnFileParameters(FILE *configFile,int *arrayRowChar, char ***arrayParam
 
         for(counterFileRow=0;counterFileRow<lastRow;counterFileRow++){
 
-            fileRow=malloc(sizeof(char)*(arrayRowChar[counterFileRow]+1));
+            if(arrayRowChar[counterFileRow]>1){
+                fileRow=malloc(sizeof(char)*(arrayRowChar[counterFileRow]+1));
 
-            if(fileRow!=NULL){
+                if(fileRow!=NULL){
 
                 fgets(fileRow,arrayRowChar[counterFileRow]+1,configFile);
-                deleteEndRow(&fileRow);
-                strncpy(commentChar,fileRow,1);
 
-                if(commentChar[0]!='#'){
-                    
-                    *arrayParameters=realloc(*arrayParameters,(sizeof(char**)*(counterParameters+1)));
+                    deleteEndRow(&fileRow);
+                    strncpy(commentChar,fileRow,1);
 
-                    if(*arrayParameters!=NULL){
+                    if(commentChar[0]!='#'){
+                        
+                        *arrayParameters=realloc(*arrayParameters,(sizeof(char**)*(counterParameters+1)));
 
-                        *(*arrayParameters+counterParameters)=malloc(sizeof(char)*(arrayRowChar[counterFileRow]+1));
+                        if(*arrayParameters!=NULL){
 
-                        if(*(*arrayParameters+counterParameters)!=NULL){
+                            *(*arrayParameters+counterParameters)=malloc(sizeof(char)*(arrayRowChar[counterFileRow]+1));
 
-                            strcpy(*(*arrayParameters+counterParameters),fileRow);
-                            // printf("%s",*(*arrayParameters+counterParameters));
-                            counterParameters++;
-                        }
-                    }                
+                            if(*(*arrayParameters+counterParameters)!=NULL){
+
+                                strcpy(*(*arrayParameters+counterParameters),fileRow);
+                                printf("%s",*(*arrayParameters+counterParameters));
+                                counterParameters++;
+                            }
+                        }                
+                    }
                 }
-                
-        
-                
-                // printf("caractere : %c",searchChar[0]);
-                // printf("%d : %d : %s",counterRow,arrayRowChar[counterRow],fileRow);
-                //printf("<<<<<<<<<<nbchar:%d nbrow: %d row: %s sizeRow: %d :>>>>>>>>>>>",arrayRowChar[counterRow], counterRow, fileRow,strlen(fileRow));
                 free(fileRow);
             }
-        }
+
+            else if((counterFileRow+1)<lastRow){
+                fseek(configFile,arrayRowChar[counterFileRow]+1,SEEK_CUR);
+            }
+        }       
     }
-    *(*arrayParameters+counterParameters+1)=malloc(sizeof(char));
+    
+    *(*arrayParameters+counterParameters)=malloc(sizeof(char)*2);
 
-    if(*(*arrayParameters+counterParameters+1)!=NULL){
+    if(*(*arrayParameters+counterParameters)!=NULL){
 
-        *(*arrayParameters+counterParameters+1)='\0';
+        *(*arrayParameters+counterParameters)="\0";
+        printf("%s",*(*arrayParameters+counterParameters));
     }
 }
 
@@ -140,7 +143,43 @@ sizeRow=strlen(*row);
 
 
 
+// if(*arrayParameters!=NULL){
 
+//         for(counterFileRow=0;counterFileRow<lastRow;counterFileRow++){
+
+//             fileRow=malloc(sizeof(char)*(arrayRowChar[counterFileRow]+1));
+
+//             if(fileRow!=NULL){
+
+//                 fgets(fileRow,arrayRowChar[counterFileRow]+1,configFile);
+//                 printf("%d",strlen(fileRow));
+//                 if(strlen(fileRow)>1){
+                    
+//                     deleteEndRow(&fileRow);
+//                     strncpy(commentChar,fileRow,1);
+
+//                     if(commentChar[0]!='#'){
+                        
+//                         *arrayParameters=realloc(*arrayParameters,(sizeof(char**)*(counterParameters+1)));
+
+//                         if(*arrayParameters!=NULL){
+
+//                             *(*arrayParameters+counterParameters)=malloc(sizeof(char)*(arrayRowChar[counterFileRow]+1));
+
+//                             if(*(*arrayParameters+counterParameters)!=NULL){
+//                                 printf("%s",fileRow);
+
+//                                 strcpy(*(*arrayParameters+counterParameters),fileRow);
+//                                 // printf("%s",*(*arrayParameters+counterParameters));
+//                                 counterParameters++;
+//                             }
+//                         }                
+//                     }
+//                 }
+//                 free(fileRow);
+//             }
+//         }
+//     }
 
 
 
