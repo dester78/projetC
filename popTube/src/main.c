@@ -1,6 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <fileReader.h>
+#include <fileManager.h>
 #include <structures.h>  
 #include <SDL2/SDL.h>
 #include <mysql.h>
@@ -29,8 +29,6 @@ int main(int argc, char *argv[]) {
         
         initDbConfig(newDbConfig,arrayParameters);
 
-        printf("%s",newDbConfig->host);
-
     }
 
 
@@ -45,7 +43,7 @@ int main(int argc, char *argv[]) {
             fprintf(stdout, "[OK] mysql_init\n");
  
             /* Connexion au serveur mysql */
-            if (mysql_real_connect(mysql, newDbConfig->host, newDbConfig->user, newDbConfig->passwd, newDbConfig->db, 0, NULL, 0) != NULL)
+            if (mysql_real_connect(mysql,  (*newDbConfig).host, newDbConfig->user, newDbConfig->passwd, newDbConfig->db, 0, NULL, 0) != NULL)
             {
                 fprintf(stdout, "[OK] mysql_real_connect\n");
             }
@@ -71,7 +69,6 @@ int main(int argc, char *argv[]) {
         fprintf(stderr, "[ERR] mysql_library_init\n");
     }
  
-    free(newDbConfig);
     return 0;
 
 }

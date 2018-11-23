@@ -7,21 +7,19 @@ void initDbConfig(DbConfig *newDbConfig, char ***arrayParameters){
 
     int counterParameters=0;
     
-    while(strcmp(*(*arrayParameters+counterParameters),"\0")!=0){
+    while( strcmp(*(*arrayParameters + counterParameters),"\0")!=0 ){
 
         
-        if(strncmp(*(*arrayParameters+counterParameters),"host=",strlen("host=")) == 0){
+        if( strncmp(*(*arrayParameters + counterParameters) , "host=" , strlen("host=")) == 0){
 
-            newDbConfig->host = malloc(sizeof(char*)*strlen(*(*arrayParameters+counterParameters))- strlen("host="));
+            newDbConfig->host = malloc( sizeof(char*) * strlen(*(*arrayParameters + counterParameters)) - strlen("host="));
 
             if(newDbConfig->host != NULL){
-                strcpy(newDbConfig->host,(*(*arrayParameters+counterParameters)+ strlen("host=")));
+                strcpy(newDbConfig->host , (*(*arrayParameters + counterParameters) + strlen("host=")));
             }
-
-            printf("%s",newDbConfig->host);
         }
 
-        else if(strncmp(*(*arrayParameters+counterParameters),"user=",strlen("user=")) == 0){
+        else if( strncmp(*(*arrayParameters+counterParameters),"user=",strlen("user=")) == 0){
 
             newDbConfig->user = malloc(sizeof(char*)*strlen(*(*arrayParameters+counterParameters))- strlen("user="));
             

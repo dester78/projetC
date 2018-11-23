@@ -1,7 +1,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <structures.h>
-#include <fileReader.h>
+#include <fileManager.h>
 #include <string.h>
 
 
@@ -18,7 +18,7 @@ FILE *openFile(char *fileName, char *openMode){
 
 }
 
-//Extrait d'un fichier des lignes correspondant à des paramètres et les stock dans un tableau 
+
 void returnFileParameters(FILE *configFile,int *arrayRowChar, char ***arrayParameters, int lastRow){
 
     char *fileRow; 
@@ -39,11 +39,12 @@ void returnFileParameters(FILE *configFile,int *arrayRowChar, char ***arrayParam
 
                 fgets(fileRow,arrayRowChar[counterFileRow]+1,configFile);
 
-                    deleteEndRow(&fileRow);
+                    deleteLineFeed(&fileRow);
                     strncpy(commentChar,fileRow,1);
 
                     if(commentChar[0]!='#'){
                         
+                        deleteEndSpace(&fileRow);
                         *arrayParameters=realloc(*arrayParameters,(sizeof(char**)*(counterParameters+1)));
 
                         if(*arrayParameters!=NULL){
@@ -53,7 +54,6 @@ void returnFileParameters(FILE *configFile,int *arrayRowChar, char ***arrayParam
                             if(*(*arrayParameters+counterParameters)!=NULL){
 
                                 strcpy(*(*arrayParameters+counterParameters),fileRow);
-                                printf("%s",*(*arrayParameters+counterParameters));
                                 counterParameters++;
                             }
                         }                
@@ -73,7 +73,6 @@ void returnFileParameters(FILE *configFile,int *arrayRowChar, char ***arrayParam
     if(*(*arrayParameters+counterParameters)!=NULL){
 
         *(*arrayParameters+counterParameters)="\0";
-        printf("%s",*(*arrayParameters+counterParameters));
     }
 }
 
@@ -115,7 +114,7 @@ int *countFileRowChar(FILE *file, int *lastRow){
 
 }
 
-void deleteEndRow( char **row){
+void deleteLineFeed( char **row){
 
 char *bufferRow;
 int counterChar;
@@ -140,46 +139,39 @@ sizeRow=strlen(*row);
     }
 }
 
+void deleteEndSpace(char **row){
+
+char *bufferRow;
+int counterChar;
+int counterSpace=0;
+int sizeRow;
+
+sizeRow=strlen(*row);
+
+    bufferRow=malloc(sizeof(char)*(sizeRow+1));
+    strcpy(bufferRow,*row);
+    free(row);
+    
+    if(bufferRow[sizeRow-1]==' '){
+    
+        counterChar=sizeRow-1;
+        while(bufferRow[counterChar-counterSpace]==' '){
+            counterSpace++;
+        }
+    }
+
+    *row=malloc(sizeof(char)*(sizeRow-counterSpace));
+
+    for(counterChar=0;counterChar<(sizeRow-counterSpace);counterChar++){
+        *(*row+counterChar)=bufferRow[counterChar];
+    }
+
+    *(*row+counterChar)='\0';;
+    free(bufferRow);
+}
 
 
 
-// if(*arrayParameters!=NULL){
-
-//         for(counterFileRow=0;counterFileRow<lastRow;counterFileRow++){
-
-//             fileRow=malloc(sizeof(char)*(arrayRowChar[counterFileRow]+1));
-
-//             if(fileRow!=NULL){
-
-//                 fgets(fileRow,arrayRowChar[counterFileRow]+1,configFile);
-//                 printf("%d",strlen(fileRow));
-//                 if(strlen(fileRow)>1){
-                    
-//                     deleteEndRow(&fileRow);
-//                     strncpy(commentChar,fileRow,1);
-
-//                     if(commentChar[0]!='#'){
-                        
-//                         *arrayParameters=realloc(*arrayParameters,(sizeof(char**)*(counterParameters+1)));
-
-//                         if(*arrayParameters!=NULL){
-
-//                             *(*arrayParameters+counterParameters)=malloc(sizeof(char)*(arrayRowChar[counterFileRow]+1));
-
-//                             if(*(*arrayParameters+counterParameters)!=NULL){
-//                                 printf("%s",fileRow);
-
-//                                 strcpy(*(*arrayParameters+counterParameters),fileRow);
-//                                 // printf("%s",*(*arrayParameters+counterParameters));
-//                                 counterParameters++;
-//                             }
-//                         }                
-//                     }
-//                 }
-//                 free(fileRow);
-//             }
-//         }
-//     }
 
 
 

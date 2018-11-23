@@ -15,5 +15,6 @@ struct DbConfig{
 
 
 void initDbConfig(DbConfig *newDbConfig, char ***arrayParameters);
+void deleteEndSpace(char **row);
 
 #endif 
