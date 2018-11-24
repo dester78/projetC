@@ -11,7 +11,7 @@
 
 
 
-int main(int argc, char *argv[]) {
+int main(int argc, char **argv) {
      
     char *configFileName="popTube.ini";
     char *openMode="r";
@@ -39,7 +39,6 @@ int main(int argc, char *argv[]) {
         configFile=openFile(configFileName,openMode);
         arrayRowChar=countFileRowChar(configFile,&lastRow);
         returnFileParameters(configFile,arrayRowChar,arrayParameters ,lastRow);
-        printf("e");
         
         initDbConfig(dbConfigElement,arrayParameters);
 
@@ -49,10 +48,8 @@ int main(int argc, char *argv[]) {
 
     }
 
-    printf("tutu");
     initSDLVideoConfig(config->video ,arrayParameters);
 
-    printf("toto");
 
 
     if (SDL_Init(SDL_INIT_VIDEO ) != 0 ){
