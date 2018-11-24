@@ -1,9 +1,9 @@
 #ifndef STRUCTURES
 #define STRUCTURES
+#include <SDL2/SDL.h>
 
 
-typedef struct DbConfig DbConfig;
-struct DbConfig{
+typedef struct DbConfig{
 
     char* host;
     char* user;
@@ -11,10 +11,28 @@ struct DbConfig{
     char* db;
 
 
-};
+}DbConfig;
+
+typedef struct SDLConfig{
+
+    
+    struct SDLVideoConfig *video;
+    
+    
+}SDLConfig;
 
 
-void initDbConfig(DbConfig *newDbConfig, char ***arrayParameters);
+typedef struct SDLVideoConfig{
+
+    long unsigned windowFlag;
+
+}SDLVideoConfig;
+
+
+
+
+void initDbConfig(DbConfig *dbConfigElement, char ***arrayParameters);
+void initSDLVideoConfig(SDLVideoConfig *videoConfigElement, char ***arrayParameters);
 void deleteEndSpace(char **row);
 
 #endif 

@@ -1,9 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
+
 #include <fileManager.h>
-#include <structures.h>  
+#include <structures.h> 
+#include <dbManager.h>
+
 #include <SDL2/SDL.h>
 #include <mysql.h>
+
 
 
 
@@ -12,63 +16,76 @@ int main(int argc, char *argv[]) {
     char *configFileName="popTube.ini";
     char *openMode="r";
     FILE *configFile;
-    DbConfig *newDbConfig;
+    MYSQL *dbConnection;
+    DbConfig *dbConfigElement;
     int lastRow;
     int *arrayRowChar;
     char ***arrayParameters;
+    SDLConfig *config;
+    
+    config=malloc(sizeof(SDLConfig*));
+    config->video=(malloc(sizeof(SDLVideoConfig*)));
+
+    // config->video->windowFlag=0x00000001;
+    // config->video->windowFlag=config->video->windowFlag| 0x00000004 ;
+
 
     arrayParameters=malloc(sizeof(char***));
 
-    newDbConfig=malloc(sizeof(DbConfig*));
+    dbConfigElement=malloc(sizeof(DbConfig*));
 
-    if(newDbConfig!=NULL){
+    if(dbConfigElement!=NULL){
 
         configFile=openFile(configFileName,openMode);
         arrayRowChar=countFileRowChar(configFile,&lastRow);
         returnFileParameters(configFile,arrayRowChar,arrayParameters ,lastRow);
+        printf("e");
         
-        initDbConfig(newDbConfig,arrayParameters);
+        initDbConfig(dbConfigElement,arrayParameters);
+
+        if((dbConnection=mysqlConnection(dbConfigElement))!=NULL){
+            
+        }
 
     }
 
+    printf("tutu");
+    initSDLVideoConfig(config->video ,arrayParameters);
 
-    MYSQL *mysql;
-    /* Initialisation bibliotheque mysql */
-    if (mysql_library_init(0, NULL, NULL) == 0)
-    {
-        /* Initialisation du pointeur MYSQL */
-        mysql = mysql_init(NULL);
-        if (mysql != NULL)
+    printf("toto");
+
+
+    if (SDL_Init(SDL_INIT_VIDEO ) != 0 ){
+        fprintf(stdout,"Échec de l'initialisation de la SDL (%s)\n",SDL_GetError());
+        return -1;
+    }
+
+    else{
+        /* Création de la fenêtre */
+        SDL_Window* mainWindow = NULL;
+        mainWindow = SDL_CreateWindow("Ma première application SDL2",SDL_WINDOWPOS_UNDEFINED,
+                                                                  SDL_WINDOWPOS_UNDEFINED,
+                                                                  640,
+                                                                  480,
+                                                                  config->video->windowFlag);
+
+        if( mainWindow )
         {
-            fprintf(stdout, "[OK] mysql_init\n");
- 
-            /* Connexion au serveur mysql */
-            if (mysql_real_connect(mysql,  (*newDbConfig).host, newDbConfig->user, newDbConfig->passwd, newDbConfig->db, 0, NULL, 0) != NULL)
-            {
-                fprintf(stdout, "[OK] mysql_real_connect\n");
-            }
-            else
-            {
-                fprintf(stderr, "[ERR] mysql_real_connect : '%s'\n", mysql_error(mysql));
-            }
- 
-            /* Fermeture de la connexion / Liberation memoire mysql */
-            mysql_close(mysql);
-            mysql = NULL;
+            SDL_Delay(3000); /* Attendre trois secondes, que l'utilisateur voie la fenêtre */
+
+            SDL_DestroyWindow(mainWindow);
         }
         else
         {
-            perror("mysql_init");
+            fprintf(stderr,"Erreur de création de la fenêtre: %s\n",SDL_GetError());
         }
- 
-        /* Fermeture de la bibliotheque */
-        mysql_library_end();
     }
-    else
-    {
-        fprintf(stderr, "[ERR] mysql_library_init\n");
-    }
- 
+
+    SDL_Quit();
+
+
+
+    mysql_close(dbConnection);
     return 0;
 
 }
@@ -76,8 +93,7 @@ int main(int argc, char *argv[]) {
 
 
 //     int status =  EXIT_FAILURE;
-    
-//     SDL_Window *fenetre = NULL;
+
 //     SDL_Event event; 
 
 //     MYSQL *mysql;
@@ -119,24 +135,7 @@ int main(int argc, char *argv[]) {
  
      
 //     // Initialisation + vérification de la SDL : VIDEO.
-//     if (SDL_Init(SDL_INIT_VIDEO) != 0 ) {
-//         fprintf(stdout,"Échec de l'initialisation de la SDL : %s\n", SDL_GetError());
-//         goto quit;
-//     }
-     
-//     // Création fenêtre.
-//     fenetre = SDL_CreateWindow("Tuto SDL 2.", SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED, 640, 480, SDL_WINDOW_SHOWN);
-//     if(fenetre == NULL) {
-//         fprintf(stderr, "Impossible de créer la fenêtre : %s\n", SDL_GetError());
-//         goto quit;
-//     }
-    
-//     do {
-//         SDL_WaitEvent(&event);
-//     }
-//     while(event.type != SDL_QUIT);
-//     SDL_DestroyWindow(fenetre); 
-//     status = EXIT_SUCCESS;
+//     i
     
 // quit:
 //     // Quitter SDL.

@@ -3,47 +3,48 @@
 #include <stdio.h>
 #include <string.h>
 
-void initDbConfig(DbConfig *newDbConfig, char ***arrayParameters){
+void initDbConfig(DbConfig *dbConfigElement, char ***arrayParameters){
 
     int counterParameters=0;
+    printf("DB");
     
     while( strcmp(*(*arrayParameters + counterParameters),"\0")!=0 ){
 
         
         if( strncmp(*(*arrayParameters + counterParameters) , "host=" , strlen("host=")) == 0){
 
-            newDbConfig->host = malloc( sizeof(char*) * strlen(*(*arrayParameters + counterParameters)) - strlen("host="));
+            dbConfigElement->host = malloc( sizeof(char*) * strlen(*(*arrayParameters + counterParameters)) - strlen("host="));
 
-            if(newDbConfig->host != NULL){
-                strcpy(newDbConfig->host , (*(*arrayParameters + counterParameters) + strlen("host=")));
+            if(dbConfigElement->host != NULL){
+                strcpy(dbConfigElement->host , (*(*arrayParameters + counterParameters) + strlen("host=")));
             }
         }
 
         else if( strncmp(*(*arrayParameters+counterParameters),"user=",strlen("user=")) == 0){
 
-            newDbConfig->user = malloc(sizeof(char*)*strlen(*(*arrayParameters+counterParameters))- strlen("user="));
+            dbConfigElement->user = malloc(sizeof(char*)*strlen(*(*arrayParameters+counterParameters))- strlen("user="));
             
-            if(newDbConfig->user != NULL){
-                strcpy(newDbConfig->user,(*(*arrayParameters+counterParameters)+ strlen("user=")));
+            if(dbConfigElement->user != NULL){
+                strcpy(dbConfigElement->user,(*(*arrayParameters+counterParameters)+ strlen("user=")));
             }
         }
 
         else if(strncmp(*(*arrayParameters+counterParameters),"passwd=",strlen("passwd=")) == 0){
 
-            newDbConfig->passwd = malloc(sizeof(char*)*strlen(*(*arrayParameters+counterParameters))- strlen("passwd="));
+            dbConfigElement->passwd = malloc(sizeof(char*)*strlen(*(*arrayParameters+counterParameters))- strlen("passwd="));
             
-            if(newDbConfig->passwd != NULL){
-                strcpy(newDbConfig->passwd,(*(*arrayParameters+counterParameters)+ strlen("passwd=")));
+            if(dbConfigElement->passwd != NULL){
+                strcpy(dbConfigElement->passwd,(*(*arrayParameters+counterParameters)+ strlen("passwd=")));
             }
         }
 
         
         else if(strncmp(*(*arrayParameters+counterParameters),"db=",strlen("db=")) == 0){
 
-            newDbConfig->db = malloc(sizeof(char*)*strlen(*(*arrayParameters+counterParameters))- strlen("db="));
+            dbConfigElement->db = malloc(sizeof(char*)*strlen(*(*arrayParameters+counterParameters))- strlen("db="));
             
-            if(newDbConfig->db != NULL){
-                strcpy(newDbConfig->db,(*(*arrayParameters+counterParameters)+ strlen("db=")));
+            if(dbConfigElement->db != NULL){
+                strcpy(dbConfigElement->db,(*(*arrayParameters+counterParameters)+ strlen("db=")));
             }
         }
 
@@ -51,4 +52,31 @@ void initDbConfig(DbConfig *newDbConfig, char ***arrayParameters){
     }
 
 }
+
+
+void initSDLVideoConfig(SDLVideoConfig *videoConfigElement, char ***arrayParameters){
+
+    int counterParameters=0;
+    videoConfigElement->windowFlag=0x00000000;
+    
+    while( strcmp(*(*arrayParameters + counterParameters),"\0")!=0 ){
+
+        
+        if( strncmp(*(*arrayParameters + counterParameters) , "SDL_WindowFlags=" , strlen("SDL_WindowFlags=")) == 0){
+
+            // if(strstr(*(*arrayParameters + counterParameters),"SDL_WINDOW_FULLSCREEN")!=NULL){
+            //     videoConfigElement->windowFlag=videoConfigElement->windowFlag|SDL_WINDOW_FULLSCREEN;
+            // }
+            // else 
+            if(strstr(*(*arrayParameters + counterParameters),"SDL_WINDOW_SHOWN")!=NULL){
+                videoConfigElement->windowFlag=videoConfigElement->windowFlag|SDL_WINDOW_SHOWN;
+            }
+        }
+
+        counterParameters++;
+    }
+
+}
+
+
 

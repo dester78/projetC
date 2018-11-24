@@ -26,47 +26,68 @@ void returnFileParameters(FILE *configFile,int *arrayRowChar, char ***arrayParam
     char commentChar[2];
     int counterParameters=0;
 
-    *arrayParameters=malloc(sizeof(char**));
+ 
+    // *arrayParameters=malloc(sizeof(char**));
+    //  printf("%d",lastRow);
 
-    if(*arrayParameters!=NULL){
+    // if(*arrayParameters!=NULL){
 
         for(counterFileRow=0;counterFileRow<lastRow;counterFileRow++){
 
-            if(arrayRowChar[counterFileRow]>1){
-                fileRow=malloc(sizeof(char)*(arrayRowChar[counterFileRow]+1));
+            // printf("%d\n",arrayRowChar[counterFileRow]);
+            printf("counter row%d\n",counterFileRow);
+            printf("counterchar %d",arrayRowChar[counterFileRow]);
+             
+
+        
+                fileRow=malloc(sizeof(char*)*(arrayRowChar[counterFileRow]+1));
+
 
                 if(fileRow!=NULL){
 
-                fgets(fileRow,arrayRowChar[counterFileRow]+1,configFile);
+                    printf("firstMalloc");
 
-                    deleteLineFeed(&fileRow);
+                fgets(fileRow,arrayRowChar[counterFileRow]+1,configFile);
+                printf("row : %s",fileRow);
+                   
                     strncpy(commentChar,fileRow,1);
 
                     if(commentChar[0]!='#'){
                         
+                        printf("%d",counterParameters);
+                        deleteLineFeed(&fileRow);
                         deleteEndSpace(&fileRow);
                         *arrayParameters=realloc(*arrayParameters,(sizeof(char**)*(counterParameters+1)));
+                        // printf("%d",*arrayParameters);
 
                         if(*arrayParameters!=NULL){
 
-                            *(*arrayParameters+counterParameters)=malloc(sizeof(char)*(arrayRowChar[counterFileRow]+1));
+                            printf("realoc");
 
+                            *(*arrayParameters+counterParameters)=malloc(sizeof(char)*(arrayRowChar[counterFileRow]+1));
+                            
                             if(*(*arrayParameters+counterParameters)!=NULL){
 
+                                printf("lastMalloc");
                                 strcpy(*(*arrayParameters+counterParameters),fileRow);
-                                counterParameters++;
+                                // printf("%s",*(*arrayParameters+counterParameters));
+                                
+            
                             }
-                        }                
-                    }
-                }
-                free(fileRow);
-            }
 
-            else if((counterFileRow+1)<lastRow){
-                fseek(configFile,arrayRowChar[counterFileRow]+1,SEEK_CUR);
-            }
+                            
+                        }  
+
+                        counterParameters++;              
+                    }
+                    free(fileRow);
+                    printf("freeOK");
+                }
+                
+                
+           
         }       
-    }
+    // }
     
     *(*arrayParameters+counterParameters)=malloc(sizeof(char)*2);
 
@@ -91,9 +112,14 @@ int *countFileRowChar(FILE *file, int *lastRow){
         while(counterChar!=-1){
 
             bufferChar=fgetc(file);
+            // printf("%c",bufferChar);
             counterChar++;
 
             if(bufferChar=='\n'||bufferChar==EOF){
+
+                if(counterChar==1){
+                    counterChar++;
+                }
 
                 arrayRowChar=realloc(arrayRowChar,sizeof(int)*(counterRow+1));
                 arrayRowChar[counterRow]=counterChar;
@@ -125,17 +151,26 @@ sizeRow=strlen(*row);
     if(*(*row+sizeRow-1)=='\n'){
 
         bufferRow=malloc(sizeof(char)*(sizeRow+1));
-        strcpy(bufferRow,*row);
+        if(bufferRow!=NULL){
 
-        free(row);
-        *row=malloc(sizeof(char)*(sizeRow));
+            strcpy(bufferRow,*row);
+            free(row);
 
-        for(counterChar=0;counterChar<sizeRow-1;counterChar++){
-            *(*row+counterChar)=bufferRow[counterChar];
+            *row=malloc(sizeof(char)*(sizeRow));
+
+            if(*row!=NULL){
+
+                for(counterChar=0;counterChar<sizeRow-1;counterChar++){
+                    *(*row+counterChar)=bufferRow[counterChar];
+                }
+
+            *(*row+counterChar)='\0';
+            }
+
+            
+            free(bufferRow);
+
         }
-
-        *(*row+counterChar)='\0';
-        free(bufferRow);
     }
 }
 
@@ -149,25 +184,37 @@ int sizeRow;
 sizeRow=strlen(*row);
 
     bufferRow=malloc(sizeof(char)*(sizeRow+1));
-    strcpy(bufferRow,*row);
-    free(row);
     
-    if(bufferRow[sizeRow-1]==' '){
     
-        counterChar=sizeRow-1;
-        while(bufferRow[counterChar-counterSpace]==' '){
-            counterSpace++;
+    if(bufferRow!=NULL){
+
+        strcpy(bufferRow,*row);
+        if(bufferRow[sizeRow-1]==' '){
+    
+            free(row);
+            counterChar=sizeRow-1;
+            while(bufferRow[counterChar-counterSpace]==' '){
+                counterSpace++;
+            }
+
+            *row=malloc(sizeof(char)*(sizeRow-counterSpace));
+
+            if(*row!=NULL){
+
+                for(counterChar=0;counterChar<(sizeRow-counterSpace);counterChar++){
+
+                    *(*row+counterChar)=bufferRow[counterChar];
+                }
+
+                *(*row+counterChar)='\0';
+                
+            }
         }
+
+        free(bufferRow);
     }
-
-    *row=malloc(sizeof(char)*(sizeRow-counterSpace));
-
-    for(counterChar=0;counterChar<(sizeRow-counterSpace);counterChar++){
-        *(*row+counterChar)=bufferRow[counterChar];
-    }
-
-    *(*row+counterChar)='\0';;
-    free(bufferRow);
+    
+    
 }
 
 

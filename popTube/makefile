@@ -26,11 +26,14 @@ EXEC=main
 
 all: $(EXEC)
 
-$(EXEC): fileManager.o structures.o main.o 
-	$(CC) $(CFLAGS) -o	$(EXEC) fileManager.o structures.o  main.o  $(LDFLAGS) $(CPPFLAGS)  $(LDLIBS)
+$(EXEC): dbManager.o  fileManager.o structures.o main.o 
+	$(CC) $(CFLAGS) -o	$(EXEC) fileManager.o structures.o dbManager.o main.o  $(LDFLAGS) $(CPPFLAGS)  $(LDLIBS)
 
-main.o: $(P_DIR)\$(S_DIR)\main.c $(P_DIR)\$(H_DIR)\fileManager.h $(P_DIR)\$(H_DIR)\structures.h 
+main.o: $(P_DIR)\$(S_DIR)\main.c $(P_DIR)\$(H_DIR)\fileManager.h $(P_DIR)\$(H_DIR)\structures.h $(P_DIR)\$(H_DIR)\dbManager.h
 	$(CC)  -o main.o -c $(P_DIR)\$(S_DIR)\main.c $(CFLAGS) $(CPPFLAGS) 
+
+dbManager.o: $(P_DIR)\$(H_DIR)\dbManager.h $(P_DIR)\$(S_DIR)\dbManager.c $(P_DIR)\$(H_DIR)\structures.h 
+	$(CC)   -o dbManager.o -c $(P_DIR)\$(S_DIR)\dbManager.c $(CFLAGS) $(CPPFLAGS)
 
 structures.o: $(P_DIR)\$(H_DIR)\structures.h $(P_DIR)\$(S_DIR)\structures.c
 	$(CC)   -o structures.o -c $(P_DIR)\$(S_DIR)\structures.c $(CFLAGS) $(CPPFLAGS)
