@@ -8,23 +8,30 @@
 FILE *openFile(char *fileName, char *openMode){
 
     FILE *file;
-    if(fileName!=NULL && openMode!=NULL){
+    file=malloc(sizeof(FILE));
 
-        file=fopen(fileName,openMode);
+    
+    if((file=fopen(fileName,openMode))!=NULL){
+        
         return file;
     }
+        
+    
 
-    return NULL;
-
+    else{
+        printf("Erreur lors de l'allocation du pointeur de fichier dans la fonction %s",__func__);
+        return NULL;
+    }
 }
 
-
+//Fonction parcourant un fichier afin de créer un tabeau de paramètres nécessaire au fonctionnement du programme 
 void returnFileParameters(FILE *configFile,int *arrayRowChar, char ***arrayParameters, int lastRow){
 
     char *fileRow; 
     int counterFileRow;
     char commentChar[2];
     int counterParameters=0;
+
 
         for(counterFileRow=0;counterFileRow<lastRow;counterFileRow++){
 
@@ -38,12 +45,13 @@ void returnFileParameters(FILE *configFile,int *arrayRowChar, char ***arrayParam
 
                 else{
                     fgets(fileRow,arrayRowChar[counterFileRow]+1,configFile);
-                }                
-                
+                } 
+
                 strncpy(commentChar,fileRow,1);
 
                 if(commentChar[0]!='#'){
                     
+                     
                     deleteLineFeed(&fileRow);
                     deleteEndSpace(&fileRow);
                     *arrayParameters=realloc(*arrayParameters,(sizeof(char**)*(counterParameters+1)));
@@ -54,25 +62,30 @@ void returnFileParameters(FILE *configFile,int *arrayRowChar, char ***arrayParam
                         
                         if(*(*arrayParameters+counterParameters)!=NULL){
 
-                            strcpy(*(*arrayParameters+counterParameters),fileRow);
-                            printf("%s",*(*arrayParameters+counterParameters));        
+                            strcpy(*(*arrayParameters+counterParameters),fileRow); 
+                            printf("%s\n",*(*arrayParameters+counterParameters));     
                         }  
-                    }  
+                        else{
+                            printf("Erreur lors de la modification d'une chaine de caractere du tableau de parametre dans la fonction %s",__func__);
+                        }
+                    } 
+                    else{
+                        printf("Echec lors de l'allocation de arrayParamaters dans la fonction %s",__func__);
+                    } 
 
                     counterParameters++;              
                 }
                 free(fileRow);
             }
+            else{
+                printf("L'allocation du pointeur fileRow de la fonction %s n'a pas fonctionne",__func__);
+            }
         }       
     
-    // *(*arrayParameters+counterParameters)=malloc(sizeof(char)*2);
-
-    // if(*(*arrayParameters+counterParameters)!=NULL){
-
-        *(*arrayParameters+counterParameters)=NULL;
-    // }
+    *(*arrayParameters+counterParameters)=NULL;
 }
 
+//Fonction parcourant un fichier passé en paramètre afin de compter le nombres de lignes et le nombre de caractères/ligne. Renvoie ensuite un tableau contenant ces informations.
 int *countFileRowChar(FILE *file, int *lastRow){
 
     int counterRow=0; 
@@ -88,7 +101,6 @@ int *countFileRowChar(FILE *file, int *lastRow){
         while(counterChar!=-1){
 
             bufferChar=fgetc(file);
-            // printf("%c",bufferChar);
             counterChar++;
 
             if(bufferChar=='\n'||bufferChar==EOF){
@@ -107,15 +119,21 @@ int *countFileRowChar(FILE *file, int *lastRow){
                 counterRow++;
             }
         }
+
+        fseek(file,0,SEEK_SET);
+        *lastRow=counterRow;
+        return arrayRowChar;
+    }  
+        
+
+    else{
+        printf("Echec lors de l'allocation du tableau arrayRowChar de la fonction %s",__func__);
+        return 0;
     }
     
-    fseek(file,0,SEEK_SET);
-    *lastRow=counterRow;
-    
-    return arrayRowChar;
-
 }
 
+//Fonction supprimant le retour chariot de fin de chaine de caractères passée en paramètre en passant par un buffer pour faire les modifications nécessaires
 void deleteLineFeed( char **row){
 
 char *bufferRow;
@@ -143,13 +161,20 @@ sizeRow=strlen(*row);
             *(*row+counterChar)='\0';
             }
 
+            else{
+                printf("L'allocation du pointeur row de la fonction %s n'a pas fonctionné",__func__);
+            }
             
             free(bufferRow);
 
         }
+        else{
+            printf("L'allocation du buffer de la fonction %s n'a pas fonctionné",__func__);
+        }
     }
 }
 
+//Fonction supprimant les espaces présents à la fin d'une chaine de caractère passée en paramètre
 void deleteEndSpace(char **row){
 
 char *bufferRow;
@@ -160,7 +185,6 @@ int sizeRow;
 sizeRow=strlen(*row);
 
     bufferRow=malloc(sizeof(char)*(sizeRow+1));
-    
     
     if(bufferRow!=NULL){
 
@@ -179,16 +203,22 @@ sizeRow=strlen(*row);
 
                 for(counterChar=0;counterChar<(sizeRow-counterSpace);counterChar++){
 
-                    printf("%c",bufferRow[counterChar]);
                     *(*row+counterChar)=bufferRow[counterChar];
                 }
 
                 *(*row+counterChar)='\0';
-                
+            }
+
+            else{
+                printf("L'allocation du pointeur row de la fonction %s n'a pas fonctionné",__func__);
             }
         }
 
         free(bufferRow);
+    }
+
+    else{
+        printf("L'allocation du pointeur bufferRow de la fonction %s n'a pas fonctionné",__func__);
     }
     
     

@@ -1,43 +1,33 @@
 #include <stdio.h>
 
+#include <winsock.h>
 #include <dbManager.h>
 #include <structures.h>
 
 #include <mysql.h>
 
 
-MYSQL *mysqlConnection(DbConfig *dbConfigElement){
+void mysqlConnection(DbConfig *dbConfigElement, MYSQL *dbConnection){
 
-    MYSQL *mySQLConnection;
+    
+        if (dbConnection != NULL){
 
-    if (mysql_library_init(0, NULL, NULL) == 0)
-    {
-        mySQLConnection = mysql_init(NULL);
-
-        if (mySQLConnection != NULL)
-        {
             fprintf(stdout, "[OK] mysql_init\n");
 
-            if (mysql_real_connect(mySQLConnection,  dbConfigElement->host, dbConfigElement->user, dbConfigElement->passwd, dbConfigElement->db, 0, NULL, 0) != NULL)
-            {
+            if (mysql_real_connect(dbConnection,  dbConfigElement->host, dbConfigElement->user, dbConfigElement->passwd, dbConfigElement->db, 0, NULL, 0) != NULL){
                 fprintf(stdout, "[OK] mysql_real_connect\n");
+                mysql_close(dbConnection);
             }
-            else
-            {
-                fprintf(stderr, "[ERR] mysql_real_connect : '%s'\n", mysql_error(mySQLConnection));
+
+            else{
+                fprintf(stderr, "[ERR] mysql_real_connect : '%s'\n", mysql_error(dbConnection));
             }
  
-            /* Fermeture de la connexion / Liberation memoire mysql */
         }
-        else
-        {
+
+        else{
             perror("mysql_init");
         }
-    }
-    else
-    {
-        fprintf(stderr, "[ERR] mysql_library_init\n");
-    }
+    
 
-    return mySQLConnection;
 }

@@ -1,6 +1,6 @@
 #ifndef STRUCTURES
 #define STRUCTURES
-#include <SDL2/SDL.h>
+#include <SDL.h>
 
 
 typedef struct DbConfig{
@@ -16,23 +16,32 @@ typedef struct DbConfig{
 typedef struct SDLConfig{
 
     
-    struct SDLVideoConfig *video;
+    struct SDLWindowConfig *window;
+    struct SDLInitConfig *init;
     
     
 }SDLConfig;
 
 
-typedef struct SDLVideoConfig{
+typedef struct SDLWindowConfig{
 
     long unsigned windowFlag;
 
-}SDLVideoConfig;
+}SDLWindowConfig;
+
+typedef struct SDLInitConfig{
+
+    long unsigned initFlag;
+
+}SDLInitConfig;
 
 
 
 
 void initDbConfig(DbConfig *dbConfigElement, char ***arrayParameters);
-void initSDLVideoConfig(SDLVideoConfig *videoConfigElement, char ***arrayParameters);
-void deleteEndSpace(char **row);
+void initSDLWindowConfig(SDLWindowConfig *windowConfigElement, char ***arrayParameters);
+void initSDLInitConfig(SDLInitConfig *initConfigElement, char ***arrayParameters);
+void initSDLConfig(SDLConfig *SDLConfigElement,char ***arrayParameters);
+
 
 #endif 

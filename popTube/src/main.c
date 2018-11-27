@@ -1,88 +1,111 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <winsock.h>
 
 #include <fileManager.h>
 #include <structures.h> 
 #include <dbManager.h>
+#include <SDLMain.h>
 
-#include <SDL2/SDL.h>
+#include <SDL.h>
+// #include <SDL_ttf.h>
 #include <mysql.h>
-
-
-
 
 int main(int argc, char **argv) {
      
-    char *configFileName="popTube.ini";
+    char *configFileName="popTube.cfg";
     char *openMode="r";
     FILE *configFile;
-    MYSQL *dbConnection;
+    MYSQL dbConnection;
     DbConfig *dbConfigElement;
     int lastRow;
     int *arrayRowChar;
-    char ***arrayParameters;
-    SDLConfig *config;
     
-    config=malloc(sizeof(SDLConfig*));
-    config->video=(malloc(sizeof(SDLVideoConfig*)));
+    char **arrayParameters;
+    SDLConfig *SDLConfigElement;
+    SDL_Window* mainWindow;
+    
+    configFile=malloc(sizeof(FILE));
+    SDLConfigElement=malloc(sizeof(SDLConfig));
+    arrayParameters=malloc(sizeof(char**));
+    dbConfigElement=malloc(sizeof(DbConfig));
+    // dbConnection=malloc(sizeof(MYSQL));
 
-    // config->video->windowFlag=0x00000001;
-    // config->video->windowFlag=config->video->windowFlag| 0x00000004 ;
+    // mysql_library_init(0,NULL,NULL);
 
-
-    arrayParameters=malloc(sizeof(char***));
-
-    dbConfigElement=malloc(sizeof(DbConfig*));
-
+    printf("ta");
+    
     if(dbConfigElement!=NULL){
 
-        configFile=openFile(configFileName,openMode);
-        arrayRowChar=countFileRowChar(configFile,&lastRow);
-        returnFileParameters(configFile,arrayRowChar,arrayParameters ,lastRow);
-        
-        initDbConfig(dbConfigElement,arrayParameters);
+        if((configFile=openFile(configFileName,openMode))!=NULL){
 
-        if((dbConnection=mysqlConnection(dbConfigElement))!=NULL){
             
+            arrayRowChar=countFileRowChar(configFile,&lastRow);
+            returnFileParameters(configFile,arrayRowChar,&arrayParameters ,lastRow);
         }
 
-    }
-
-    initSDLVideoConfig(config->video ,arrayParameters);
-
-
-
-    if (SDL_Init(SDL_INIT_VIDEO ) != 0 ){
-        fprintf(stdout,"Échec de l'initialisation de la SDL (%s)\n",SDL_GetError());
-        return -1;
-    }
-
-    else{
-        /* Création de la fenêtre */
-        SDL_Window* mainWindow = NULL;
-        mainWindow = SDL_CreateWindow("Ma première application SDL2",SDL_WINDOWPOS_UNDEFINED,
-                                                                  SDL_WINDOWPOS_UNDEFINED,
-                                                                  640,
-                                                                  480,
-                                                                  config->video->windowFlag);
-
-        if( mainWindow )
-        {
-            SDL_Delay(3000); /* Attendre trois secondes, que l'utilisateur voie la fenêtre */
-
-            SDL_DestroyWindow(mainWindow);
+        else{
+            printf("Erreur lors du chargement du fichier %s", configFileName);
         }
-        else
-        {
-            fprintf(stderr,"Erreur de création de la fenêtre: %s\n",SDL_GetError());
-        }
+
+        
+        // initDbConfig(dbConfigElement,&arrayParameters);
+        initSDLConfig(SDLConfigElement,&arrayParameters);
+
+        // // if((dbConnection=mysqlConnection(dbConfigElement))!=NULL){
+            
+        // // }
+        // printf("tete");
+
+
     }
+    printf("%s",mysql_get_client_info());
 
-    SDL_Quit();
+    
+    if(mysql_init(&dbConnection)!=NULL){
+
+         mysql_options(&dbConnection,MYSQL_READ_DEFAULT_GROUP,"option");
+            fprintf(stdout, "[OK] mysql_init\n");
+
+            if (mysql_real_connect(&dbConnection,  "localhost", "root", "root", "sys", 0, NULL, 0) != NULL){
+                fprintf(stdout, "[OK] mysql_real_connect\n");
+                fprintf(stdout, "[ERR] mysql_real_connect : '%s'\n", mysql_error(&dbConnection));
+                printf("toto");
+                mysql_close(&dbConnection);
+
+            }
+
+            else{
+                fprintf(stderr, "[ERR] mysql_real_connect : '%s'\n", mysql_error(&dbConnection));
+            }
+    }
+    
+ 
+        
+
+        
 
 
 
-    mysql_close(dbConnection);
+    // if (SDL_Init(SDLConfigElement->init->initFlag ) != 0 ){
+    //     fprintf(stdout,"Échec de l'initialisation de la SDL (%s)\n",SDL_GetError());
+    //     return -1;
+    // }
+
+    // else{
+    //     if((mainWindow=SDLCreateMainWindow(SDLConfigElement))!=NULL){
+
+    //         SDLMainLoop(mainWindow);
+    //     }
+    // }
+
+    // SDL_Quit();
+
+
+    mysql_library_end();
+    free(dbConfigElement);
+    free(SDLConfigElement);
+    free(configFile);
     return 0;
 
 }
