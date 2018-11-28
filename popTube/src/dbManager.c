@@ -7,7 +7,7 @@
 #include <mysql.h>
 
 
-void createMysqlConnection(DbConfig *dbConfigElement, MYSQL *dbConnection){
+int createMysqlConnection(DbConfig *dbConfigElement, MYSQL *dbConnection){
 
 
     if (mysql_init(dbConnection)!=NULL){
@@ -18,17 +18,19 @@ void createMysqlConnection(DbConfig *dbConfigElement, MYSQL *dbConnection){
 
         if (mysql_real_connect(dbConnection,  dbConfigElement->host, dbConfigElement->user, dbConfigElement->passwd, dbConfigElement->db, 0, NULL, 0) != NULL){
             fprintf(stdout, "[OK] mysql_real_connect\n");
+            return 1;
             
         }
 
         else{
             perror(mysql_error(dbConnection));
+            return 0;
         }
     }
 
     else{
         perror("mysql_init");
+        return 0;
     }
-    
 
 }

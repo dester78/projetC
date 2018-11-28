@@ -4,7 +4,7 @@
 #include <structures.h>
 
 
-void mysqlConnection(DbConfig *dbConfigElement, MYSQL *dbConnection);
+int createMysqlConnection(DbConfig *dbConfigElement, MYSQL *dbConnection);
 
 
 

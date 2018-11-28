@@ -14,7 +14,7 @@
 int main(int argc, char **argv) {
      
     char *configFileName="popTube.cfg";
-    char *openMode="r";
+    char openMode[3]="r";
     FILE *configFile;
     MYSQL dbConnection;
     
@@ -31,24 +31,34 @@ int main(int argc, char **argv) {
 
     if((configFile=openFile(configFileName,openMode))!=NULL){
 
-        
         arrayRowChar=countFileRowChar(configFile,&lastRow);
-        
-        arrayParameters=returnFileParameters(configFile,arrayRowChar ,&lastRow);
-
-        
+        arrayParameters=returnFileParameters(configFile,arrayRowChar ,&lastRow);        
     }
 
     else{
         printf("Erreur lors du chargement du fichier %s", configFileName);
     }        
 
-    initDbConfig(&dbConfigElement,arrayParameters,lastRow);
+    
 
-    initSDLConfig(&SDLConfigElement,arrayParameters,lastRow);
+    if(initDbConfig(&dbConfigElement,arrayParameters,lastRow)){
 
+        if(initSDLConfig(&SDLConfigElement,arrayParameters,lastRow)){
 
-    createMysqlConnection(&dbConfigElement,&dbConnection);
+            if(createMysqlConnection(&dbConfigElement,&dbConnection)){
+            
+            }
+
+            else{
+                
+            }
+        
+        }
+
+    }
+    
+
+    
     
 
 

@@ -3,10 +3,9 @@
 #include <stdio.h>
 #include <string.h>
 
-void initDbConfig(DbConfig *dbConfigElement, char **arrayParameters,int lastRow){
+int initDbConfig(DbConfig *dbConfigElement, char **arrayParameters,int lastRow){
 
     int counterParameters=0;
-    printf("%d",lastRow);
     
     while( counterParameters< lastRow){
     
@@ -18,6 +17,7 @@ void initDbConfig(DbConfig *dbConfigElement, char **arrayParameters,int lastRow)
 
             else{
                 printf("Erreur lors de l'allocation de host dans la structure dbConfigElement dans la fonction %s",__func__);
+                return 0;
             }
         }
 
@@ -28,6 +28,7 @@ void initDbConfig(DbConfig *dbConfigElement, char **arrayParameters,int lastRow)
             }
             else{
                 printf("Erreur lors de l'allocation de host dans la structure dbConfigElement dans la fonction %s",__func__);
+                return 0;
             }
         }
 
@@ -38,6 +39,7 @@ void initDbConfig(DbConfig *dbConfigElement, char **arrayParameters,int lastRow)
             }
             else{
                 printf("Erreur lors de l'allocation de host dans la structure dbConfigElement dans la fonction %s",__func__);
+                return 0;
             }
         }
 
@@ -48,20 +50,42 @@ void initDbConfig(DbConfig *dbConfigElement, char **arrayParameters,int lastRow)
             }
             else{
                 printf("Erreur lors de l'allocation de host dans la structure dbConfigElement dans la fonction %s",__func__);
+                return 0;
             }
         }
         counterParameters++;
     }
+
+    return 1;
 }
 
-void initSDLConfig(SDLConfig *SDLConfigElement,char **arrayParameters, int lastRow){
+int initSDLConfig(SDLConfig *SDLConfigElement,char **arrayParameters, int lastRow){
 
-    SDLConfigElement->window=(malloc(sizeof(SDLWindowConfig*)));
-    SDLConfigElement->init=(malloc(sizeof(SDLInitConfig*)));
+    if((SDLConfigElement->window=(malloc(sizeof(SDLWindowConfig*))))!=NULL){
 
-    initSDLWindowConfig(SDLConfigElement->window ,arrayParameters, lastRow);
-    initSDLInitConfig(SDLConfigElement->init ,arrayParameters, lastRow);
+        initSDLWindowConfig(SDLConfigElement->window ,arrayParameters, lastRow);
+    }
 
+    else{
+        printf("Erreur d'allocation dans la fonction %s",__func__);
+        return 0;
+    }
+    
+
+    if((SDLConfigElement->init=(malloc(sizeof(SDLInitConfig*))))!=NULL){
+
+        initSDLInitConfig(SDLConfigElement->init ,arrayParameters, lastRow);
+
+    }
+
+    else{
+        printf("Erreur d'allocation dans la fonction %s",__func__);
+        return 0;
+    }
+
+    return 1;
+    
+    
 }
 
 
@@ -83,7 +107,6 @@ void initSDLWindowConfig(SDLWindowConfig *windowConfigElement, char **arrayParam
     
     while( counterParameters<lastRow ){
 
-
         if( strncmp(arrayParameters[counterParameters], "SDL_WindowFlags=" , strlen("SDL_WindowFlags=")) == 0){
 
             if(strstr(arrayParameters[counterParameters],"SDL_WINDOW_FULLSCREEN")!=NULL){
@@ -92,6 +115,8 @@ void initSDLWindowConfig(SDLWindowConfig *windowConfigElement, char **arrayParam
             else if(strstr(arrayParameters[counterParameters],"SDL_WINDOW_SHOWN")!=NULL){
                 windowConfigElement->windowFlag=windowConfigElement->windowFlag|SDL_WINDOW_SHOWN;
             }
+
+            printf("%p",windowConfigElement->windowFlag);
         }
 
         counterParameters++;
