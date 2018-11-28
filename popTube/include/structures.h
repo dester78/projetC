@@ -38,10 +38,14 @@ typedef struct SDLInitConfig{
 
 
 
-void initDbConfig(DbConfig *dbConfigElement, char ***arrayParameters);
-void initSDLWindowConfig(SDLWindowConfig *windowConfigElement, char ***arrayParameters);
-void initSDLInitConfig(SDLInitConfig *initConfigElement, char ***arrayParameters);
-void initSDLConfig(SDLConfig *SDLConfigElement,char ***arrayParameters);
+void initDbConfig(DbConfig *dbConfigElement, char **arrayParameters,int lastRow);
+void initSDLWindowConfig(SDLWindowConfig *windowConfigElement, char **arrayParameters,int lastRow);
+void initSDLInitConfig(SDLInitConfig *initConfigElement, char **arrayParameters,int lastRow);
+void initSDLConfig(SDLConfig *SDLConfigElement,char **arrayParameters,int lastRow);
+
+
+void freeDbConfigElement(DbConfig *dbConfigElement);
+void freeSDLConfigElement(SDLConfig *SDLConfigElement);
 
 
 #endif 

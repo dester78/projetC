@@ -17,94 +17,66 @@ int main(int argc, char **argv) {
     char *openMode="r";
     FILE *configFile;
     MYSQL dbConnection;
-    DbConfig *dbConfigElement;
+    
     int lastRow;
     int *arrayRowChar;
     
     char **arrayParameters;
-    SDLConfig *SDLConfigElement;
+    SDLConfig SDLConfigElement;
+    DbConfig dbConfigElement;
     SDL_Window* mainWindow;
     
     configFile=malloc(sizeof(FILE));
-    SDLConfigElement=malloc(sizeof(SDLConfig));
-    arrayParameters=malloc(sizeof(char**));
-    dbConfigElement=malloc(sizeof(DbConfig));
-    // dbConnection=malloc(sizeof(MYSQL));
-
-    // mysql_library_init(0,NULL,NULL);
-
-    printf("ta");
     
-    if(dbConfigElement!=NULL){
 
-        if((configFile=openFile(configFileName,openMode))!=NULL){
-
-            
-            arrayRowChar=countFileRowChar(configFile,&lastRow);
-            returnFileParameters(configFile,arrayRowChar,&arrayParameters ,lastRow);
-        }
-
-        else{
-            printf("Erreur lors du chargement du fichier %s", configFileName);
-        }
+    if((configFile=openFile(configFileName,openMode))!=NULL){
 
         
-        // initDbConfig(dbConfigElement,&arrayParameters);
-        initSDLConfig(SDLConfigElement,&arrayParameters);
+        arrayRowChar=countFileRowChar(configFile,&lastRow);
+        
+        arrayParameters=returnFileParameters(configFile,arrayRowChar ,&lastRow);
 
-        // // if((dbConnection=mysqlConnection(dbConfigElement))!=NULL){
-            
-        // // }
-        // printf("tete");
-
-
+        
     }
-    printf("%s",mysql_get_client_info());
 
+    else{
+        printf("Erreur lors du chargement du fichier %s", configFileName);
+    }        
+
+    initDbConfig(&dbConfigElement,arrayParameters,lastRow);
+
+    initSDLConfig(&SDLConfigElement,arrayParameters,lastRow);
+
+
+    createMysqlConnection(&dbConfigElement,&dbConnection);
     
-    if(mysql_init(&dbConnection)!=NULL){
-
-         mysql_options(&dbConnection,MYSQL_READ_DEFAULT_GROUP,"option");
-            fprintf(stdout, "[OK] mysql_init\n");
-
-            if (mysql_real_connect(&dbConnection,  "localhost", "root", "root", "sys", 0, NULL, 0) != NULL){
-                fprintf(stdout, "[OK] mysql_real_connect\n");
-                fprintf(stdout, "[ERR] mysql_real_connect : '%s'\n", mysql_error(&dbConnection));
-                printf("toto");
-                mysql_close(&dbConnection);
-
-            }
-
-            else{
-                fprintf(stderr, "[ERR] mysql_real_connect : '%s'\n", mysql_error(&dbConnection));
-            }
-    }
-    
- 
-        
-
-        
 
 
-
-    // if (SDL_Init(SDLConfigElement->init->initFlag ) != 0 ){
-    //     fprintf(stdout,"Échec de l'initialisation de la SDL (%s)\n",SDL_GetError());
+    // if (SDL_Init( SDLConfigElement.init->initFlag ) != 0 ){
+    //     fprintf(stderr,"Échec de l'initialisation de la SDL (%s)\n",SDL_GetError());
     //     return -1;
     // }
 
     // else{
-    //     if((mainWindow=SDLCreateMainWindow(SDLConfigElement))!=NULL){
+    //     if((mainWindow=SDLCreateMainWindow(SDLConfigElement.init->initFlag))!=NULL){
 
     //         SDLMainLoop(mainWindow);
     //     }
     // }
 
-    // SDL_Quit();
+    
 
+    
+    freeDbConfigElement(&dbConfigElement);
+    freeSDLConfigElement(&SDLConfigElement);
+    freeArrayParameter(arrayParameters,lastRow);
+    
+    free(arrayParameters);
 
+    mysql_close(&dbConnection);
+    SDL_Quit();
     mysql_library_end();
-    free(dbConfigElement);
-    free(SDLConfigElement);
+
     free(configFile);
     return 0;
 

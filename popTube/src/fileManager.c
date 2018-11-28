@@ -25,55 +25,53 @@ FILE *openFile(char *fileName, char *openMode){
 }
 
 //Fonction parcourant un fichier afin de créer un tabeau de paramètres nécessaire au fonctionnement du programme 
-void returnFileParameters(FILE *configFile,int *arrayRowChar, char ***arrayParameters, int lastRow){
+char **returnFileParameters(FILE *configFile,int *arrayRowChar, int *lastRow){
 
     char *fileRow; 
     int counterFileRow;
     char commentChar[2];
     int counterParameters=0;
+    char **arrayParameters;
+
+    if((arrayParameters=malloc(sizeof(char*)))!=NULL){
+
+        for(counterFileRow=0;counterFileRow<*lastRow;counterFileRow++){
 
 
-        for(counterFileRow=0;counterFileRow<lastRow;counterFileRow++){
+            if((fileRow=malloc(sizeof(char*)*(arrayRowChar[counterFileRow]+1)))!=NULL){
 
-            fileRow=malloc(sizeof(char*)*(arrayRowChar[counterFileRow]+1));
-
-            if(fileRow!=NULL){
-
-                if(counterFileRow==lastRow-1){
-                    fgets(fileRow,arrayRowChar[counterFileRow]-1,configFile);
-                }
-
-                else{
-                    fgets(fileRow,arrayRowChar[counterFileRow]+1,configFile);
-                } 
-
-                strncpy(commentChar,fileRow,1);
-
-                if(commentChar[0]!='#'){
+                if(arrayRowChar[counterFileRow]!=-1){
                     
-                     
-                    deleteLineFeed(&fileRow);
-                    deleteEndSpace(&fileRow);
-                    *arrayParameters=realloc(*arrayParameters,(sizeof(char**)*(counterParameters+1)));
+                    fgets(fileRow,arrayRowChar[counterFileRow]+1,configFile);
+                    strncpy(commentChar,fileRow,1);
 
-                    if(*arrayParameters!=NULL){
+                    if(commentChar[0]!='#' && commentChar[0]!='\n' && commentChar[0]!=EOF && commentChar[0]!='\0'){
+                    
+                        deleteLineFeed(&fileRow);
+                        deleteEndSpace(&fileRow);
 
-                        *(*arrayParameters+counterParameters)=malloc(sizeof(char)*(arrayRowChar[counterFileRow]+1));
-                        
-                        if(*(*arrayParameters+counterParameters)!=NULL){
+                    
+                        if((arrayParameters=realloc(arrayParameters,(sizeof(char*)*(counterParameters+1))))!=NULL){
 
-                            strcpy(*(*arrayParameters+counterParameters),fileRow); 
-                            printf("%s\n",*(*arrayParameters+counterParameters));     
-                        }  
+                            if((arrayParameters[counterParameters]=malloc(sizeof(char)*( arrayRowChar[counterFileRow]) ))!=NULL){
+
+                                printf("%x\n",arrayParameters[counterParameters]);
+                                strncpy( arrayParameters[counterParameters],fileRow,(arrayRowChar[counterFileRow])); 
+                                printf("%s\n", arrayParameters[counterParameters]); 
+                                printf("%x\n",arrayParameters[counterParameters]); 
+                            }  
+                            else{
+                                printf("Erreur lors de la modification d'une chaine de caractere du tableau de parametre dans la fonction %s",__func__);
+                            }
+                        } 
+
                         else{
-                            printf("Erreur lors de la modification d'une chaine de caractere du tableau de parametre dans la fonction %s",__func__);
-                        }
-                    } 
-                    else{
-                        printf("Echec lors de l'allocation de arrayParamaters dans la fonction %s",__func__);
-                    } 
+                            printf("Echec lors de la réallocation de arrayParamaters dans la fonction %s",__func__);
+                        } 
 
                     counterParameters++;              
+                    }
+                
                 }
                 free(fileRow);
             }
@@ -81,8 +79,14 @@ void returnFileParameters(FILE *configFile,int *arrayRowChar, char ***arrayParam
                 printf("L'allocation du pointeur fileRow de la fonction %s n'a pas fonctionne",__func__);
             }
         }       
-    
-    *(*arrayParameters+counterParameters)=NULL;
+    }
+
+    else{
+        printf("Echec lors de l'allocation de arrayParamaters dans la fonction %s",__func__);
+    }
+
+    *lastRow=counterParameters;
+    return arrayParameters;
 }
 
 //Fonction parcourant un fichier passé en paramètre afin de compter le nombres de lignes et le nombre de caractères/ligne. Renvoie ensuite un tableau contenant ces informations.
@@ -111,10 +115,17 @@ int *countFileRowChar(FILE *file, int *lastRow){
 
                 arrayRowChar=realloc(arrayRowChar,sizeof(int)*(counterRow+1));
                 arrayRowChar[counterRow]=counterChar;
-                counterChar=0;
-
+                
                 if(bufferChar==EOF){
+
+                    if(counterChar==2){
+                        arrayRowChar[counterRow]=-1;
+                    }
                     counterChar=-1;
+                }
+
+                else{
+                    counterChar=0;
                 }
                 counterRow++;
             }
@@ -148,7 +159,7 @@ sizeRow=strlen(*row);
         if(bufferRow!=NULL){
 
             strcpy(bufferRow,*row);
-            free(row);
+            free(*row);
 
             *row=malloc(sizeof(char)*(sizeRow));
 
@@ -191,7 +202,7 @@ sizeRow=strlen(*row);
         strcpy(bufferRow,*row);
         if(bufferRow[sizeRow-1]==' '){
     
-            free(row);
+            free(*row);
             counterChar=sizeRow-1;
             while(bufferRow[counterChar-counterSpace]==' '){
                 counterSpace++;
@@ -218,10 +229,26 @@ sizeRow=strlen(*row);
     }
 
     else{
-        printf("L'allocation du pointeur bufferRow de la fonction %s n'a pas fonctionné",__func__);
+        fprintf(stderr,"L'allocation du pointeur bufferRow de la fonction %s n'a pas fonctionné",__func__);
     }
     
     
+}
+
+void freeArrayParameter(char** arrayParameters, int lastRow){
+
+    int counterParameters=0;
+    
+    while(counterParameters<lastRow){
+
+        free(arrayParameters[counterParameters]);
+        arrayParameters[counterParameters]=NULL;
+        counterParameters++;
+    }
+
+
+
+    printf("OK");
 }
 
 
