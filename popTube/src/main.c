@@ -45,34 +45,31 @@ int main(int argc, char **argv) {
 
         if(initSDLConfig(&SDLConfigElement,arrayParameters,lastRow)){
 
+            printf("%s",SDLConfigElement->window.windowFlag);
+            
             if(createMysqlConnection(&dbConfigElement,&dbConnection)){
             
+                
             }
 
             else{
                 
             }
-        
         }
-
     }
     
 
-    
-    
+    if (SDL_Init( SDLConfigElement->init.initFlag ) != 0 ){
+        fprintf(stderr,"Échec de l'initialisation de la SDL (%s)\n",SDL_GetError());
+        return -1;
+    }
 
+    else{
+        if((mainWindow=SDLCreateMainWindow(SDLConfigElement.init->initFlag))!=NULL){
 
-    // if (SDL_Init( SDLConfigElement.init->initFlag ) != 0 ){
-    //     fprintf(stderr,"Échec de l'initialisation de la SDL (%s)\n",SDL_GetError());
-    //     return -1;
-    // }
-
-    // else{
-    //     if((mainWindow=SDLCreateMainWindow(SDLConfigElement.init->initFlag))!=NULL){
-
-    //         SDLMainLoop(mainWindow);
-    //     }
-    // }
+            SDLMainLoop(mainWindow);
+        }
+    }
 
     
 

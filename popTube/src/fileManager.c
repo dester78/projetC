@@ -50,7 +50,6 @@ char **returnFileParameters(FILE *configFile,int *arrayRowChar, int *lastRow){
                         deleteLineFeed(&fileRow);
                         deleteEndSpace(&fileRow);
 
-                    
                         if((arrayParameters=realloc(arrayParameters,(sizeof(char*)*(counterParameters+1))))!=NULL){
 
                             if((arrayParameters[counterParameters]=malloc(sizeof(char)*( arrayRowChar[counterFileRow]) ))!=NULL){
@@ -70,8 +69,7 @@ char **returnFileParameters(FILE *configFile,int *arrayRowChar, int *lastRow){
                         } 
 
                     counterParameters++;              
-                    }
-                
+                    }     
                 }
                 free(fileRow);
             }
