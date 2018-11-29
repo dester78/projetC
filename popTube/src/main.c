@@ -22,6 +22,7 @@ int main(int argc, char **argv) {
     int *arrayRowChar;
     
     char **arrayParameters;
+    SDL_DisplayMode * arrayDisplayModes;
     SDLConfig SDLConfigElement;
     DbConfig dbConfigElement;
     SDL_Window* mainWindow;
@@ -45,11 +46,11 @@ int main(int argc, char **argv) {
 
         if(initSDLConfig(&SDLConfigElement,arrayParameters,lastRow)){
 
-            printf("%s",SDLConfigElement->window.windowFlag);
+            
             
             if(createMysqlConnection(&dbConfigElement,&dbConnection)){
             
-                
+ 
             }
 
             else{
@@ -59,15 +60,19 @@ int main(int argc, char **argv) {
     }
     
 
-    if (SDL_Init( SDLConfigElement->init.initFlag ) != 0 ){
+    if (SDL_Init( SDLConfigElement.init->initFlag ) != 0 ){
+        printf("toto");
         fprintf(stderr,"Échec de l'initialisation de la SDL (%s)\n",SDL_GetError());
         return -1;
     }
 
     else{
-        if((mainWindow=SDLCreateMainWindow(SDLConfigElement.init->initFlag))!=NULL){
+        if((mainWindow=SDLCreateMainWindow(SDLConfigElement.window->windowFlag))!=NULL){
 
-            SDLMainLoop(mainWindow);
+
+           arrayDisplayModes=SDLGetArrayDisplayModes();
+           
+
         }
     }
 
@@ -79,6 +84,7 @@ int main(int argc, char **argv) {
     freeArrayParameter(arrayParameters,lastRow);
     
     free(arrayParameters);
+    free(arrayDisplayModes);
 
     mysql_close(&dbConnection);
     SDL_Quit();

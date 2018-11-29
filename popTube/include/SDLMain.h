@@ -1,11 +1,15 @@
 #ifndef SDLMAIN
 #define SDLMAIN
+#include <SDL.h>
+#include <structures.h>
 
 
-    SDL_Window *SDLCreateMainWindow(SDLConfig *SDLConfigElement);
+    SDL_Window *SDLCreateMainWindow(long int windowFlag);
     SDL_Surface *SDLCreateHostMenu(SDL_Window* mainWindow);
     void SDLMainLoop(SDL_Window* mainWindow);
-    void SDLGetDisplayModes(SDL_DisplayMode *displayMode);
+    
+    SDL_DisplayMode *SDLGetArrayDisplayModes();
+    // void SDLGetDisplayModes(SDL_DisplayMode *displayMode);
 
 
 #endif

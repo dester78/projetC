@@ -92,8 +92,8 @@ int initSDLConfig(SDLConfig *SDLConfigElement,char **arrayParameters, int lastRo
 void freeSDLConfigElement(SDLConfig *SDLConfigElement){
 
 
-    free(SDLConfigElement->window->windowFlag);
-    free(SDLConfigElement->init->initFlag);
+    // free(SDLConfigElement->window.windowFlag);
+    // free(SDLConfigElement->init->initFlag);
     free(SDLConfigElement->window);
     free(SDLConfigElement->init);
 }

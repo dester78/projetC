@@ -8,12 +8,12 @@
 #include <SDL_ttf.h>
 
 
-SDL_Window *SDLCreateMainWindow(SDLConfig *SDLConfigElement){
+SDL_Window* SDLCreateMainWindow(long int windowFlag){
 
 SDL_Window* mainWindow;
 // SDL_Renderer *renderer;
 
-    mainWindow = SDL_CreateWindow("Ma première application SDL2",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,1280,960,SDLConfigElement->window->windowFlag);
+    mainWindow = SDL_CreateWindow("Ma première application SDL2",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,1280,960,windowFlag);
     // enderer = SDL_CreateRenderer(mainWind, -1, 0);
 
     if(mainWindow!=NULL){    
@@ -63,25 +63,46 @@ SDL_Event event;
 
 // void SDLGetDisplayModes(SDL_DisplayMode *displayMode){
 
-//     int modeNumber = SDL_GetNumDisplayModes(0);
+SDL_DisplayMode *SDLGetArrayDisplayModes(){
 
-//     if (modeNumber < 0){
+    SDL_DisplayMode *arrayDisplayModes;
 
-//     fprintf(stderr,"Échec lors de la récupération du nombre de modes (%s)\n",SDL_GetError());
-//     }
+    int modeNumber = SDL_GetNumDisplayModes(0);
 
-//     fprintf(stdout,"Il y a %d mode(s) d'affichage", modeNumber);
+    if (modeNumber < 0){
 
-//     for (int modeCounter= 0 ; modeCounter < modeNumber ; modeCounter++){
+        fprintf(stderr,"Échec lors de la récupération du nombre de modes (%s)\n",SDL_GetError());
+    }
 
-//         if (SDL_GetDisplayMode(0, modeCounter, displayMode)< 0){
-//             fprintf(stderr, "Échec lors de la récupération du mode d'affichage (%s)\n", SDL_GetError());
-//         }
+    else{
 
-//         fprintf(stdout, "Mode %d : %dx%dx%d\n", modeCounter, displayMode->w, displayMode->h, displayMode->refresh_rate);
-//     }
+        if((arrayDisplayModes=malloc(sizeof(SDL_DisplayMode*)*modeNumber))!=NULL){
 
-// }
+            for (int modeCounter= 0 ; modeCounter < modeNumber ; modeCounter++){
+
+                if (SDL_GetDisplayMode(0, modeCounter, (arrayDisplayModes+modeCounter))< 0){
+                    fprintf(stderr, "Échec lors de la récupération du mode d'affichage (%s)\n", SDL_GetError());
+                }
+
+                fprintf(stdout, "Mode %d : %dx%dx%d\n", modeCounter, arrayDisplayModes[modeCounter].w, arrayDisplayModes[modeCounter].h, arrayDisplayModes[modeCounter].refresh_rate);
+
+             }
+
+             return arrayDisplayModes;
+        }
+
+        else{
+            printf("Erreur lors d'une allocation dans la fonction %s",__func__);
+        }
+        
+
+    }
+
+    return NULL;
+
+
+
+}
 
 
 
