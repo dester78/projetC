@@ -17,7 +17,7 @@ int main(int argc, char **argv) {
      
     
     MYSQL dbConnection;
-    SDL_Window* mainWindow;
+    SDL_Window  *mainWindow;
     
     int lastRow;
     int *arrayRowChar;
@@ -81,9 +81,7 @@ int main(int argc, char **argv) {
 
                 }
    
-        }
-
-        
+        }  
     }
 
     freeDbConfigElement(&dbConfigElement);
@@ -104,56 +102,3 @@ int main(int argc, char **argv) {
     return 0;
 
 }
-
-
-
-//     int status =  EXIT_FAILURE;
-
-//     SDL_Event event; 
-
-//     MYSQL *mysql;
-//     /* Initialisation bibliotheque mysql */
-//     if (mysql_library_init(0, NULL, NULL) == 0)
-//     {
-//         /* Initialisation du pointeur MYSQL */
-//         mysql = mysql_init(NULL);
-//         if (mysql != NULL)
-//         {
-//             fprintf(stdout, "[OK] mysql_init\n");
- 
-//             /* Connexion au serveur mysql */
-//             if (mysql_real_connect(mysql, "localhost", "root", "root", "sys", 0, NULL, 0) != NULL)
-//             {
-//                 fprintf(stdout, "[OK] mysql_real_connect\n");
-//             }
-//             else
-//             {
-//                 fprintf(stderr, "[ERR] mysql_real_connect : '%s'\n", mysql_error(mysql));
-//             }
- 
-//             /* Fermeture de la connexion / Liberation memoire mysql */
-//             mysql_close(mysql);
-//             mysql = NULL;
-//         }
-//         else
-//         {
-//             perror("mysql_init");
-//         }
- 
-//         /* Fermeture de la bibliotheque */
-//         mysql_library_end();
-//     }
-//     else
-//     {
-//         fprintf(stderr, "[ERR] mysql_library_init\n");
-//     }
- 
-     
-//     // Initialisation + vérification de la SDL : VIDEO.
-//     i
-    
-// quit:
-//     // Quitter SDL.
-//     SDL_Quit();
-     
-//     return status;

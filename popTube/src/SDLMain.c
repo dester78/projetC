@@ -12,11 +12,10 @@
 
 SDL_Window* SDLCreateMainWindow(long int windowFlag){
 
-SDL_Window* mainWindow;
-// SDL_Renderer *renderer;
+    SDL_Window  *mainWindow;
 
-    mainWindow = SDL_CreateWindow("Ma première application SDL2",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,1280,960,windowFlag);
-    // enderer = SDL_CreateRenderer(mainWind, -1, 0);
+    mainWindow = SDL_CreateWindow("PopTube",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,1280,960,windowFlag);
+    mainWindow->format;
 
     if(mainWindow!=NULL){    
         return mainWindow;
@@ -28,30 +27,41 @@ SDL_Window* mainWindow;
     }
 }
 
-// SDL_Surface *SDLCreateHostMenu(SDL_Window* mainWindow){
+SDL_Surface *SDLCreateHostMenu(SDL_Window* mainWindow){
 
-//     int wWindow;
-//     int hWindow;
-//     SDL_Surface *hostMenu;
-//     SDL_GetWindowSize(mainWindow,&wWindow,&hWindow);
-//     hostMenu=SDL_CreateRGBSurface(SDL_RENDERER_ACCELERATED,wWindow/2,hWindow/2,32,0,0,0,0);
+    int wWindow;
+    int hWindow;
+    SDL_Surface *hostMenu;
+    SDL_GetWindowSize(mainWindow,&wWindow,&hWindow);
+    hostMenu=SDL_CreateRGBSurface(SDL_RENDERER_ACCELERATED,wWindow/2,hWindow/2,32,0,0,0,0);
+    
+}
 
 
-// }
+int SDLMainLoop(SDL_Window  *mainWindow, SDLConfig *SDLConfigElement,DbConfig *dbConfigElement,MYSQL *dbConnection, Files *arrayFiles){
+
+    int windowLoop;
 
 
-int SDLMainLoop(SDL_Window* mainWindow, SDLConfig *SDLConfigElement,DbConfig *dbConfigElement,MYSQL *dbConnection, Files *arrayFiles){
+    // SDL_DisplayMode *displayMode;
+    SDL_Event event;
 
-int windowLoop;
+    // hostMenu=SDL_CreateRGBSurface(SDL_RENDERER_ACCELERATED,wWindow/2,hWindow/2,32,0,0,0,0);
 
-printf("%p\n",SDLConfigElement->init->initFlag );
 
-// SDL_DisplayMode *displayMode;
-SDL_Event event;
+    // SDL_Surface *buttonSurface; 
+    // SDL_Color color;
+
 
     // SDLGetDisplayModes(displayMode);
+
+
+    // printf("%p",SDL_GetWindowPixelFormat(*mainWindow));
+
+    //SDL_FillRect(mainWindow, NULL, SDL_MapRGB(32, 238, 238, 238));
     while(windowLoop){
 
+        
 
         SDL_PollEvent(&event);
         
@@ -87,23 +97,15 @@ SDL_DisplayMode *SDLGetArrayDisplayModes(){
                 if (SDL_GetDisplayMode(0, modeCounter, (arrayDisplayModes+modeCounter))< 0){
                     fprintf(stderr, "Échec lors de la récupération du mode d'affichage (%s)\n", SDL_GetError());
                 }
-
-                fprintf(stdout, "Mode %d : %dx%dx%d\n", modeCounter, arrayDisplayModes[modeCounter].w, arrayDisplayModes[modeCounter].h, arrayDisplayModes[modeCounter].refresh_rate);
-
              }
-
              return arrayDisplayModes;
         }
 
         else{
             createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
         }
-        
-
     }
-
     return NULL;
-
 }
 
 
