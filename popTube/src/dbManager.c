@@ -1,8 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <winsock.h>
+
 #include <dbManager.h>
 #include <structures.h>
+#include <fileManager.h>
 
 #include <mysql.h>
 
@@ -29,7 +31,7 @@ int createMysqlConnection(DbConfig *dbConfigElement, MYSQL *dbConnection){
     }
 
     else{
-        perror("mysql_init");
+        createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
         return 0;
     }
 

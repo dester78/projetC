@@ -1,9 +1,47 @@
-#include <structures.h>
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
 
-int initDbConfig(DbConfig *dbConfigElement, char **arrayParameters,int lastRow){
+#include <structures.h>
+#include <fileManager.h>
+
+
+Files returnFileElement(char *fullName, char* openMode ){
+
+    Files fileElement;
+
+    if((fileElement.fullName=malloc(sizeof(char)*(strlen( fullName )+1 ) ) ) != NULL){
+
+        if(strcpy(fileElement.fullName,fullName)==NULL){
+            createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
+        }
+
+    }
+    else{
+        createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
+    }
+
+    if(strlen(openMode)<3){
+
+        if(strcpy(fileElement.openMode,openMode)==NULL){
+            createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
+        }
+    }
+
+    else{
+        createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
+    }
+    
+    if((fileElement.filePointer=malloc(sizeof(FILE)))==NULL){
+
+        createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
+    }
+
+    return fileElement;
+}
+
+
+int initDbConfig(DbConfig *dbConfigElement, char **arrayParameters,int lastRow ){
 
     int counterParameters=0;
     
@@ -16,7 +54,7 @@ int initDbConfig(DbConfig *dbConfigElement, char **arrayParameters,int lastRow){
             }
 
             else{
-                printf("Erreur lors de l'allocation de host dans la structure dbConfigElement dans la fonction %s",__func__);
+                createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
                 return 0;
             }
         }
@@ -27,7 +65,7 @@ int initDbConfig(DbConfig *dbConfigElement, char **arrayParameters,int lastRow){
                 strcpy(dbConfigElement->user,(arrayParameters[counterParameters]+ strlen("user=")));
             }
             else{
-                printf("Erreur lors de l'allocation de host dans la structure dbConfigElement dans la fonction %s",__func__);
+                createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
                 return 0;
             }
         }
@@ -38,7 +76,7 @@ int initDbConfig(DbConfig *dbConfigElement, char **arrayParameters,int lastRow){
                 strcpy(dbConfigElement->passwd,(arrayParameters[counterParameters]+ strlen("passwd=")));
             }
             else{
-                printf("Erreur lors de l'allocation de host dans la structure dbConfigElement dans la fonction %s",__func__);
+                createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
                 return 0;
             }
         }
@@ -49,7 +87,7 @@ int initDbConfig(DbConfig *dbConfigElement, char **arrayParameters,int lastRow){
                 strcpy(dbConfigElement->db,(arrayParameters[counterParameters]+ strlen("db=")));
             }
             else{
-                printf("Erreur lors de l'allocation de host dans la structure dbConfigElement dans la fonction %s",__func__);
+                createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
                 return 0;
             }
         }
@@ -59,7 +97,7 @@ int initDbConfig(DbConfig *dbConfigElement, char **arrayParameters,int lastRow){
     return 1;
 }
 
-int initSDLConfig(SDLConfig *SDLConfigElement,char **arrayParameters, int lastRow){
+int initSDLConfig(SDLConfig *SDLConfigElement,char **arrayParameters, int lastRow ){
 
     if((SDLConfigElement->window=(malloc(sizeof(SDLWindowConfig*))))!=NULL){
 
@@ -67,7 +105,7 @@ int initSDLConfig(SDLConfig *SDLConfigElement,char **arrayParameters, int lastRo
     }
 
     else{
-        printf("Erreur d'allocation dans la fonction %s",__func__);
+        createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
         return 0;
     }
     
@@ -79,7 +117,7 @@ int initSDLConfig(SDLConfig *SDLConfigElement,char **arrayParameters, int lastRo
     }
 
     else{
-        printf("Erreur d'allocation dans la fonction %s",__func__);
+        createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
         return 0;
     }
 
@@ -91,16 +129,13 @@ int initSDLConfig(SDLConfig *SDLConfigElement,char **arrayParameters, int lastRo
 
 void freeSDLConfigElement(SDLConfig *SDLConfigElement){
 
-
-    // free(SDLConfigElement->window.windowFlag);
-    // free(SDLConfigElement->init->initFlag);
     free(SDLConfigElement->window);
     free(SDLConfigElement->init);
 }
 
 
 
-void initSDLWindowConfig(SDLWindowConfig *windowConfigElement, char **arrayParameters, int lastRow){
+void initSDLWindowConfig(SDLWindowConfig *windowConfigElement, char **arrayParameters, int lastRow ){
 
     int counterParameters=0;
     windowConfigElement->windowFlag=0x00000000;
@@ -115,8 +150,6 @@ void initSDLWindowConfig(SDLWindowConfig *windowConfigElement, char **arrayParam
             else if(strstr(arrayParameters[counterParameters],"SDL_WINDOW_SHOWN")!=NULL){
                 windowConfigElement->windowFlag=windowConfigElement->windowFlag|SDL_WINDOW_SHOWN;
             }
-
-            printf("%p",windowConfigElement->windowFlag);
         }
 
         counterParameters++;
@@ -172,4 +205,10 @@ void freeDbConfigElement(DbConfig *dbConfigElement){
     free(dbConfigElement->passwd);
     free(dbConfigElement->db);
     
+}
+
+void freeFileElement(Files fileElement){
+
+    fclose(fileElement.filePointer);
+    free(fileElement.filePointer);
 }

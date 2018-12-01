@@ -8,7 +8,7 @@ S_DIR=popTube\src
 #Header DIR 
 H_DIR=popTube\include
 
-CPPFLAGS = -I $(P_DIR)\$(H_DIR) -I 'C:\Program Files (x86)\MySQL\MySQL Connector C 6.1\include'
+CPPFLAGS = -I $(P_DIR)\$(H_DIR) -I $(P_DIR)\$(H_DIR)\SDL2  -I 'C:\Program Files (x86)\MySQL\MySQL Connector C 6.1\include'
 
 #CFLAGS current variable for compilation options   
 #-W et -Wall display front end compiler warnings 
@@ -44,9 +44,9 @@ fileManager.o: $(P_DIR)\$(S_DIR)\fileManager.c $(P_DIR)\$(H_DIR)\fileManager.h $
 	$(CC)   -o fileManager.o -c $(P_DIR)\$(S_DIR)\fileManager.c $(CFLAGS) $(CPPFLAGS)
 
 clean:
-	del *.o core
+	rm *.o core
 
 delproper: clean
-	del main.exe
+	rm main.exe
 
 

@@ -3,9 +3,11 @@
 
 #include <structures.h> 
 #include <SDLMain.h>
+#include <fileManager.h>
 
 #include <SDL.h>
 #include <SDL_ttf.h>
+#include <mysql.h>
 
 
 SDL_Window* SDLCreateMainWindow(long int windowFlag){
@@ -38,9 +40,12 @@ SDL_Window* mainWindow;
 // }
 
 
-void SDLMainLoop(SDL_Window* mainWindow){
+int SDLMainLoop(SDL_Window* mainWindow, SDLConfig *SDLConfigElement,DbConfig *dbConfigElement,MYSQL *dbConnection, Files *arrayFiles){
 
 int windowLoop;
+
+printf("%p\n",SDLConfigElement->init->initFlag );
+
 // SDL_DisplayMode *displayMode;
 SDL_Event event;
 
@@ -59,9 +64,8 @@ SDL_Event event;
             
         }
     }
+    return 0;
 }
-
-// void SDLGetDisplayModes(SDL_DisplayMode *displayMode){
 
 SDL_DisplayMode *SDLGetArrayDisplayModes(){
 
@@ -92,15 +96,13 @@ SDL_DisplayMode *SDLGetArrayDisplayModes(){
         }
 
         else{
-            printf("Erreur lors d'une allocation dans la fonction %s",__func__);
+            createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
         }
         
 
     }
 
     return NULL;
-
-
 
 }
 

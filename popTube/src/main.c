@@ -1,11 +1,13 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <winsock.h>
+#include <errno.h>
 
 #include <fileManager.h>
 #include <structures.h> 
 #include <dbManager.h>
 #include <SDLMain.h>
+
 
 #include <SDL.h>
 // #include <SDL_ttf.h>
@@ -13,41 +15,42 @@
 
 int main(int argc, char **argv) {
      
-    char *configFileName="popTube.cfg";
-    char openMode[3]="r";
-    FILE *configFile;
+    
     MYSQL dbConnection;
+    SDL_Window* mainWindow;
     
     int lastRow;
     int *arrayRowChar;
-    
     char **arrayParameters;
-    SDL_DisplayMode * arrayDisplayModes;
+
     SDLConfig SDLConfigElement;
     DbConfig dbConfigElement;
-    SDL_Window* mainWindow;
-    
-    configFile=malloc(sizeof(FILE));
-    
+    Files *arrayFiles;
 
-    if((configFile=openFile(configFileName,openMode))!=NULL){
+    
+    arrayFiles=malloc(sizeof(Files));
+  
+    arrayFiles[0]=returnFileElement("errorLog.txt","a+");
+    arrayFiles[1]=returnFileElement("popTube.cfg","r+");
+    arrayFiles[0].filePointer=malloc(sizeof(FILE*));
+    arrayFiles[1].filePointer=malloc(sizeof(FILE*));
 
-        arrayRowChar=countFileRowChar(configFile,&lastRow);
-        arrayParameters=returnFileParameters(configFile,arrayRowChar ,&lastRow);        
+    if((arrayFiles[0].filePointer=openFluxFile(arrayFiles[0].fullName,arrayFiles[0].openMode))!=NULL){
+
+        if((arrayFiles[1].filePointer=openFile(arrayFiles[1].fullName,arrayFiles[1].openMode))!=NULL){
+
+            arrayRowChar=countFileRowChar(arrayFiles[1].filePointer,&lastRow);
+            arrayParameters=returnFileParameters(arrayFiles[1].filePointer,arrayRowChar ,&lastRow); 
+        }        
+
+        else{createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);}   
     }
 
-    else{
-        printf("Erreur lors du chargement du fichier %s", configFileName);
-    }        
-
-    
-
+         
     if(initDbConfig(&dbConfigElement,arrayParameters,lastRow)){
 
         if(initSDLConfig(&SDLConfigElement,arrayParameters,lastRow)){
 
-            
-            
             if(createMysqlConnection(&dbConfigElement,&dbConnection)){
             
  
@@ -61,36 +64,43 @@ int main(int argc, char **argv) {
     
 
     if (SDL_Init( SDLConfigElement.init->initFlag ) != 0 ){
-        printf("toto");
+
         fprintf(stderr,"Échec de l'initialisation de la SDL (%s)\n",SDL_GetError());
-        return -1;
     }
 
     else{
+
         if((mainWindow=SDLCreateMainWindow(SDLConfigElement.window->windowFlag))!=NULL){
 
+            while(SDLMainLoop(
+                mainWindow,
+                &SDLConfigElement,
+                &dbConfigElement,
+                &dbConnection,
+                arrayFiles) != 0){
 
-           arrayDisplayModes=SDLGetArrayDisplayModes();
-           
-
+                }
+   
         }
+
+        
     }
 
-    
-
-    
     freeDbConfigElement(&dbConfigElement);
     freeSDLConfigElement(&SDLConfigElement);
+    freeFileElement(arrayFiles[0]);
+    // freeFileElement(arrayFiles[1]);
+    // perror(createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__));
+    free(arrayFiles);
     freeArrayParameter(arrayParameters,lastRow);
     
     free(arrayParameters);
-    free(arrayDisplayModes);
+
 
     mysql_close(&dbConnection);
     SDL_Quit();
     mysql_library_end();
 
-    free(configFile);
     return 0;
 
 }

@@ -1,3 +1,4 @@
+#define ERROR_BUFFER_SIZE 250
 #include <stdio.h>
 #include <stdlib.h>
 #include <structures.h>
@@ -5,27 +6,57 @@
 #include <string.h>
 
 
+
 FILE *openFile(char *fileName, char *openMode){
 
-    FILE *file;
-    file=malloc(sizeof(FILE));
+FILE *file;
 
-    
-    if((file=fopen(fileName,openMode))!=NULL){
-        
-        return file;
+    if((file=malloc(sizeof(FILE)))!=NULL){
+
+        if((file=fopen(fileName,openMode))!=NULL){
+            return file;
+        }
+            
+        else if((file=fopen(fileName,"w+"))!=NULL){
+            return file;
+        }
+
+        else{
+            createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
+            return NULL;
+        }
     }
-        
-    
+    return NULL;
+}
 
+
+FILE *openFluxFile(char *fileName, char *openMode){
+
+FILE * redirectFile; 
+
+    if((redirectFile=malloc(sizeof(FILE)))!=NULL){
+
+        if((redirectFile=freopen(fileName,openMode,stderr))!=NULL){
+            return redirectFile;
+        }
+
+        else if((redirectFile=freopen(fileName,"w+",stderr))!=NULL){
+            return redirectFile;
+        }
+
+        else{
+            createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
+            return NULL; 
+        }
+    }
     else{
-        printf("Erreur lors de l'allocation du pointeur de fichier dans la fonction %s",__func__);
+        createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
         return NULL;
     }
 }
 
-//Fonction parcourant un fichier afin de créer un tabeau de paramètres nécessaire au fonctionnement du programme 
-char **returnFileParameters(FILE *configFile,int *arrayRowChar, int *lastRow){
+
+char **returnFileParameters(FILE *configFile,  int *arrayRowChar, int *lastRow ){
 
     char *fileRow; 
     int counterFileRow;
@@ -37,16 +68,15 @@ char **returnFileParameters(FILE *configFile,int *arrayRowChar, int *lastRow){
 
         for(counterFileRow=0;counterFileRow<*lastRow;counterFileRow++){
 
-
-            if((fileRow=malloc(sizeof(char*)*(arrayRowChar[counterFileRow]+1)))!=NULL){
+            if((fileRow=malloc(sizeof(char)*(arrayRowChar[counterFileRow]+1)))!=NULL){
 
                 if(arrayRowChar[counterFileRow]!=-1){
                     
                     fgets(fileRow,arrayRowChar[counterFileRow]+1,configFile);
                     strncpy(commentChar,fileRow,1);
-
+ 
                     if(commentChar[0]!='#' && commentChar[0]!='\n' && commentChar[0]!=EOF && commentChar[0]!='\0'){
-                    
+                        
                         deleteLineFeed(&fileRow);
                         deleteEndSpace(&fileRow);
 
@@ -54,34 +84,23 @@ char **returnFileParameters(FILE *configFile,int *arrayRowChar, int *lastRow){
 
                             if((arrayParameters[counterParameters]=malloc(sizeof(char)*( arrayRowChar[counterFileRow]) ))!=NULL){
 
-                                printf("%x\n",arrayParameters[counterParameters]);
                                 strncpy( arrayParameters[counterParameters],fileRow,(arrayRowChar[counterFileRow])); 
-                                printf("%s\n", arrayParameters[counterParameters]); 
-                                printf("%x\n",arrayParameters[counterParameters]); 
+                                printf("%s",arrayParameters[counterParameters]);
                             }  
-                            else{
-                                printf("Erreur lors de la modification d'une chaine de caractere du tableau de parametre dans la fonction %s",__func__);
-                            }
+                            else{createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);}
                         } 
-
-                        else{
-                            printf("Echec lors de la réallocation de arrayParamaters dans la fonction %s",__func__);
-                        } 
+                        else{createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);} 
 
                     counterParameters++;              
                     }     
                 }
                 free(fileRow);
             }
-            else{
-                printf("L'allocation du pointeur fileRow de la fonction %s n'a pas fonctionne",__func__);
+            else{createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
             }
         }       
     }
-
-    else{
-        printf("Echec lors de l'allocation de arrayParamaters dans la fonction %s",__func__);
-    }
+    else{createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);}
 
     *lastRow=counterParameters;
     return arrayParameters;
@@ -96,9 +115,8 @@ int *countFileRowChar(FILE *file, int *lastRow){
     int counterChar=0;
 
     fseek(file,0,SEEK_SET);
-    arrayRowChar=malloc(sizeof(int));
     
-    if(arrayRowChar!=NULL){
+    if((arrayRowChar=malloc(sizeof(int)))!=NULL){
 
         while(counterChar!=-1){
 
@@ -107,43 +125,29 @@ int *countFileRowChar(FILE *file, int *lastRow){
 
             if(bufferChar=='\n'||bufferChar==EOF){
 
-                if(counterChar==1){
-                    counterChar++;
-                }
-
                 arrayRowChar=realloc(arrayRowChar,sizeof(int)*(counterRow+1));
                 arrayRowChar[counterRow]=counterChar;
                 
                 if(bufferChar==EOF){
-
-                    if(counterChar==2){
-                        arrayRowChar[counterRow]=-1;
-                    }
                     counterChar=-1;
                 }
+                else{counterChar=0;}
 
-                else{
-                    counterChar=0;
-                }
                 counterRow++;
             }
         }
-
         fseek(file,0,SEEK_SET);
         *lastRow=counterRow;
         return arrayRowChar;
-    }  
-        
+    }        
 
     else{
-        printf("Echec lors de l'allocation du tableau arrayRowChar de la fonction %s",__func__);
+        createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
         return 0;
-    }
-    
+    }   
 }
 
-//Fonction supprimant le retour chariot de fin de chaine de caractères passée en paramètre en passant par un buffer pour faire les modifications nécessaires
-void deleteLineFeed( char **row){
+void deleteLineFeed( char **row ){
 
 char *bufferRow;
 int counterChar;
@@ -153,38 +157,29 @@ sizeRow=strlen(*row);
 
     if(*(*row+sizeRow-1)=='\n'&& *(*row+sizeRow)!=EOF){
 
-        bufferRow=malloc(sizeof(char)*(sizeRow+1));
-        if(bufferRow!=NULL){
+        if((bufferRow=malloc(sizeof(char)*(sizeRow+1)))!=NULL){
 
             strcpy(bufferRow,*row);
             free(*row);
 
-            *row=malloc(sizeof(char)*(sizeRow));
-
-            if(*row!=NULL){
+            if((*row=malloc(sizeof(char)*(sizeRow)))!=NULL){
 
                 for(counterChar=0;counterChar<sizeRow-1;counterChar++){
                     *(*row+counterChar)=bufferRow[counterChar];
                 }
-
-            *(*row+counterChar)='\0';
+                *(*row+counterChar)='\0';
             }
 
-            else{
-                printf("L'allocation du pointeur row de la fonction %s n'a pas fonctionné",__func__);
-            }
+            else{createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);}
             
             free(bufferRow);
-
+            bufferRow=NULL;
         }
-        else{
-            printf("L'allocation du buffer de la fonction %s n'a pas fonctionné",__func__);
-        }
+        else{createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);}
     }
 }
 
-//Fonction supprimant les espaces présents à la fin d'une chaine de caractère passée en paramètre
-void deleteEndSpace(char **row){
+void deleteEndSpace(char **row ){
 
 char *bufferRow;
 int counterChar;
@@ -192,10 +187,8 @@ int counterSpace=0;
 int sizeRow;
 
 sizeRow=strlen(*row);
-
-    bufferRow=malloc(sizeof(char)*(sizeRow+1));
     
-    if(bufferRow!=NULL){
+    if((bufferRow=malloc(sizeof(char)*(sizeRow+1)))!=NULL){
 
         strcpy(bufferRow,*row);
         if(bufferRow[sizeRow-1]==' '){
@@ -206,34 +199,24 @@ sizeRow=strlen(*row);
                 counterSpace++;
             }
 
-            *row=malloc(sizeof(char)*(sizeRow-counterSpace));
-
-            if(*row!=NULL){
+            if((*row=malloc(sizeof(char)*(sizeRow-counterSpace)))!=NULL){
 
                 for(counterChar=0;counterChar<(sizeRow-counterSpace);counterChar++){
 
                     *(*row+counterChar)=bufferRow[counterChar];
                 }
-
                 *(*row+counterChar)='\0';
             }
 
-            else{
-                printf("L'allocation du pointeur row de la fonction %s n'a pas fonctionné",__func__);
-            }
+            else{createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);}
         }
-
         free(bufferRow);
     }
-
-    else{
-        fprintf(stderr,"L'allocation du pointeur bufferRow de la fonction %s n'a pas fonctionné",__func__);
-    }
-    
-    
+    else{createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);}
 }
 
-void freeArrayParameter(char** arrayParameters, int lastRow){
+
+void freeArrayParameter(char** arrayParameters, int lastRow ){
 
     int counterParameters=0;
     
@@ -243,10 +226,19 @@ void freeArrayParameter(char** arrayParameters, int lastRow){
         arrayParameters[counterParameters]=NULL;
         counterParameters++;
     }
+}
 
 
+void createErrorReport(char * fileError, int lineError, char  *dateError, char *timeError){
 
-    printf("OK");
+    char  errorReportString[ERROR_BUFFER_SIZE]; 
+
+    if(sprintf(errorReportString,"| Error | file %s | line %d | date %s | time %s |",fileError,lineError,dateError,timeError)>0){
+        
+        perror(errorReportString);
+    }
+
+    else{fprintf(stderr,"Erreur lors de la création d'un message d'erreur dans la fonction %s",__func__);}
 }
 
 
