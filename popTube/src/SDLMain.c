@@ -14,10 +14,7 @@ SDL_Window* SDLCreateMainWindow(long int windowFlag){
 
     SDL_Window  *mainWindow;
 
-    mainWindow = SDL_CreateWindow("PopTube",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,1280,960,windowFlag);
-    mainWindow->format;
-
-    if(mainWindow!=NULL){    
+    if( (mainWindow = SDL_CreateWindow("PopTube",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,1280,960,windowFlag))!=NULL){    
         return mainWindow;
     }
 
@@ -27,24 +24,116 @@ SDL_Window* SDLCreateMainWindow(long int windowFlag){
     }
 }
 
-SDL_Surface *SDLCreateHostMenu(SDL_Window* mainWindow){
+SDL_Renderer* SDLCreateMainRenderer(SDL_Window *mainWindow, long int rendererFlag){
 
-    int wWindow;
-    int hWindow;
-    SDL_Surface *hostMenu;
-    SDL_GetWindowSize(mainWindow,&wWindow,&hWindow);
-    hostMenu=SDL_CreateRGBSurface(SDL_RENDERER_ACCELERATED,wWindow/2,hWindow/2,32,0,0,0,0);
-    
+    SDL_Renderer  *mainRenderer;
+
+    if((mainRenderer=SDL_CreateRenderer(mainWindow,-1,rendererFlag))!=NULL){    
+        return mainRenderer;
+    }
+
+    else{
+        fprintf(stderr,"Erreur de mise en place de moteur de rendu : %s\n",SDL_GetError());
+        return NULL;
+    }
 }
 
 
-int SDLMainLoop(SDL_Window  *mainWindow, SDLConfig *SDLConfigElement,DbConfig *dbConfigElement,MYSQL *dbConnection, Files *arrayFiles){
+
+void SDLCreateContainerHostMenu(SDL_Window* mainWindow,SDL_Renderer *mainRenderer,SDL_Texture *containerHostMenuTexture){
+
+    int wWindow;
+    int hWindow;
+
+    SDL_Color backgroundColor={249,249,249,255};
+    SDL_Rect position;
+
+    SDL_GetWindowSize(mainWindow,&wWindow,&hWindow);
+
+    if((containerHostMenuTexture=SDL_CreateTexture(mainRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,wWindow/2,hWindow/1.1))!=NULL){
+        
+        if(SDL_SetRenderTarget(mainRenderer, containerHostMenuTexture)==0){
+            if(SDL_SetRenderDrawColor(mainRenderer,backgroundColor.r,backgroundColor.g,backgroundColor.b,backgroundColor.a)==0){
+                if(SDL_RenderClear(mainRenderer)==0){
+                    if(SDL_SetRenderTarget(mainRenderer, NULL)==0){
+                        if(SDL_QueryTexture(containerHostMenuTexture, NULL, NULL, &position.w, &position.h)==0){
+
+                            position.x = (wWindow/2)-(position.w/2);
+                            position.y = (hWindow/2)-(position.h/2);
+                            SDL_RenderCopy(mainRenderer,containerHostMenuTexture,NULL,&position);
+                            SDL_RenderPresent(mainRenderer);
+                        }
+                        else{fprintf(stderr,"Échec lors de la perte du déciblage de la texture par le renderer dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
+                    } 
+                    else{fprintf(stderr,"Échec lors du déciblage de la texture par le renderer dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());}
+                }
+                else{fprintf(stderr,"Échec lors du remplissage de la texture par la couleur de rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());}
+            } 
+            else{fprintf(stderr,"Échec lors du réglage de la couleur de rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
+        }
+        else{fprintf(stderr,"Échec lors du ciblage de la texture par le renderer dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
+    }
+    else{fprintf(stderr,"Échec lors la création de la texture dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
+
+}
+
+
+void SDLCreateButtonsHostMenu(SDL_Window  *mainWindow,SDL_Renderer *mainRenderer,SDL_Texture *containerHostMenuTexture,SDLButtons** buttonsHostMenuTexture,int *sizeArrayButtons, char *fontPath){
+
+    for(int counterButton=0;counterButton<*sizeArrayButtons;counterButton++){
+
+        // buttonsHostMenuTexture[counterButton].
+
+    }
+}
+
+
+int SDLMainLoop(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer, SDLConfig *SDLConfigElement,DbConfig *dbConfigElement,MYSQL *dbConnection, Files *arrayFiles){
 
     int windowLoop;
+    int wWindow;
+    int hWindow;
+    int sizeArrayButtons; 
 
-
-    // SDL_DisplayMode *displayMode;
+    SDL_Renderer *renderer;
     SDL_Event event;
+    SDL_Texture **containerHostMenuTexture;
+    SDLButtons *buttonsHostMenuTexture;
+    SDL_Texture *textureMessage;
+    SDL_Surface *message;
+    
+    TTF_Font *font;
+    SDL_Color color={255,255,255};
+    
+    buttonsHostMenuTexture=malloc(sizeof(SDLButtons)*sizeArrayButtons);
+
+    font=TTF_OpenFont(SDLConfigElement->ttf->fontMenu,28);
+    message=TTF_RenderText_Solid(font,"Test",color);
+    textureMessage=SDL_CreateTextureFromSurface(mainRenderer,message);
+
+    SDL_SetRenderDrawColor(mainRenderer,255,144,28,125);
+    SDL_RenderClear(mainRenderer);
+
+    SDL_SetRenderTarget(mainRenderer,NULL);
+
+    SDLCreateContainerHostMenu(mainWindow,mainRenderer,containerHostMenuTexture);
+    SDLCreateButtonsHostMenu(mainWindow,mainRenderer,containerHostMenuTexture, &buttonsHostMenuTexture,&sizeArrayButtons,SDLConfigElement->ttf->fontMenu);
+
+
+    
+    
+
+    // SDL_QueryTexture(textureMessage, NULL, NULL, &position.w, &position.h);
+    // position.x = (wWindow/2)-(position.w/2);
+    // position.y = (hWindow/2)-(position.h/2);
+    SDL_RenderCopy(mainRenderer,textureMessage,NULL,NULL);
+    SDL_RenderPresent(mainRenderer);
+    
+
+
+    // if(renderer=SDL_CreateRenderer(mainWindow))
+    // // SDL_DisplayMode *displayMode;
+    
 
     // hostMenu=SDL_CreateRGBSurface(SDL_RENDERER_ACCELERATED,wWindow/2,hWindow/2,32,0,0,0,0);
 
@@ -74,6 +163,8 @@ int SDLMainLoop(SDL_Window  *mainWindow, SDLConfig *SDLConfigElement,DbConfig *d
             
         }
     }
+
+    printf("%s",__func__);
     return 0;
 }
 

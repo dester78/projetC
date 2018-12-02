@@ -28,8 +28,9 @@ typedef struct SDLConfig{
     
     struct SDLWindowConfig *window;
     struct SDLInitConfig *init;
-    
-    
+    struct SDLRendererConfig *renderer;
+    struct TTFConfig *ttf;
+
 }SDLConfig;
 
 
@@ -45,22 +46,45 @@ typedef struct SDLInitConfig{
 
 }SDLInitConfig;
 
-// typedef struct SDLButtons{
+typedef struct SDLRendererConfig{
 
-//     SDL_Surface *buttonSurface; 
-//     SDL_Rect *buttonPosition;
-//     TTF_Font *textFont; 
+    long unsigned rendererFlag;
+
+}SDLRendererConfig;
+
+typedef struct TTFConfig{
+
+    char *fontDirectory;
+    char *fontMenu;
+
+}TTFConfig;
+
+typedef struct SDLButtons{
+
+    SDL_Texture *buttonTexture; 
+    SDL_Rect *buttonPosition;
+    SDL_Color *buttonColor;
+    SDLText *buttonText;
     
-//     SDL
+}SDLButtons;
 
+typedef struct SDLText{
 
-// }SDLButtons;
+    SDL_Surface *textSurface;
+    SDL_Texture *textTexture;
+    SDL_Color *textColor; 
+    TTF_Font *textFont;
+    int sizeFont;
+    char *textContent;
+}SDLText;
 
 
 //Fonctions d'initialisation de structures : 
 int initDbConfig(DbConfig *dbConfigElement, char **arrayParameters,int lastRow );
 void initSDLWindowConfig(SDLWindowConfig *windowConfigElement, char **arrayParameters,int lastRow );
 void initSDLInitConfig(SDLInitConfig *initConfigElement, char **arrayParameters,int lastRow );
+void initSDLRendererConfig(SDLRendererConfig *rendererConfigElement, char **arrayParameters,int lastRow );
+void initTTFConfig(TTFConfig *ttfConfigElement, char **arrayParameters,int lastRow );
 int initSDLConfig(SDLConfig *SDLConfigElement,char **arrayParameters,int lastRow );
 Files returnFileElement(char *fullName, char* openMode);
 

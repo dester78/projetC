@@ -4,6 +4,7 @@
             "name": "Win32",
             "includePath": [
                 "${workspaceFolder}\\popTube\\include",
+                "${workspaceFolder}\\popTube\\include\\SDL2",
                 "C:\\Program Files (x86)\\MySQL\\MySQL Connector C 6.1\\include"
 
             ],

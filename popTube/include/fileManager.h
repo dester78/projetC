@@ -16,26 +16,18 @@ FILE *openFluxFile(char *fileName, char *openMode);
 //Fonction renvoyant un tableau de chaines de caractères, ce tableau stock seulement les chaines correspondant à des paramètres. 
 //Elle prend en paramètre un pointeur du fichier qui sera parcouru, un tableau contenant les informations de tailles du fichier (nb lignes / nb caractères)
 //et la longueur du dit tableau. 
-char **returnFileParameters(FILE *configFile,int *arrayRowChar, int *lastRow );
+void returnFileParameters(FILE *configFile, int *lastRow,char ***arrayParameters );
 
 //Fonction renvoyant un tableau contenant les informations de tailles d'un fichier (nb lignes / nb caractères), le pointeur FILE* passé en paramètre permet le parcours de ce fichier, 
-//le second paramètre est un pointeur permettant de récupérer la longueur du tableau. 
-int *countFileRowChar(FILE *file, int *lastRow  );
-
-//Fonction traitant une chaine de caractère passée en paramètre et référencée par un pointeur,
-//elle supprime le retour chariot de la chaine, ces traitements sont effectués en passant par une chaine de caractère intérmédiaire.
-void deleteLineFeed( char **row  );
-
-//Fonction traitant une chaine de caractère passée en paramètre et référencée par un pointeur,
-//elle supprime les espaces de fin de chaine, ces traitements sont effectués en passant par une chaine de caractère intérmédiaire.
-void deleteEndSpace(char **row  );
+//le second paramètre est un pointeur permettant de récupérer la longueur du tableau. La valeur de retour est le nombre de paramètres présents dans le fichier.
+int countFileRowChar(int **arrayRowChar,FILE *file, int *lastRow);
 
 //Fonction créant un message d'erreur comprenant, le fichier, la ligne, la date et l'heure de l'erreur, 
 //ce message est ensuite envoyé dans le flux d'erreur avec la fonction perror
 void createErrorReport(char *fileError, int lineError, char  *dateError, char *timeError);
 
-void freeArrayParameter(char** arrayParameter, int lastRow );
-
-
+//Fonction de libération d'allocation mémoire pour le tableau de paramètre
+void freeCharArray(char*** charArray, int lastRow );
+void freeIntArray(int** intArray, int lastRow);
 
 #endif

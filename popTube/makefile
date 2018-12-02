@@ -19,14 +19,14 @@ CFLAGS=-W -Wall -ansi -pedantic -std=c99
 #LDFLAGS current variable for link editing 
 LDFLAGS = -L $(P_DIR)\popTube\lib  -L 'C:\Program Files (x86)\MySQL\MySQL Connector C 6.1\lib'
 
-LDLIBS = -lmingw32 -lSDL2main -lSDL2  -lmysql -lSDL2_ttf
+LDLIBS = -lmingw32 -lSDL2main -lSDL2  -lSDL2_ttf -lSDL2_image -lmysql 
 # curent variable for executable 
 EXEC=main
 
 all: $(EXEC)
 
-$(EXEC): dbManager.o  fileManager.o structures.o SDLMain.o main.o 
-	$(CC) $(CFLAGS) -o $(EXEC) fileManager.o structures.o dbManager.o SDLMain.o main.o  $(LDFLAGS) $(CPPFLAGS)  $(LDLIBS)
+$(EXEC): dbManager.o  fileManager.o structures.o SDLMain.o main.o formatString.o
+	$(CC) $(CFLAGS) -o $(EXEC)  formatString.o fileManager.o structures.o dbManager.o SDLMain.o main.o  $(LDFLAGS) $(CPPFLAGS)  $(LDLIBS)
 
 main.o: $(P_DIR)\$(S_DIR)\main.c $(P_DIR)\$(H_DIR)\fileManager.h $(P_DIR)\$(H_DIR)\structures.h $(P_DIR)\$(H_DIR)\dbManager.h
 	$(CC)  -o main.o -c $(P_DIR)\$(S_DIR)\main.c $(CFLAGS) $(CPPFLAGS) 
@@ -37,11 +37,15 @@ SDLMain.o: $(P_DIR)\$(H_DIR)\SDLmain.h $(P_DIR)\$(S_DIR)\SDLmain.c $(P_DIR)\$(H_
 dbManager.o: $(P_DIR)\$(H_DIR)\dbManager.h $(P_DIR)\$(S_DIR)\dbManager.c $(P_DIR)\$(H_DIR)\structures.h 
 	$(CC)   -o dbManager.o -c $(P_DIR)\$(S_DIR)\dbManager.c $(CFLAGS) $(CPPFLAGS)
 
-structures.o: $(P_DIR)\$(H_DIR)\structures.h $(P_DIR)\$(S_DIR)\structures.c
+structures.o: $(P_DIR)\$(H_DIR)\structures.h $(P_DIR)\$(S_DIR)\structures.c $(P_DIR)\$(H_DIR)\fileManager.h $(P_DIR)\$(H_DIR)\formatString.h 
 	$(CC)   -o structures.o -c $(P_DIR)\$(S_DIR)\structures.c $(CFLAGS) $(CPPFLAGS)
 
-fileManager.o: $(P_DIR)\$(S_DIR)\fileManager.c $(P_DIR)\$(H_DIR)\fileManager.h $(P_DIR)\$(H_DIR)\structures.h 
+fileManager.o: $(P_DIR)\$(S_DIR)\fileManager.c $(P_DIR)\$(H_DIR)\fileManager.h $(P_DIR)\$(H_DIR)\structures.h $(P_DIR)\$(H_DIR)\formatString.h 
 	$(CC)   -o fileManager.o -c $(P_DIR)\$(S_DIR)\fileManager.c $(CFLAGS) $(CPPFLAGS)
+
+formatString.o: $(P_DIR)\$(S_DIR)\formatString.c $(P_DIR)\$(H_DIR)\formatString.h $(P_DIR)\$(H_DIR)\fileManager.h 
+	$(CC)   -o formatString.o -c $(P_DIR)\$(S_DIR)\formatString.c $(CFLAGS) $(CPPFLAGS)
+
 
 clean:
 	rm *.o core
