@@ -63,17 +63,17 @@ int initDbConfig(DbConfig *dbConfigElement, char **arrayParameters,int lastRow )
 
             if( (dbConfigElement->user = malloc(sizeof(char)*strlen(arrayParameters[counterParameters])- strlen("user=")))!= NULL){
                 strcpy(dbConfigElement->user,(arrayParameters[counterParameters]+ strlen("user=")));
-            }
-            else{
-                createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
-                return 0;
-            }
-        }
 
-        else if(strncmp(arrayParameters[counterParameters],"passwd=",strlen("passwd=")) == 0){
+                if(strcmp(dbConfigElement->user,"root")==0){
 
-            if((dbConfigElement->passwd = malloc(sizeof(char)*strlen(arrayParameters[counterParameters])- strlen("passwd=")))!= NULL){
-                strcpy(dbConfigElement->passwd,(arrayParameters[counterParameters]+ strlen("passwd=")));
+                    if((dbConfigElement->passwd = malloc(sizeof(char)*strlen("root")))!= NULL){
+                            strcpy(dbConfigElement->passwd,"root");
+                    }
+                    else{
+                        createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
+                        return 0;
+                    }
+                }
             }
             else{
                 createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
@@ -85,6 +85,28 @@ int initDbConfig(DbConfig *dbConfigElement, char **arrayParameters,int lastRow )
             
             if((dbConfigElement->db = malloc(sizeof(char)*strlen(arrayParameters[counterParameters])- strlen("db=")))!= NULL){
                 strcpy(dbConfigElement->db,(arrayParameters[counterParameters]+ strlen("db=")));
+            }
+            else{
+                createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
+                return 0;
+            }
+        }
+
+        else if(strncmp(arrayParameters[counterParameters],"playerLogin=",strlen("playerLogin=")) == 0){
+            
+            if((dbConfigElement->playerLogin = malloc(sizeof(char)*strlen(arrayParameters[counterParameters])- strlen("playerLogin=")))!= NULL){
+                strcpy(dbConfigElement->playerLogin,(arrayParameters[counterParameters]+ strlen("playerLogin=")));
+            }
+            else{
+                createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
+                return 0;
+            }
+        }
+
+        else if(strncmp(arrayParameters[counterParameters],"playerPasswd=",strlen("playerPasswd=")) == 0){
+            
+            if((dbConfigElement->playerPasswd = malloc(sizeof(char)*strlen(arrayParameters[counterParameters])- strlen("playerPasswd=")))!= NULL){
+                strcpy(dbConfigElement->playerPasswd,(arrayParameters[counterParameters]+ strlen("playerPasswd=")));
             }
             else{
                 createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
@@ -313,6 +335,8 @@ void freeDbConfigElement(DbConfig *dbConfigElement){
     free(dbConfigElement->user);
     free(dbConfigElement->passwd);
     free(dbConfigElement->db);
+    free(dbConfigElement->playerLogin);
+    free(dbConfigElement->playerPasswd);
     
 }
 

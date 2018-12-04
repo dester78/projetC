@@ -39,11 +39,11 @@ FILE *openFluxFile(char *fileName, char *openMode){
 
     if((redirectFile=malloc(sizeof(FILE)))!=NULL){
 
-        if((redirectFile=freopen(fileName,openMode,stderr))!=NULL){
+        if((redirectFile=freopen(fileName,openMode,stderr))!=NULL){//freopen permet de rediriger un flux vers un fichier dans ce cas
             return redirectFile;
         }
 
-        else if((redirectFile=freopen(fileName,"w+",stderr))!=NULL){
+        else if((redirectFile=freopen(fileName,"w+",stderr))!=NULL){//Si ca ne fonctionne pas le mode w+ permet de créer le fichier 
             return redirectFile;
         }
 
@@ -76,20 +76,20 @@ void returnFileParameters(FILE *configFile, int *lastRow, char ***arrayParameter
                 if(arrayRowChar[counterFileRow]!=-1){
                     
                     if(arrayRowChar[counterFileRow]<=1&&arrayRowChar[counterFileRow]<*lastRow-1){   //Utile dans le cas d'une ligne compose seulement d'un \n
-                        fseek(configFile,2,SEEK_CUR);
+                        fseek(configFile,2,SEEK_CUR);//Déplace le curseur de fichier de 2 caractère en partant de sa position courante, utilisé pour sauté les lignes vides
                     }
                     else{
-                        fgets(fileRow,arrayRowChar[counterFileRow]+1,configFile);
+                        fgets(fileRow,arrayRowChar[counterFileRow]+1,configFile);//Lit une ligne du fichier et déplace le curseur automatiquement
                         strncpy(commentChar,fileRow,1);
 
-                        if(commentChar[0]!='#'){
+                        if(commentChar[0]!='#'){//Vérifie si la ligne correspond à un paramètre ou un commentaire
                             
                             deleteLineFeed(&fileRow);
                             deleteEndSpace(&fileRow);
 
                             if(((*arrayParameters)[counterParameters]=malloc(sizeof(char)*( arrayRowChar[counterFileRow]+2) ))!=NULL){
 
-                                strncpy( (*arrayParameters)[counterParameters],fileRow,(arrayRowChar[counterFileRow])); 
+                                strncpy( (*arrayParameters)[counterParameters],fileRow,(arrayRowChar[counterFileRow])); //Copie la ligne de paramètre dans le tableau de lignes de paramètre
                                 printf("%d",strlen((*arrayParameters)[counterParameters]));
                                 printf("%s|",(*arrayParameters)[counterParameters]);
                             }  
@@ -97,11 +97,9 @@ void returnFileParameters(FILE *configFile, int *lastRow, char ***arrayParameter
 
                         counterParameters++;              
                         }  
-
-                    }
-                       
+                    }   
                 }
-                free(fileRow);
+                free(fileRow);//Désalloue la ligne
                 fileRow=NULL;
             }
             else{createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
@@ -124,13 +122,13 @@ int countFileRowChar(int **arrayRowChar,FILE *file, int *lastRow){
     char bufferChar;
     int counterChar=0;
 
-    fseek(file,0,SEEK_SET);
+    fseek(file,0,SEEK_SET);//Place le curseur en début de fichier
     
     if((*arrayRowChar=malloc(sizeof(int)))!=NULL){
 
         while(counterChar!=-1){
 
-            bufferChar=fgetc(file);
+            bufferChar=fgetc(file);//Lit le fichier caractère par caractère
             counterChar++;
 
             if(bufferChar=='#'){
@@ -139,10 +137,10 @@ int countFileRowChar(int **arrayRowChar,FILE *file, int *lastRow){
                
             if(bufferChar=='\n'||bufferChar==EOF){
 
-                *arrayRowChar=realloc(*arrayRowChar,sizeof(int)*(counterRow+1));
+                *arrayRowChar=realloc(*arrayRowChar,sizeof(int)*(counterRow+1));//Réalloue le tableau à chaque nouvelle ligne
                 (*arrayRowChar)[counterRow]=counterChar;
                 
-                if(bufferChar==EOF){
+                if(bufferChar==EOF){//Stop la boucle quand le curseur arrive à la fin du fichier
                     counterChar=-1;
                 }
                 else{counterChar=0;}
@@ -150,7 +148,7 @@ int countFileRowChar(int **arrayRowChar,FILE *file, int *lastRow){
                 counterRow++;
             }
         }
-        fseek(file,0,SEEK_SET);
+        fseek(file,0,SEEK_SET);//Replace le curseur en début de fichier
         *lastRow=counterRow;
     }        
 
@@ -161,7 +159,7 @@ int countFileRowChar(int **arrayRowChar,FILE *file, int *lastRow){
     return counterParameters; 
 }
 
-void freeCharArray(char*** arrayChar, int lastRow ){
+void freeCharArray(char*** arrayChar, int lastRow ){//Libère un tableau à deux dimension comprenant des chaines de caractères
 
     int counter=0;
     
@@ -197,7 +195,7 @@ void createErrorReport(char * fileError, int lineError, char  *dateError, char *
 
     if(sprintf(errorReportString,"| Error | file %s | line %d | date %s | time %s |",fileError,lineError,dateError,timeError)>0){
         
-        perror(errorReportString);
+        perror(errorReportString);//Perror permet l'envoie d'une erreur dans le flux stderr, le message d'erreur comprend le fichier, la ligne, la date et l'heure de l'erreur
     }
 
     else{fprintf(stderr,"Erreur lors de la creation d'un message d'erreur dans la fonction %s",__func__);}

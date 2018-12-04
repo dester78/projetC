@@ -432,7 +432,7 @@ extern DECLSPEC int SDLCALL SDL_LockTexture(SDL_Texture * texture,
 
 /**
  *  \brief Unlock a texture, uploading the changes to video memory, if needed.
- *
+ 
  *  \sa SDL_LockTexture()
  */
 extern DECLSPEC void SDLCALL SDL_UnlockTexture(SDL_Texture * texture);

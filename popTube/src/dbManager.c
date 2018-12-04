@@ -32,7 +32,7 @@ int createMysqlConnection(DbConfig *dbConfigElement, MYSQL *dbConnection){
 
     else{
         createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
-        return 0;
+        return -1;
     }
 
 }

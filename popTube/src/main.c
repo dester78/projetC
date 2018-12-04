@@ -48,7 +48,7 @@ int main(int argc, char **argv) {
         }   
    // }
 
-    if(initDbConfig(&dbConfigElement,arrayParameters,lastRow)){
+    if(initDbConfig(&dbConfigElement,arrayParameters,lastRow)!=-1){
         
 
         if(initSDLConfig(&SDLConfigElement,arrayParameters,lastRow)){

@@ -21,6 +21,8 @@ typedef struct DbConfig{
     char* user;
     char* passwd;
     char* db;
+    char* playerLogin;
+    char* playerPasswd;
 
 
 }DbConfig;
@@ -84,8 +86,9 @@ typedef struct SDLText{
 
     SDL_Surface *surface;
     SDL_Texture *texture;
-    SDL_Color color; 
     TTF_Font *font;
+    SDL_Color color; 
+    SDL_Rect rect;
     int sizeFont;
     char *content;
 }SDLText;
