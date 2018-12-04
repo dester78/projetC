@@ -1,7 +1,9 @@
 #ifndef STRUCTURES
 #define STRUCTURES
-#include <SDL.h>
+
 #include <stdio.h>
+
+#include <SDL.h>
 #include <SDL_ttf.h>
 
 typedef struct Files{
@@ -36,19 +38,21 @@ typedef struct SDLConfig{
 
 typedef struct SDLWindowConfig{
 
-    long unsigned windowFlag;
+    unsigned int windowFlag;
+    int windowHeight;
+    int windowWidth;
 
 }SDLWindowConfig;
 
 typedef struct SDLInitConfig{
 
-    long unsigned initFlag;
+    unsigned int initFlag;
 
 }SDLInitConfig;
 
 typedef struct SDLRendererConfig{
 
-    long unsigned rendererFlag;
+    unsigned int rendererFlag;
 
 }SDLRendererConfig;
 
@@ -59,23 +63,31 @@ typedef struct TTFConfig{
 
 }TTFConfig;
 
+typedef struct SDLContainer{
+
+    SDL_Texture *texture; 
+    SDL_Rect rect;
+    SDL_Color color;
+
+}SDLContainer;
+
 typedef struct SDLButtons{
 
-    SDL_Texture *buttonTexture; 
-    SDL_Rect *buttonPosition;
-    SDL_Color *buttonColor;
-    SDLText *buttonText;
+    SDL_Texture *texture; 
+    SDL_Rect rect;
+    SDL_Color color;
+    struct SDLText *text;
     
 }SDLButtons;
 
 typedef struct SDLText{
 
-    SDL_Surface *textSurface;
-    SDL_Texture *textTexture;
-    SDL_Color *textColor; 
-    TTF_Font *textFont;
+    SDL_Surface *surface;
+    SDL_Texture *texture;
+    SDL_Color color; 
+    TTF_Font *font;
     int sizeFont;
-    char *textContent;
+    char *content;
 }SDLText;
 
 
@@ -88,7 +100,7 @@ void initTTFConfig(TTFConfig *ttfConfigElement, char **arrayParameters,int lastR
 int initSDLConfig(SDLConfig *SDLConfigElement,char **arrayParameters,int lastRow );
 Files returnFileElement(char *fullName, char* openMode);
 
-//Fonctions de libération d'allocations de structures
+//Fonctions de liberation d'allocations de structures
 void freeDbConfigElement(DbConfig *dbConfigElement );
 void freeSDLConfigElement(SDLConfig *SDLConfigElement );
 void freeFileElement(Files fileElement);

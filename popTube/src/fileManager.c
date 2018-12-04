@@ -75,7 +75,7 @@ void returnFileParameters(FILE *configFile, int *lastRow, char ***arrayParameter
 
                 if(arrayRowChar[counterFileRow]!=-1){
                     
-                    if(arrayRowChar[counterFileRow]<=1&&arrayRowChar[counterFileRow]<*lastRow-1){   //Utile dans le cas d'une ligne composé seulement d'un \n
+                    if(arrayRowChar[counterFileRow]<=1&&arrayRowChar[counterFileRow]<*lastRow-1){   //Utile dans le cas d'une ligne compose seulement d'un \n
                         fseek(configFile,2,SEEK_CUR);
                     }
                     else{
@@ -87,17 +87,13 @@ void returnFileParameters(FILE *configFile, int *lastRow, char ***arrayParameter
                             deleteLineFeed(&fileRow);
                             deleteEndSpace(&fileRow);
 
-                            // if((*arrayParameters=realloc(*arrayParameters,(sizeof(char*)*(counterParameters+1))))!=NULL){
+                            if(((*arrayParameters)[counterParameters]=malloc(sizeof(char)*( arrayRowChar[counterFileRow]+2) ))!=NULL){
 
-                                if(((*arrayParameters)[counterParameters]=malloc(sizeof(char)*( arrayRowChar[counterFileRow]+1) ))!=NULL){
-
-                                    strncpy( (*arrayParameters)[counterParameters],fileRow,(arrayRowChar[counterFileRow])); 
-                                    printf("%d",strlen((*arrayParameters)[counterParameters]));
-                                    printf("%s|",(*arrayParameters)[counterParameters]);
-                                }  
-                                else{createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);}
-                            // } 
-                            // else{createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);} 
+                                strncpy( (*arrayParameters)[counterParameters],fileRow,(arrayRowChar[counterFileRow])); 
+                                printf("%d",strlen((*arrayParameters)[counterParameters]));
+                                printf("%s|",(*arrayParameters)[counterParameters]);
+                            }  
+                            else{createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);}
 
                         counterParameters++;              
                         }  
@@ -120,7 +116,7 @@ void returnFileParameters(FILE *configFile, int *lastRow, char ***arrayParameter
 
 }
 
-//Fonction parcourant un fichier passé en paramètre afin de compter le nombres de lignes et le nombre de caractères/ligne. Renvoie ensuite un tableau contenant ces informations.
+//Fonction parcourant un fichier passe en paramètre afin de compter le nombres de lignes et le nombre de caractères/ligne. Renvoie ensuite un tableau contenant ces informations.
 int countFileRowChar(int **arrayRowChar,FILE *file, int *lastRow){
 
     int counterRow=0; 
@@ -204,7 +200,7 @@ void createErrorReport(char * fileError, int lineError, char  *dateError, char *
         perror(errorReportString);
     }
 
-    else{fprintf(stderr,"Erreur lors de la création d'un message d'erreur dans la fonction %s",__func__);}
+    else{fprintf(stderr,"Erreur lors de la creation d'un message d'erreur dans la fonction %s",__func__);}
 }
 
 

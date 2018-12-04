@@ -10,18 +10,50 @@
 #include <mysql.h>
 
 
-SDL_Window* SDLCreateMainWindow(long int windowFlag){
+SDL_Window* SDLCreateMainWindow(SDLWindowConfig *windowConfigElement){
 
     SDL_Window  *mainWindow;
+    SDL_DisplayMode currentDisplayMode;
 
-    if( (mainWindow = SDL_CreateWindow("PopTube",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,1280,960,windowFlag))!=NULL){    
-        return mainWindow;
+    if(windowConfigElement->windowHeight>0&&windowConfigElement->windowWidth>0){
+        if( (mainWindow = SDL_CreateWindow("PopTube",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,windowConfigElement->windowWidth,windowConfigElement->windowHeight,windowConfigElement->windowFlag))!=NULL){    
+            return mainWindow;
+        }
+        else{
+            fprintf(stderr,"Erreur de creation de la fenetre: %s\n",SDL_GetError());
+            return NULL;
+        }
     }
 
     else{
-        fprintf(stderr,"Erreur de création de la fenêtre: %s\n",SDL_GetError());
-        return NULL;
+        if(SDL_GetCurrentDisplayMode(0,&currentDisplayMode)==0){
+            if( (mainWindow = SDL_CreateWindow("PopTube",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,currentDisplayMode.w,currentDisplayMode.h,windowConfigElement->windowFlag))!=NULL){   
+                return mainWindow;
+            }
+            else{
+                fprintf(stderr,"Erreur de creation de la fenetre: %s\n",SDL_GetError());
+                return NULL;
+            }
+        }
+        else{
+            fprintf(stderr,"Erreur lors du chargement des modes d'affichage");
+            return NULL;
+        }
     }
+
+    
+
+    // printf(arrayDisplayModes[modeNumber-1].w);
+
+
+    // if( (mainWindow = SDL_CreateWindow("PopTube",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,1920,1080,windowConfigElement->windowFlag))!=NULL){    
+    //     return mainWindow;
+    // }
+
+    // else{
+    //     fprintf(stderr,"Erreur de creation de la fenetre: %s\n",SDL_GetError());
+    //     return NULL;
+    // }
 }
 
 SDL_Renderer* SDLCreateMainRenderer(SDL_Window *mainWindow, long int rendererFlag){
@@ -40,52 +72,113 @@ SDL_Renderer* SDLCreateMainRenderer(SDL_Window *mainWindow, long int rendererFla
 
 
 
-void SDLCreateContainerHostMenu(SDL_Window* mainWindow,SDL_Renderer *mainRenderer,SDL_Texture *containerHostMenuTexture){
+void SDLCreateContainerHostMenu(SDL_Window* mainWindow,SDL_Renderer *mainRenderer,SDLContainer *containerHostMenu){
 
     int wWindow;
     int hWindow;
 
-    SDL_Color backgroundColor={249,249,249,255};
-    SDL_Rect position;
+    SDL_Color containerColor={249,249,249,255};
+    containerHostMenu->color=containerColor;
+
+    SDL_GetWindowSize(mainWindow,&wWindow,&hWindow);
+    
+    if((containerHostMenu->texture=SDL_CreateTexture(mainRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,wWindow/2,hWindow/1.1))!=NULL){
+        
+        if(SDL_SetRenderTarget(mainRenderer, containerHostMenu->texture)==0){
+            if(SDL_SetRenderDrawColor(mainRenderer,containerHostMenu->color.r,containerHostMenu->color.g,containerHostMenu->color.b,containerHostMenu->color.a)==0){
+                if(SDL_RenderClear(mainRenderer)==0){
+                    if(SDL_SetRenderTarget(mainRenderer, NULL)==0){
+                        if(SDL_QueryTexture(containerHostMenu->texture, NULL, NULL, &containerHostMenu->rect.w, &containerHostMenu->rect.h)==0){
+                            containerHostMenu->rect.x = (wWindow/2)-(containerHostMenu->rect.w/2);
+                            containerHostMenu->rect.y = (hWindow/2)-(containerHostMenu->rect.h/2);
+                            if(SDL_RenderCopy(mainRenderer,containerHostMenu->texture,NULL,&containerHostMenu->rect)==0){
+                                 SDL_RenderPresent(mainRenderer);
+                            }
+                            else{fprintf(stderr,"Echec lors de la copie de texture dans le rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
+                        }
+                        else{fprintf(stderr,"Echec lors du la récupération des attributs de la texture dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
+                    } 
+                    else{fprintf(stderr,"Echec lors du deciblage de la texture par le renderer dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());}
+                }
+                else{fprintf(stderr,"Echec lors du remplissage du renderer par la couleur de rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());}
+            } 
+            else{fprintf(stderr,"Echec lors du reglage de la couleur de rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
+        }
+        else{fprintf(stderr,"Echec lors du ciblage de la texture par le renderer dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
+    }
+    else{fprintf(stderr,"Echec lors la creation de la texture dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
+
+}
+
+
+void SDLCreateButtonsHostMenu(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer,SDLContainer *containerHostMenu,SDLButtons** buttonsHostMenu,int *sizeArrayButtons, char *fontPath){
+
+    SDL_Color buttonColor={125,125,190,160};
+
+    int wWindow;
+    int hWindow;
+    double yButtonFactor;
 
     SDL_GetWindowSize(mainWindow,&wWindow,&hWindow);
 
-    if((containerHostMenuTexture=SDL_CreateTexture(mainRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,wWindow/2,hWindow/1.1))!=NULL){
-        
-        if(SDL_SetRenderTarget(mainRenderer, containerHostMenuTexture)==0){
-            if(SDL_SetRenderDrawColor(mainRenderer,backgroundColor.r,backgroundColor.g,backgroundColor.b,backgroundColor.a)==0){
-                if(SDL_RenderClear(mainRenderer)==0){
-                    if(SDL_SetRenderTarget(mainRenderer, NULL)==0){
-                        if(SDL_QueryTexture(containerHostMenuTexture, NULL, NULL, &position.w, &position.h)==0){
+    //Règle le placement vertical des boutons en fonction de l'affichage la fenêtre
+    switch(hWindow){
 
-                            position.x = (wWindow/2)-(position.w/2);
-                            position.y = (hWindow/2)-(position.h/2);
-                            SDL_RenderCopy(mainRenderer,containerHostMenuTexture,NULL,&position);
-                            SDL_RenderPresent(mainRenderer);
-                        }
-                        else{fprintf(stderr,"Échec lors de la perte du déciblage de la texture par le renderer dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
-                    } 
-                    else{fprintf(stderr,"Échec lors du déciblage de la texture par le renderer dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());}
-                }
-                else{fprintf(stderr,"Échec lors du remplissage de la texture par la couleur de rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());}
-            } 
-            else{fprintf(stderr,"Échec lors du réglage de la couleur de rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
-        }
-        else{fprintf(stderr,"Échec lors du ciblage de la texture par le renderer dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
+        case 1080:
+        yButtonFactor =1.3;
+        break;
+
+        case 1050:
+        yButtonFactor=1.2;
+        break;
+
+        default:
+        yButtonFactor=1;
     }
-    else{fprintf(stderr,"Échec lors la création de la texture dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
-
-}
-
-
-void SDLCreateButtonsHostMenu(SDL_Window  *mainWindow,SDL_Renderer *mainRenderer,SDL_Texture *containerHostMenuTexture,SDLButtons** buttonsHostMenuTexture,int *sizeArrayButtons, char *fontPath){
 
     for(int counterButton=0;counterButton<*sizeArrayButtons;counterButton++){
 
-        // buttonsHostMenuTexture[counterButton].
+        if((buttonsHostMenu[counterButton]=malloc(sizeof(SDLButtons)))!=NULL){
 
-    }
+            buttonsHostMenu[counterButton]->color=buttonColor;
+
+            if((buttonsHostMenu[counterButton]->texture=SDL_CreateTexture(mainRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,containerHostMenu->rect.w*0.8,containerHostMenu->rect.h*0.15))!=NULL){
+                if(SDL_SetRenderTarget(mainRenderer,buttonsHostMenu[counterButton]->texture)==0){
+                    if(SDL_SetRenderDrawColor(mainRenderer,buttonsHostMenu[counterButton]->color.r,buttonsHostMenu[counterButton]->color.g,buttonsHostMenu[counterButton]->color.b,buttonsHostMenu[counterButton]->color.a)==0){
+                        if(SDL_RenderClear(mainRenderer)==0){
+                            if(SDL_SetRenderTarget(mainRenderer,NULL)==0){
+                                if(SDL_QueryTexture(buttonsHostMenu[counterButton]->texture, NULL, NULL, &buttonsHostMenu[counterButton]->rect.w, &buttonsHostMenu[counterButton]->rect.h)==0){
+
+                                    buttonsHostMenu[counterButton]->rect.x=((buttonsHostMenu[counterButton]->rect.w/2)+((containerHostMenu->rect.x/2)*0.8));
+                                    if(counterButton==0){
+                                        buttonsHostMenu[counterButton]->rect.y=buttonsHostMenu[counterButton]->rect.h+containerHostMenu->rect.y;
+                                    }
+                                    else{
+                                        buttonsHostMenu[counterButton]->rect.y=buttonsHostMenu[counterButton]->rect.h*yButtonFactor+buttonsHostMenu[counterButton-1]->rect.y;
+                                    }
+
+                                    if(SDL_RenderCopy(mainRenderer,buttonsHostMenu[counterButton]->texture,NULL,&buttonsHostMenu[counterButton]->rect)==0){
+                                        SDL_RenderPresent(mainRenderer);
+                                    }
+
+                                    else{fprintf(stderr,"Echec lors de la copie de texture dans le rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
+                                }
+                                else{fprintf(stderr,"Echec lors de la recuperation des attribut de la texture dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
+                            }
+                            else{fprintf(stderr,"Echec lors du ciblage de la texture par le renderer dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());}
+                        }
+                        else{fprintf(stderr,"Echec lors du remplissage du renderer par la couleur de rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());}
+                    }
+                    else{fprintf(stderr,"Echec lors du reglage de la couleur de rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
+                }
+                else{fprintf(stderr,"Echec lors du ciblage de la texture par le renderer dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
+            }
+            else{fprintf(stderr,"Echec lors la creation de la texture dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
+        }
+        else{createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);} 
+    }    
 }
+
 
 
 int SDLMainLoop(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer, SDLConfig *SDLConfigElement,DbConfig *dbConfigElement,MYSQL *dbConnection, Files *arrayFiles){
@@ -97,39 +190,38 @@ int SDLMainLoop(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer, SDLConfig *
 
     SDL_Renderer *renderer;
     SDL_Event event;
-    SDL_Texture **containerHostMenuTexture;
-    SDLButtons *buttonsHostMenuTexture;
+    SDLContainer containerHostMenu;
+    SDLButtons **buttonsHostMenu;
     SDL_Texture *textureMessage;
     SDL_Surface *message;
     
     TTF_Font *font;
-    SDL_Color color={255,255,255};
+    SDL_Color color={255,255,255,255};
+
+    sizeArrayButtons=4;
     
-    buttonsHostMenuTexture=malloc(sizeof(SDLButtons)*sizeArrayButtons);
+    buttonsHostMenu=malloc(sizeof(SDLButtons*)*sizeArrayButtons);
 
-    font=TTF_OpenFont(SDLConfigElement->ttf->fontMenu,28);
-    message=TTF_RenderText_Solid(font,"Test",color);
-    textureMessage=SDL_CreateTextureFromSurface(mainRenderer,message);
 
-    SDL_SetRenderDrawColor(mainRenderer,255,144,28,125);
+    // font=TTF_OpenFont(SDLConfigElement->ttf->fontMenu,28);
+    // message=TTF_RenderText_Solid(font,"Test",color);
+    // textureMessage=SDL_CreateTextureFromSurface(mainRenderer,message);
+
+    SDL_SetRenderDrawColor(mainRenderer,255,170,28,125);
     SDL_RenderClear(mainRenderer);
 
     SDL_SetRenderTarget(mainRenderer,NULL);
 
-    SDLCreateContainerHostMenu(mainWindow,mainRenderer,containerHostMenuTexture);
-    SDLCreateButtonsHostMenu(mainWindow,mainRenderer,containerHostMenuTexture, &buttonsHostMenuTexture,&sizeArrayButtons,SDLConfigElement->ttf->fontMenu);
-
-
-    
+    SDLCreateContainerHostMenu(mainWindow,mainRenderer,&containerHostMenu);
+    SDLCreateButtonsHostMenu(mainWindow,mainRenderer,&containerHostMenu, buttonsHostMenu,&sizeArrayButtons,SDLConfigElement->ttf->fontMenu);
     
 
     // SDL_QueryTexture(textureMessage, NULL, NULL, &position.w, &position.h);
     // position.x = (wWindow/2)-(position.w/2);
     // position.y = (hWindow/2)-(position.h/2);
-    SDL_RenderCopy(mainRenderer,textureMessage,NULL,NULL);
-    SDL_RenderPresent(mainRenderer);
+    // SDL_RenderCopy(mainRenderer,textureMessage,NULL,NULL);
+    // SDL_RenderPresent(mainRenderer);
     
-
 
     // if(renderer=SDL_CreateRenderer(mainWindow))
     // // SDL_DisplayMode *displayMode;
@@ -168,35 +260,34 @@ int SDLMainLoop(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer, SDLConfig *
     return 0;
 }
 
-SDL_DisplayMode *SDLGetArrayDisplayModes(){
-
-    SDL_DisplayMode *arrayDisplayModes;
+int SDLGetArrayDisplayModes(SDL_DisplayMode **arrayDisplayModes){
 
     int modeNumber = SDL_GetNumDisplayModes(0);
 
     if (modeNumber < 0){
 
-        fprintf(stderr,"Échec lors de la récupération du nombre de modes (%s)\n",SDL_GetError());
+        fprintf(stderr,"Echec lors de la recuperation du nombre de modes (%s)\n",SDL_GetError());
     }
 
     else{
 
-        if((arrayDisplayModes=malloc(sizeof(SDL_DisplayMode*)*modeNumber))!=NULL){
+        if((*arrayDisplayModes=malloc(sizeof(SDL_DisplayMode*)*modeNumber))!=NULL){
 
             for (int modeCounter= 0 ; modeCounter < modeNumber ; modeCounter++){
 
-                if (SDL_GetDisplayMode(0, modeCounter, (arrayDisplayModes+modeCounter))< 0){
-                    fprintf(stderr, "Échec lors de la récupération du mode d'affichage (%s)\n", SDL_GetError());
+                if (SDL_GetDisplayMode(0, modeCounter, ((*arrayDisplayModes)+modeCounter))< 0){
+                    
+                    fprintf(stderr, "Echec lors de la recuperation du mode d'affichage (%s)\n", SDL_GetError());
+                    return 0;
                 }
-             }
-             return arrayDisplayModes;
+             }     
         }
 
         else{
             createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
         }
     }
-    return NULL;
+    return modeNumber;
 }
 
 

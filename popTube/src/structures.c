@@ -99,7 +99,7 @@ int initDbConfig(DbConfig *dbConfigElement, char **arrayParameters,int lastRow )
 
 int initSDLConfig(SDLConfig *SDLConfigElement,char **arrayParameters, int lastRow ){
 
-    if((SDLConfigElement->window=(malloc(sizeof(SDLWindowConfig*))))!=NULL){
+    if((SDLConfigElement->window=(malloc(sizeof(SDLWindowConfig))))!=NULL){
 
         initSDLWindowConfig(SDLConfigElement->window ,arrayParameters, lastRow);
     }
@@ -110,7 +110,7 @@ int initSDLConfig(SDLConfig *SDLConfigElement,char **arrayParameters, int lastRo
     }
     
 
-    if((SDLConfigElement->init=(malloc(sizeof(SDLInitConfig*))))!=NULL){
+    if((SDLConfigElement->init=(malloc(sizeof(SDLInitConfig))))!=NULL){
 
         initSDLInitConfig(SDLConfigElement->init ,arrayParameters, lastRow);
 
@@ -121,7 +121,7 @@ int initSDLConfig(SDLConfig *SDLConfigElement,char **arrayParameters, int lastRo
         return 0;
     }
 
-    if((SDLConfigElement->renderer=(malloc(sizeof(SDLRendererConfig*))))!=NULL){
+    if((SDLConfigElement->renderer=(malloc(sizeof(SDLRendererConfig))))!=NULL){
 
         initSDLRendererConfig(SDLConfigElement->renderer ,arrayParameters, lastRow);
 
@@ -132,7 +132,7 @@ int initSDLConfig(SDLConfig *SDLConfigElement,char **arrayParameters, int lastRo
         return 0;
     }
 
-    if((SDLConfigElement->ttf=(malloc(sizeof(TTFConfig*))))!=NULL){
+    if((SDLConfigElement->ttf=(malloc(sizeof(TTFConfig))))!=NULL){
 
         initTTFConfig(SDLConfigElement->ttf ,arrayParameters, lastRow);
 
@@ -164,7 +164,9 @@ void initSDLWindowConfig(SDLWindowConfig *windowConfigElement, char **arrayParam
 
     int counterParameters=0;
     windowConfigElement->windowFlag=0x00000000;
-    
+    windowConfigElement->windowHeight=0;
+    windowConfigElement->windowWidth=0;
+
     while( counterParameters<lastRow ){
 
         if( strncmp(arrayParameters[counterParameters], "SDL_WindowFlags=" , strlen("SDL_WindowFlags=")) == 0){
@@ -176,9 +178,19 @@ void initSDLWindowConfig(SDLWindowConfig *windowConfigElement, char **arrayParam
                 windowConfigElement->windowFlag=windowConfigElement->windowFlag|SDL_WINDOW_SHOWN;
             }
         }
+       
+        else if( strncmp(arrayParameters[counterParameters], "windowHeight=" , strlen("windowHeight=")) == 0){
+            
+            windowConfigElement->windowHeight=atoi( arrayParameters[counterParameters]+ strlen("windowHeight="));
+        }
 
+        else if( strncmp(arrayParameters[counterParameters], "windowWidth=" , strlen("windowWidth=")) == 0){
+            
+            windowConfigElement->windowWidth=atoi( arrayParameters[counterParameters]+ strlen("windowWidth="));
+        }
         counterParameters++;
     }
+
 }
 
 void initSDLRendererConfig(SDLRendererConfig *rendererConfigElement, char **arrayParameters, int lastRow ){

@@ -39,7 +39,6 @@ int main(int argc, char **argv) {
     //if((arrayFiles[0].filePointer=openFluxFile(arrayFiles[0].fullName,arrayFiles[0].openMode))!=NULL){
 
         if((arrayFiles[0].filePointer=openFile(arrayFiles[0].fullName,arrayFiles[0].openMode))!=NULL){
-
             returnFileParameters(arrayFiles[0].filePointer,&lastRow,&arrayParameters); 
         }        
 
@@ -49,10 +48,11 @@ int main(int argc, char **argv) {
         }   
    // }
 
-         
     if(initDbConfig(&dbConfigElement,arrayParameters,lastRow)){
+        
 
         if(initSDLConfig(&SDLConfigElement,arrayParameters,lastRow)){
+            printf("tototototo");
 
             if(createMysqlConnection(&dbConfigElement,&dbConnection)){
             
@@ -64,18 +64,20 @@ int main(int argc, char **argv) {
             }
         }
     }
+
+    
     
 
     if (SDL_Init( SDLConfigElement.init->initFlag ) != 0 ){
-        fprintf(stderr,"Échec de l'initialisation de la SDL (%s)\n",SDL_GetError());
+        fprintf(stderr,"Echec de l'initialisation de la SDL (%s)\n",SDL_GetError());
         return 0;
     }
     else if(TTF_Init()==-1) {
-        fprintf(stderr,"Échec de l'initialisation de l'extension SDL_ttf (%s)\n",TTF_GetError());
+        fprintf(stderr,"Echec de l'initialisation de l'extension SDL_ttf (%s)\n",TTF_GetError());
         return 0;
     }
     else{
-        if((mainWindow=SDLCreateMainWindow(SDLConfigElement.window->windowFlag))!=NULL){
+        if((mainWindow=SDLCreateMainWindow(SDLConfigElement.window))!=NULL){
             if((mainRenderer=SDLCreateMainRenderer(mainWindow,SDLConfigElement.renderer->rendererFlag))!=NULL){
 
                 while(SDLMainLoop(
