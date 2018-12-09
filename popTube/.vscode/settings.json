@@ -1,0 +1,8 @@
+{
+    "files.associations": {
+        "sdlmain.h": "c",
+        "dbmanager.h": "c",
+        "structures.h": "c",
+        "sdl_ttf.h": "c"
+    }
+}

@@ -3,10 +3,13 @@
 #include <winsock.h>
 #include <errno.h>
 
-#include <fileManager.h>
-#include <structures.h> 
-#include <dbManager.h>
+#include <SDLConfigStructures.h>
+#include <SDLObjects.h>
 #include <SDLMain.h>
+#include <structures.h>
+#include <fileManager.h>
+#include <dbManager.h>
+
 
 
 #include <SDL.h>
@@ -26,20 +29,21 @@ int main(int argc, char **argv) {
 
     SDLConfig SDLConfigElement;
     DbConfig dbConfigElement;
-    Files *arrayFiles;
+    Files **arrayFiles;
 
     
-    arrayFiles=malloc(sizeof(Files));
+    arrayFiles=malloc(sizeof(Files*));
   
     // arrayFiles[0]=returnFileElement("errorLog.txt","a+");
     arrayFiles[0]=returnFileElement("popTube.cfg","r+");
-    arrayFiles[0].filePointer=malloc(sizeof(FILE*));
+    // printf("%d",)
     // arrayFiles[1].filePointer=malloc(sizeof(FILE*));
 
     //if((arrayFiles[0].filePointer=openFluxFile(arrayFiles[0].fullName,arrayFiles[0].openMode))!=NULL){
 
-        if((arrayFiles[0].filePointer=openFile(arrayFiles[0].fullName,arrayFiles[0].openMode))!=NULL){
-            returnFileParameters(arrayFiles[0].filePointer,&lastRow,&arrayParameters); 
+        if((arrayFiles[0]->filePointer=openFile(arrayFiles[0]->fullName,arrayFiles[0]->openMode))!=NULL){
+            returnFileParameters(arrayFiles[0]->filePointer,&lastRow,&arrayParameters); 
+
         }        
 
         else{
@@ -52,7 +56,6 @@ int main(int argc, char **argv) {
         
 
         if(initSDLConfig(&SDLConfigElement,arrayParameters,lastRow)){
-            printf("tototototo");
 
             if(createMysqlConnection(&dbConfigElement,&dbConnection)){
             
@@ -80,7 +83,7 @@ int main(int argc, char **argv) {
         if((mainWindow=SDLCreateMainWindow(SDLConfigElement.window))!=NULL){
             if((mainRenderer=SDLCreateMainRenderer(mainWindow,SDLConfigElement.renderer->rendererFlag))!=NULL){
 
-                while(SDLMainLoop(
+                while(SDLMainMenuLoop(
                 mainWindow,mainRenderer,
                 &SDLConfigElement,
                 &dbConfigElement,
@@ -91,7 +94,7 @@ int main(int argc, char **argv) {
             }
         }  
     }
-    printf("END");
+    
     freeDbConfigElement(&dbConfigElement);
     
     freeSDLConfigElement(&SDLConfigElement);
@@ -101,13 +104,7 @@ int main(int argc, char **argv) {
     // freeFileElement(arrayFiles[1]);
     // perror(createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__));
     free(arrayFiles);
-   
-     printf("%d",lastRow);
     freeCharArray(&arrayParameters,lastRow);
-    free(arrayParameters);
-    
-
-    
     mysql_close(&dbConnection);
     TTF_Quit();
     SDL_Quit();

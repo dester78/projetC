@@ -14,21 +14,19 @@ FILE *openFile(char *fileName, char *openMode){
 
     FILE *file;
 
-    if((file=malloc(sizeof(FILE)))!=NULL){
-
-        if((file=fopen(fileName,openMode))!=NULL){
-            return file;
-        }
-            
-        else if((file=fopen(fileName,"w+"))!=NULL){
-            return file;
-        }
-
-        else{
-            createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
-            return NULL;
-        }
+    if((file=fopen(fileName,openMode))!=NULL){
+        return file;
     }
+        
+    else if((file=fopen(fileName,"w+"))!=NULL){
+        return file;
+    }
+
+    else{
+        createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
+        return NULL;
+    }
+
     return NULL;
 }
 
@@ -37,25 +35,20 @@ FILE *openFluxFile(char *fileName, char *openMode){
 
     FILE * redirectFile; 
 
-    if((redirectFile=malloc(sizeof(FILE)))!=NULL){
-
-        if((redirectFile=freopen(fileName,openMode,stderr))!=NULL){//freopen permet de rediriger un flux vers un fichier dans ce cas
-            return redirectFile;
-        }
-
-        else if((redirectFile=freopen(fileName,"w+",stderr))!=NULL){//Si ca ne fonctionne pas le mode w+ permet de créer le fichier 
-            return redirectFile;
-        }
-
-        else{
-            createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
-            return NULL; 
-        }
+    if((redirectFile=freopen(fileName,openMode,stderr))!=NULL){//freopen permet de rediriger un flux vers un fichier dans ce cas
+        return redirectFile;
     }
+
+    else if((redirectFile=freopen(fileName,"w+",stderr))!=NULL){//Si ca ne fonctionne pas le mode w+ permet de créer le fichier 
+        return redirectFile;
+    }
+
     else{
         createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
-        return NULL;
+        return NULL; 
     }
+
+    return NULL;
 }
 
 
@@ -66,16 +59,17 @@ void returnFileParameters(FILE *configFile, int *lastRow, char ***arrayParameter
     int *arrayRowChar;
     char commentChar[2];
     int counterParameters=0;
+    int sizeArrayParameters=countFileRowChar(&arrayRowChar,configFile,lastRow);
 
-    if((*arrayParameters=malloc(sizeof(char*)*(countFileRowChar(&arrayRowChar,configFile,lastRow))))!=NULL){
+    if(((*arrayParameters)=malloc(sizeof(char*)*sizeArrayParameters))!=NULL){
 
         for(counterFileRow=0;counterFileRow<*lastRow;counterFileRow++){
             
-            if((fileRow=malloc(sizeof(char)*(arrayRowChar[counterFileRow]+1)))!=NULL){
+            if((fileRow=malloc(sizeof(char)*((arrayRowChar[counterFileRow])+1)))!=NULL){
 
                 if(arrayRowChar[counterFileRow]!=-1){
                     
-                    if(arrayRowChar[counterFileRow]<=1&&arrayRowChar[counterFileRow]<*lastRow-1){   //Utile dans le cas d'une ligne compose seulement d'un \n
+                    if(arrayRowChar[counterFileRow] <= 1 && arrayRowChar[counterFileRow] < *lastRow - 1){   //Utile dans le cas d'une ligne compose seulement d'un \n
                         fseek(configFile,2,SEEK_CUR);//Déplace le curseur de fichier de 2 caractère en partant de sa position courante, utilisé pour sauté les lignes vides
                     }
                     else{
@@ -87,11 +81,9 @@ void returnFileParameters(FILE *configFile, int *lastRow, char ***arrayParameter
                             deleteLineFeed(&fileRow);
                             deleteEndSpace(&fileRow);
 
-                            if(((*arrayParameters)[counterParameters]=malloc(sizeof(char)*( arrayRowChar[counterFileRow]+2) ))!=NULL){
+                            if(((*arrayParameters)[counterParameters] = malloc( sizeof( char ) * ( strlen( fileRow ) + 1) ))!=NULL){
 
-                                strncpy( (*arrayParameters)[counterParameters],fileRow,(arrayRowChar[counterFileRow])); //Copie la ligne de paramètre dans le tableau de lignes de paramètre
-                                printf("%d",strlen((*arrayParameters)[counterParameters]));
-                                printf("%s|",(*arrayParameters)[counterParameters]);
+                                strcpy( (*arrayParameters)[counterParameters],fileRow); //Copie la ligne de paramètre dans le tableau de lignes de paramètre
                             }  
                             else{createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);}
 
@@ -100,7 +92,6 @@ void returnFileParameters(FILE *configFile, int *lastRow, char ***arrayParameter
                     }   
                 }
                 free(fileRow);//Désalloue la ligne
-                fileRow=NULL;
             }
             else{createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
             }
@@ -162,31 +153,15 @@ int countFileRowChar(int **arrayRowChar,FILE *file, int *lastRow){
 void freeCharArray(char*** arrayChar, int lastRow ){//Libère un tableau à deux dimension comprenant des chaines de caractères
 
     int counter=0;
-    
+
     while(counter<lastRow){
+        
         free((*arrayChar)[counter]);
-        (*arrayChar)[counter]=NULL;
         counter++;
     }
-
     free(*arrayChar);
 }
 
-
-// void freeIntArray(int** intArray, int lastRow){
-
-//     int counter=0;
-
-//     printf("%d",intArray[0]);
-//     printf("%d",lastRow);
-//     while(counter<lastRow){
-
-//         free(intArray[counter]);
-//         intArray[counter]=NULL;
-//         counter++;
-//     }
-//     printf("toto");
-// }
 
 
 void createErrorReport(char * fileError, int lineError, char  *dateError, char *timeError){

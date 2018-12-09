@@ -2,8 +2,11 @@
 #include <stdlib.h>
 
 #include <structures.h> 
-#include <SDLMain.h>
 #include <fileManager.h>
+#include <SDLConfigStructures.h>
+#include <SDLObjectsStructures.h>
+#include <SDLObjects.h>
+#include <SDLMain.h>
 
 #include <SDL.h>
 #include <SDL_ttf.h>
@@ -11,335 +14,273 @@
 
 
 
-SDL_Window* SDLCreateMainWindow(SDLWindowConfig *windowConfigElement){
-
-    SDL_Window  *mainWindow;
-    SDL_DisplayMode currentDisplayMode;
-
-    if(windowConfigElement->windowHeight>0&&windowConfigElement->windowWidth>0){
-        if( (mainWindow = SDL_CreateWindow("PopTube",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,windowConfigElement->windowWidth,windowConfigElement->windowHeight,windowConfigElement->windowFlag))!=NULL){    
-            return mainWindow;
-        }
-        else{
-            fprintf(stderr,"Erreur de creation de la fenetre: %s\n",SDL_GetError());
-            return NULL;
-        }
-    }
-
-    else{
-        if(SDL_GetCurrentDisplayMode(0,&currentDisplayMode)==0){
-            if( (mainWindow = SDL_CreateWindow("PopTube",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,currentDisplayMode.w,currentDisplayMode.h,windowConfigElement->windowFlag))!=NULL){   
-                return mainWindow;
-            }
-            else{
-                fprintf(stderr,"Erreur de creation de la fenetre: %s\n",SDL_GetError());
-                return NULL;
-            }
-        }
-        else{
-            fprintf(stderr,"Erreur lors du chargement des modes d'affichage");
-            return NULL;
-        }
-    }
-
-    
-
-    // printf(arrayDisplayModes[modeNumber-1].w);
-
-
-    // if( (mainWindow = SDL_CreateWindow("PopTube",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,1920,1080,windowConfigElement->windowFlag))!=NULL){    
-    //     return mainWindow;
-    // }
-
-    // else{
-    //     fprintf(stderr,"Erreur de creation de la fenetre: %s\n",SDL_GetError());
-    //     return NULL;
-    // }
-}
-
-SDL_Renderer* SDLCreateMainRenderer(SDL_Window *mainWindow, long int rendererFlag){
-
-    SDL_Renderer  *mainRenderer;
-
-    if((mainRenderer=SDL_CreateRenderer(mainWindow,-1,rendererFlag))!=NULL){    
-        return mainRenderer;
-    }
-
-    else{
-        fprintf(stderr,"Erreur de mise en place de moteur de rendu : %s\n",SDL_GetError());
-        return NULL;
-    }
-}
-
-
-
-void SDLCreateContainerHostMenu(SDL_Window* mainWindow,SDL_Renderer *mainRenderer,SDLContainer *containerHostMenu){
-
-    int wWindow;
-    int hWindow;
-
-    SDL_Color containerColor={249,249,249,255};
-    containerHostMenu->color=containerColor;
-
-    SDL_GetWindowSize(mainWindow,&wWindow,&hWindow);//Récupère les dimensions de la fenêtre pour le centrage du conteneur
-    
-    if((containerHostMenu->texture=SDL_CreateTexture(mainRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,wWindow/2,hWindow/1.1))!=NULL){
-        
-        if(SDL_SetRenderTarget(mainRenderer, containerHostMenu->texture)==0){
-            if(SDL_SetRenderDrawColor(mainRenderer,containerHostMenu->color.r,containerHostMenu->color.g,containerHostMenu->color.b,containerHostMenu->color.a)==0){
-                if(SDL_RenderClear(mainRenderer)==0){
-                    if(SDL_SetRenderTarget(mainRenderer, NULL)==0){
-                        if(SDL_QueryTexture(containerHostMenu->texture, NULL, NULL, &containerHostMenu->rect.w, &containerHostMenu->rect.h)==0){
-                            containerHostMenu->rect.x = (wWindow/2)-(containerHostMenu->rect.w/2);//Permet de centrer le conteneur horisontalement
-                            containerHostMenu->rect.y = (hWindow/2)-(containerHostMenu->rect.h/2);//Pemet de centrer le conteneur verticalement
-                            if(SDL_RenderCopy(mainRenderer,containerHostMenu->texture,NULL,&containerHostMenu->rect)==0){
-                                 SDL_RenderPresent(mainRenderer);
-                            }
-                            else{fprintf(stderr,"Echec lors de la copie de texture dans le rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
-                        }
-                        else{fprintf(stderr,"Echec lors du la récupération des attributs de la texture dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
-                    } 
-                    else{fprintf(stderr,"Echec lors du deciblage de la texture par le renderer dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());}
-                }
-                else{fprintf(stderr,"Echec lors du remplissage du renderer par la couleur de rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());}
-            } 
-            else{fprintf(stderr,"Echec lors du reglage de la couleur de rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
-        }
-        else{fprintf(stderr,"Echec lors du ciblage de la texture par le renderer dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
-    }
-    else{fprintf(stderr,"Echec lors la creation de la texture dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
-
-}
-
-void SDLCreateTextButtonsHostMenu(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer, SDLButtons** buttonsHostMenu, char *fontPath, int *sizeArrayButtons){
-
-    SDL_Color buttonColor={125,125,190,160};
-    char arrayTextContent[4][12]={"","JOUER","PARAMETRES","QUITTER"};
-
-    int wWindow;
-    int hWindow;
-    int wText;
-    int hText;
-    int sizeFont;
-
-    double yButtonFactor;
-
-    SDL_GetWindowSize(mainWindow,&wWindow,&hWindow);
-
-    //Règle le placement vertical des boutons en fonction de l'affichage la fenêtre
-    switch(hWindow){
-
-        case 1080:
-        yButtonFactor =1.3;
-        break;
-
-        case 1050:
-        yButtonFactor=1.2;
-        break;
-
-        default:
-        yButtonFactor=1;
-    }
-
-    SDL_Color color={1,1,1,255};
-
-    for(int counterText=0; counterText<*sizeArrayButtons;counterText++){
-
-       if((buttonsHostMenu[counterText]->text=malloc(sizeof(SDLText)))!=NULL){
-
-            buttonsHostMenu[counterText]->text->color=color;
-            buttonsHostMenu[counterText]->text->sizeFont=sizeFont;
-            if((buttonsHostMenu[counterText]->text->font=TTF_OpenFont(fontPath,25))!=NULL){
-                if((buttonsHostMenu[counterText]->text->surface=TTF_RenderText_Blended(buttonsHostMenu[counterText]->text->font,arrayTextContent[counterText],buttonsHostMenu[counterText]->text->color))!=NULL){
-                    if((buttonsHostMenu[counterText]->text->texture=SDL_CreateTextureFromSurface(mainRenderer,buttonsHostMenu[counterText]->text->surface))!=NULL){
-                        
-                        buttonsHostMenu[counterText]->text->rect.w=buttonsHostMenu[counterText]->rect.w;
-                        buttonsHostMenu[counterText]->text->rect.h=buttonsHostMenu[counterText]->rect.h;
-
-                        if(SDL_QueryTexture(buttonsHostMenu[counterText]->text->texture, NULL, NULL, &buttonsHostMenu[counterText]->text->rect.w, &buttonsHostMenu[counterText]->text->rect.h)==0){
-                            if(TTF_SizeText(buttonsHostMenu[counterText]->text->font,arrayTextContent[counterText],&wText,&hText)==0){
-                                buttonsHostMenu[counterText]->text->rect.x=buttonsHostMenu[counterText]->rect.x+buttonsHostMenu[counterText]->rect.w/2 - wText/2;
-                                buttonsHostMenu[counterText]->text->rect.y=buttonsHostMenu[counterText]->rect.y+buttonsHostMenu[counterText]->rect.h/2 - hText/2;
-                                if(SDL_RenderCopy(mainRenderer,buttonsHostMenu[counterText]->text->texture,NULL,&buttonsHostMenu[counterText]->text->rect)==0){
-                                    SDL_RenderPresent(mainRenderer);
-                                }
-                            }
-                        }
-                    }
-                } 
-            }
-        } 
-    }
-}
-
-
-
-void SDLCreateButtonsHostMenu(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer,SDLContainer *containerHostMenu,SDLButtons** buttonsHostMenu, int *sizeArrayButtons, int connectionState){
-
-    SDL_Color buttonColor={125,125,190,255};
-    SDL_Color noConnectionColor={255,132,135,255};
-
-    int wWindow;
-    int hWindow;
-    double yButtonFactor;
-
-    SDL_GetWindowSize(mainWindow,&wWindow,&hWindow);
-
-    //Règle le placement vertical des boutons en fonction de l'affichage la fenêtre
-    switch(hWindow){
-
-        case 1080:
-        yButtonFactor =1.3;
-        break;
-
-        case 1050:
-        yButtonFactor=1.2;
-        break;
-
-        default:
-        yButtonFactor=1;
-    }
-
-    for(int counterButton=0;counterButton<*sizeArrayButtons;counterButton++){//Boucle permettant de créer des bouttons pour le menu d'accueil
-
-        if((buttonsHostMenu[counterButton]=malloc(sizeof(SDLButtons)))!=NULL){
-
-            if(counterButton==0){
-                printf("%d",connectionState);
-                buttonsHostMenu[counterButton]->color=connectionState==1?buttonColor:noConnectionColor;
-            }
-            else{
-                buttonsHostMenu[counterButton]->color=buttonColor;
-            }
-            
-            if((buttonsHostMenu[counterButton]->texture=SDL_CreateTexture(mainRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,containerHostMenu->rect.w*0.8,containerHostMenu->rect.h*0.15))!=NULL){
-                if(SDL_SetRenderTarget(mainRenderer,buttonsHostMenu[counterButton]->texture)==0){
-                    if(SDL_SetRenderDrawColor(mainRenderer,buttonsHostMenu[counterButton]->color.r,buttonsHostMenu[counterButton]->color.g,buttonsHostMenu[counterButton]->color.b,buttonsHostMenu[counterButton]->color.a)==0){
-                        if(SDL_RenderClear(mainRenderer)==0){
-                            if(SDL_SetRenderTarget(mainRenderer,NULL)==0){
-                                if(SDL_QueryTexture(buttonsHostMenu[counterButton]->texture, NULL, NULL, &buttonsHostMenu[counterButton]->rect.w, &buttonsHostMenu[counterButton]->rect.h)==0){
-
-                                    buttonsHostMenu[counterButton]->rect.x=((buttonsHostMenu[counterButton]->rect.w/2)+((containerHostMenu->rect.x/2)*0.8));
-                                    if(counterButton==0){
-                                        buttonsHostMenu[counterButton]->rect.y=buttonsHostMenu[counterButton]->rect.h+containerHostMenu->rect.y;
-                                    }
-                                    else{
-                                        buttonsHostMenu[counterButton]->rect.y=buttonsHostMenu[counterButton]->rect.h*yButtonFactor+buttonsHostMenu[counterButton-1]->rect.y;
-                                    }
-
-                                    if(SDL_RenderCopy(mainRenderer,buttonsHostMenu[counterButton]->texture,NULL,&buttonsHostMenu[counterButton]->rect)==0){
-                                        SDL_RenderPresent(mainRenderer);
-                                    }
-
-                                    else{fprintf(stderr,"Echec lors de la copie de texture dans le rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
-                                }
-                                else{fprintf(stderr,"Echec lors de la recuperation des attribut de la texture dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
-                            }
-                            else{fprintf(stderr,"Echec lors du ciblage de la texture par le renderer dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());}
-                        }
-                        else{fprintf(stderr,"Echec lors du remplissage du renderer par la couleur de rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());}
-                    }
-                    else{fprintf(stderr,"Echec lors du reglage de la couleur de rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
-                }
-                else{fprintf(stderr,"Echec lors du ciblage de la texture par le renderer dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
-            }
-            else{fprintf(stderr,"Echec lors la creation de la texture dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
-        }
-        else{createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);} 
-    }    
-}
-
-
-
-int SDLMainLoop(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer, SDLConfig *SDLConfigElement,DbConfig *dbConfigElement,MYSQL *dbConnection, Files *arrayFiles){
+int SDLMainMenuLoop(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer, SDLConfig *SDLConfigElement,DbConfig *dbConfigElement,MYSQL *dbConnection, Files **arrayFiles){
 
     int windowLoop;
-    int wWindow;
-    int hWindow;
-    int sizeArrayButtons; 
+    int sizeArrayButtons=4; 
     int dbConnectionStatus;
-    
-    dbConnectionStatus=(mysql_get_host_info(dbConnection)!=NULL);//Status de connexion vaut 1 si fonction retourne une valeur différente à NULL
-    SDL_Event event;
-    SDLContainer containerHostMenu;
+    int saveButton=-1;
+        
+    SDLBackground *backgroundHostMenu;
+    SDLContainer *containerHostMenu;
     SDLButtons **buttonsHostMenu;
+    SDL_Event event;
 
-    SDL_Color color={255,255,255,255};
+    SDL_Color saveColor;
 
-    sizeArrayButtons=4;
-    
+    dbConnectionStatus=(mysql_get_host_info(dbConnection)!=NULL);//Status de connexion vaut 1 si fonction retourne une valeur différente à NULL
+
+    SDL_SetRenderDrawColor(mainRenderer,255,255,255,255);
+    SDL_RenderPresent(mainRenderer);
+    SDL_SetRenderTarget(mainRenderer,NULL);
+    backgroundHostMenu=malloc(sizeof(SDLBackground));
+    containerHostMenu=malloc(sizeof(SDLContainer));
     buttonsHostMenu=malloc(sizeof(SDLButtons*)*sizeArrayButtons);
 
-    SDL_SetRenderDrawColor(mainRenderer,255,170,28,125);
-    SDL_RenderClear(mainRenderer);
+    for(int counterButton=0; counterButton<sizeArrayButtons; counterButton++){
+        
+        buttonsHostMenu[counterButton]=malloc(sizeof(SDLButtons));
+        buttonsHostMenu[counterButton]->text=malloc(sizeof(SDLText));
 
-    SDL_SetRenderTarget(mainRenderer,NULL);
+    }
+     
+    initBackgroundHostMenu(mainWindow,backgroundHostMenu);
+    SDLCreateBackgroundHostMenu(mainRenderer,backgroundHostMenu);
 
-    SDLCreateContainerHostMenu(mainWindow,mainRenderer,&containerHostMenu);
-    SDLCreateButtonsHostMenu(mainWindow,mainRenderer,&containerHostMenu, buttonsHostMenu,&sizeArrayButtons,dbConnectionStatus);
+    initContainerHostMenu(mainWindow,containerHostMenu);
+    SDLCreateContainerHostMenu(mainRenderer,containerHostMenu);
 
+    initButtonsHostMenu(mainWindow,containerHostMenu,buttonsHostMenu, SDLConfigElement->ttf->fontMenu, &sizeArrayButtons, dbConnectionStatus);
 
-    SDLCreateTextButtonsHostMenu(mainWindow,mainRenderer,buttonsHostMenu,SDLConfigElement->ttf->fontMenu, &sizeArrayButtons);
+    for(int counterButton=0; counterButton<sizeArrayButtons; counterButton++){
+        
+        SDLCreateButton(mainRenderer,buttonsHostMenu[counterButton]);
+        SDLCreateTextButton(mainRenderer,buttonsHostMenu[counterButton]);
+    }
 
     while(windowLoop){
 
-        
-
         SDL_PollEvent(&event);
-        
-        // printf("%d largeur, %d hauteur",wWindows,hWindows);
+
         switch(event.type){
 
             case SDL_QUIT : 
             windowLoop = 0;
             break;
 
-            case SDL_MOUSEBUTTONUP: 
-                if(event.button.x>=buttonsHostMenu[3]->rect.x && event.button.x<=buttonsHostMenu[3]->rect.w+buttonsHostMenu[3]->rect.x){
-                    if(event.button.y>=buttonsHostMenu[3]->rect.y && event.button.y<=buttonsHostMenu[3]->rect.h+buttonsHostMenu[3]->rect.y){
-                        event.type=SDL_QUIT;
+            case SDL_MOUSEMOTION : 
+
+                for(int counterButton=0; counterButton<sizeArrayButtons; counterButton++){
+
+                    if(saveButton == -1){
+                        if(event.motion.x >= buttonsHostMenu[counterButton]->rect.x && event.motion.x <= buttonsHostMenu[counterButton]->rect.w+buttonsHostMenu[counterButton]->rect.x && event.motion.y >= buttonsHostMenu[counterButton]->rect.y && event.motion.y <= buttonsHostMenu[counterButton]->rect.h+buttonsHostMenu[counterButton]->rect.y){
+   
+                            saveButton=counterButton;
+                            saveColor=buttonsHostMenu[counterButton]->color;
+                            buttonHoverEffect(mainRenderer,buttonsHostMenu[counterButton],SDLchangeRGBColor(buttonsHostMenu[counterButton]->color.r+10,buttonsHostMenu[counterButton]->color.g+10,buttonsHostMenu[counterButton]->color.b+10,255));
+
+                        }
+                    }
+
+                    if(saveButton != -1){
+                        if(event.motion.x < buttonsHostMenu[saveButton]->rect.x || event.motion.x > buttonsHostMenu[saveButton]->rect.w+buttonsHostMenu[saveButton]->rect.x || event.motion.y < buttonsHostMenu[saveButton]->rect.y || event.motion.y > buttonsHostMenu[saveButton]->rect.h+buttonsHostMenu[saveButton]->rect.y){
+                            
+                            buttonsHostMenu[saveButton]->color=saveColor;
+                            buttonHoverEffect(mainRenderer,buttonsHostMenu[saveButton],buttonsHostMenu[saveButton]->color);
+                            saveButton= -1;
+                        }  
                     }
                 }
             break;
-            
+
+
+            case SDL_MOUSEBUTTONUP: 
+
+                
+                if(event.button.x >= buttonsHostMenu[3]->rect.x && event.button.x <= buttonsHostMenu[3]->rect.w+buttonsHostMenu[3]->rect.x){
+                    if(event.button.y >= buttonsHostMenu[3]->rect.y && event.button.y <= buttonsHostMenu[3]->rect.h+buttonsHostMenu[3]->rect.y){
+                        event.type=SDL_QUIT;
+                    }
+                }
+
+                else if(event.button.x >= buttonsHostMenu[2]->rect.x && event.button.x <= buttonsHostMenu[2]->rect.w+buttonsHostMenu[2]->rect.x){
+                    if(event.button.y >= buttonsHostMenu[2]->rect.y && event.button.y <= buttonsHostMenu[2]->rect.h+buttonsHostMenu[2]->rect.y){
+                        
+                        
+                    }
+                }
+            break;           
         }
+        SDL_RenderPresent(mainRenderer);
+
     }
 
+
+    for(int counterButton=0;counterButton<sizeArrayButtons;counterButton++){
+        printf("freeSDLButton\n");
+        printf("%d",buttonsHostMenu[counterButton]->text->sizeFont);
+        freeSDLButton(buttonsHostMenu[counterButton]);
+        
+    }   
+
+    
+    free(buttonsHostMenu);
     
     return 0;
 }
 
-int SDLGetArrayDisplayModes(SDL_DisplayMode **arrayDisplayModes){
 
-    int modeNumber = SDL_GetNumDisplayModes(0);//Récupère le nombre de mode d'affichage disponibles sur l'écran principal de l'utilisateur 0 (écran principal)
 
-    if (modeNumber < 0){
+// int parameterMenuLoop(SDL_Renderer *mainRenderer, SDLButtons* button, SDL_Color buttonColor)
 
-        fprintf(stderr,"Echec lors de la recuperation du nombre de modes (%s)\n",SDL_GetError());
-    }
 
-    else{
+// int SDLGetArrayDisplayModes(SDL_DisplayMode **arrayDisplayModes){
 
-        if((*arrayDisplayModes=malloc(sizeof(SDL_DisplayMode*)*modeNumber))!=NULL){
+//     int modeNumber = SDL_GetNumDisplayModes(0);//Récupère le nombre de mode d'affichage disponibles sur l'écran principal de l'utilisateur 0 (écran principal)
 
-            for (int modeCounter= 0 ; modeCounter < modeNumber ; modeCounter++){
+//     if (modeNumber < 0){
 
-                if (SDL_GetDisplayMode(0, modeCounter, ((*arrayDisplayModes)+modeCounter))< 0){//Affectation des modes d'affichage au tableau de modes d'affichage
+//         fprintf(stderr,"Echec lors de la recuperation du nombre de modes (%s)\n",SDL_GetError());
+//     }
+
+//     else{
+
+//         if((*arrayDisplayModes=malloc(sizeof(SDL_DisplayMode*)*modeNumber))!=NULL){
+
+//             for (int modeCounter= 0 ; modeCounter < modeNumber ; modeCounter++){
+
+//                 if (SDL_GetDisplayMode(0, modeCounter, ((*arrayDisplayModes)+modeCounter))< 0){//Affectation des modes d'affichage au tableau de modes d'affichage
                     
-                    fprintf(stderr, "Echec lors de la recuperation du mode d'affichage (%s)\n", SDL_GetError());
-                    return 0;
-                }
-            }  
-             return modeNumber;
-        }
-        else{
-            createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
-        } 
+//                     fprintf(stderr, "Echec lors de la recuperation du mode d'affichage (%s)\n", SDL_GetError());
+//                     return 0;
+//                 }
+//             }  
+//              return modeNumber;
+//         }
+//         else{
+//             createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
+//         } 
+//     }
+
+//     return 0;
+// }
+
+
+// void changeButtonsParameterMenu(SDL_Renderer *mainRenderer, SDLButtons* button, SDL_Color buttonColor)
+
+
+SDL_Color SDLchangeRGBColor(Uint8 r, Uint8 g, Uint8 b , Uint8 a ){
+
+    SDL_Color RGBColor;
+
+    RGBColor.r=r;
+    RGBColor.g=g;
+    RGBColor.b=b;
+    RGBColor.a=a;
+
+    return RGBColor;
+}
+// Uint32 SDLPixelColor(int r, int g, int b, int a){
+
+//    return r << 24 | g << 16 | b << 8 | a;
+// }
+
+// void SDLPixelControl(int x, int y, Uint32 coul)
+// {
+//   if (x >= 0 && x < affichage->w &&
+//       y >= 0 && y < affichage->h)
+      
+//     setPixel(x, y, coul);
+// }
+
+ void SDLAnimateBackgroundHostMenu( SDL_Renderer *mainRenderer, SDL_Texture *texture, SDL_Color newColor ){
+
+    SDL_PixelFormat *format;
+    Uint32 *pixels;
+    Uint32 pixelColor;
+    int wTexture;
+    int hTexture;
+    int pitch;
+    void *tmpPixelArray;
+    size_t counterHeight,counterWidth;
+
+    SDL_QueryTexture(texture,NULL,NULL,&wTexture,&hTexture);
+    format = SDL_AllocFormat(SDL_PIXELFORMAT_RGBA8888);
+
+    if(SDL_LockTexture(texture, NULL, &tmpPixelArray, &pitch)!=0){
+        printf("bug");
     }
 
-    return 0;
+    pixelColor=SDL_MapRGBA(format,(Uint8) newColor.r, (Uint8) newColor.g, (Uint8) newColor.b, (Uint8) newColor.a);
+
+    pixels = tmpPixelArray;
+
+    printf("%d\n",sizeof(pixels));
+    for(counterHeight = 0; counterHeight < (size_t)hTexture; counterHeight++){
+        for(counterWidth = 0; counterWidth < (size_t)wTexture; counterWidth++){
+
+
+            if(counterHeight%500==0 && counterWidth%500==0  ){
+                printf("\n%p",&pixels[counterHeight * (size_t)wTexture + counterWidth]);
+                cercle(&pixels[counterHeight *(size_t)wTexture + counterWidth],counterWidth,counterHeight,100,wTexture,hTexture,pixelColor);
+                
+            }
+        }
+    }
+    
+    SDL_FreeFormat(format);
+    	
+    SDL_UnlockTexture(texture);
+    
+}
+
+// Vérifie si un pixel n'est pas positionné en dehors de la fenêtre de jeu.
+void controlPixelPosition(Uint32 *pixel, int xPixel, int yPixel, int wTexture, int hTexture, Uint32 pixelColor){
+
+  if (xPixel >= 0 && xPixel < wTexture && yPixel >= 0 && yPixel < hTexture){
+      printf("%p\n",pixel);
+      pixel=pixelColor;
+  } 
 }
 
 
+
+void cercle(Uint32 *pixel,int cx, int cy, int rayon,int wTexture, int hTexture, Uint32 pixelColor)
+{
+  int d, y, x;
+ 
+  d = 3 - (2 * rayon);
+  x = 0;
+  y = rayon;
+
+  while (y >= x) {
+    controlPixelPosition(pixel,cx + x, cy + y,wTexture,hTexture, pixelColor);
+    controlPixelPosition(pixel,cx + y, cy + x,wTexture,hTexture, pixelColor);
+    controlPixelPosition(pixel,cx - x, cy + y,wTexture,hTexture, pixelColor);
+    controlPixelPosition(pixel,cx - y, cy + x,wTexture,hTexture, pixelColor);
+    controlPixelPosition(pixel,cx + x, cy - y,wTexture,hTexture, pixelColor);
+    controlPixelPosition(pixel,cx + y, cy - x,wTexture,hTexture, pixelColor);
+    controlPixelPosition(pixel,cx - x, cy - y,wTexture,hTexture, pixelColor);
+    controlPixelPosition(pixel,cx - y, cy - x,wTexture,hTexture, pixelColor);
+ 
+    if (d < 0)
+      d = d + (4 * x) + 6;
+    else {
+      d = d + 4 * (x - y) + 10;
+      y--;
+    }
+ 
+    x++;
+  }
+}
+
+void buttonHoverEffect(SDL_Renderer *mainRenderer, SDLButtons* button, SDL_Color buttonColor){
+
+    button->color=buttonColor;
+    SDL_DestroyTexture(button->texture);
+    SDLCreateButton(mainRenderer,button);
+    SDL_DestroyTexture(button->text->texture);
+    SDLCreateTextButton(mainRenderer,button); 
+}
 
 

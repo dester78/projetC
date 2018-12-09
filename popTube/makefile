@@ -25,17 +25,26 @@ EXEC=main
 
 all: $(EXEC)
 
-$(EXEC): dbManager.o  fileManager.o structures.o SDLMain.o main.o formatString.o
-	$(CC) $(CFLAGS) -o $(EXEC)  formatString.o fileManager.o structures.o dbManager.o SDLMain.o main.o  $(LDFLAGS) $(CPPFLAGS)  $(LDLIBS)
+$(EXEC): dbManager.o  fileManager.o structures.o SDLMain.o main.o formatString.o SDLConfigStructures.o SDLObjectsStructures.o SDLObjects.o
+	$(CC) $(CFLAGS) -o $(EXEC)  formatString.o fileManager.o structures.o dbManager.o SDLMain.o SDLConfigStructures.o  SDLObjectsStructures.o SDLObjects.o main.o  $(LDFLAGS) $(CPPFLAGS)  $(LDLIBS)
 
-main.o: $(P_DIR)\$(S_DIR)\main.c $(P_DIR)\$(H_DIR)\fileManager.h $(P_DIR)\$(H_DIR)\structures.h $(P_DIR)\$(H_DIR)\dbManager.h
+main.o: $(P_DIR)\$(S_DIR)\main.c $(P_DIR)\$(H_DIR)\fileManager.h $(P_DIR)\$(H_DIR)\structures.h $(P_DIR)\$(H_DIR)\dbManager.h  $(P_DIR)\$(H_DIR)\SDLConfigStructures.h $(P_DIR)\$(H_DIR)\SDLObjects.h
 	$(CC)  -o main.o -c $(P_DIR)\$(S_DIR)\main.c $(CFLAGS) $(CPPFLAGS) 
 
-SDLMain.o: $(P_DIR)\$(H_DIR)\SDLmain.h $(P_DIR)\$(S_DIR)\SDLmain.c $(P_DIR)\$(H_DIR)\structures.h 
+SDLMain.o: $(P_DIR)\$(H_DIR)\SDLmain.h $(P_DIR)\$(S_DIR)\SDLmain.c $(P_DIR)\$(H_DIR)\structures.h  $(P_DIR)\$(H_DIR)\SDLConfigStructures.h  $(P_DIR)\$(H_DIR)\SDLObjectsStructures.h $(P_DIR)\$(H_DIR)\SDLObjects.h
 	$(CC)   -o SDLmain.o -c $(P_DIR)\$(S_DIR)\SDLmain.c $(CFLAGS) $(CPPFLAGS)
 
 dbManager.o: $(P_DIR)\$(H_DIR)\dbManager.h $(P_DIR)\$(S_DIR)\dbManager.c $(P_DIR)\$(H_DIR)\structures.h 
 	$(CC)   -o dbManager.o -c $(P_DIR)\$(S_DIR)\dbManager.c $(CFLAGS) $(CPPFLAGS)
+
+SDLObjects.o: $(P_DIR)\$(H_DIR)\SDLObjects.h $(P_DIR)\$(S_DIR)\SDLObjects.c  $(P_DIR)\$(H_DIR)\SDLConfigStructures.h  $(P_DIR)\$(H_DIR)\SDLObjectsStructures.h
+	$(CC)   -o SDLObjects.o -c $(P_DIR)\$(S_DIR)\SDLObjects.c $(CFLAGS) $(CPPFLAGS)
+
+SDLConfigStructures.o: $(P_DIR)\$(H_DIR)\SDLConfigStructures.h $(P_DIR)\$(S_DIR)\SDLConfigStructures.c  $(P_DIR)\$(H_DIR)\fileManager.h
+	$(CC)   -o SDLConfigStructures.o -c $(P_DIR)\$(S_DIR)\SDLConfigStructures.c $(CFLAGS) $(CPPFLAGS)
+
+SDLObjectsStructures.o: $(P_DIR)\$(H_DIR)\SDLObjectsStructures.h $(P_DIR)\$(S_DIR)\SDLObjectsStructures.c $(P_DIR)\$(H_DIR)\fileManager.h $(P_DIR)\$(H_DIR)\SDLConfigStructures.h  $(P_DIR)\$(H_DIR)\SDLMain.h 
+	$(CC)   -o SDLObjectsStructures.o -c $(P_DIR)\$(S_DIR)\SDLObjectsStructures.c $(CFLAGS) $(CPPFLAGS)
 
 structures.o: $(P_DIR)\$(H_DIR)\structures.h $(P_DIR)\$(S_DIR)\structures.c $(P_DIR)\$(H_DIR)\fileManager.h $(P_DIR)\$(H_DIR)\formatString.h 
 	$(CC)   -o structures.o -c $(P_DIR)\$(S_DIR)\structures.c $(CFLAGS) $(CPPFLAGS)
