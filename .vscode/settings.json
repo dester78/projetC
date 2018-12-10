@@ -11,7 +11,9 @@
         "winsock.h": "c",
         "mysql.h": "c",
         "sdlmain.h": "c",
-        "filemanager.h": "c"
+        "filemanager.h": "c",
+        "sdlconfigstructures.h": "c",
+        "dbmanager.h": "c"
     },
     "C_Cpp.errorSquiggles": "Enabled"
 }
