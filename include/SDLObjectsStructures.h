@@ -13,12 +13,23 @@ typedef struct SDLContainer{
 
 }SDLContainer;
 
+typedef struct MetroStation{
+
+    int radius;
+    int xCenter;
+    int yCenter; 
+    Uint32 color;
+
+}MetroStation;
+
 typedef struct SDLBackground{
 
     SDL_Surface *surface;
     SDL_Texture *texture; 
     SDL_Rect rect;
     SDL_Color color;
+    unsigned short sizeArrMetroStations;
+    MetroStation *arrMetroStations[20];
 
 }SDLBackground;
 
@@ -45,9 +56,12 @@ typedef struct SDLText{
 }SDLText;
 
 
+
 void initBackgroundHostMenu(SDL_Window *mainWindow,SDLBackground *backgroundHostMenu);
 void initContainerHostMenu(SDL_Window* mainWindow,SDLContainer *containerHostMenu);
 void initButtonsHostMenu(SDL_Window  *mainWindow, SDLContainer *containerHostMenu,SDLButtons** buttonsHostMenu, char *fontPath, int *sizeArrayButtons, int connectionState);
+void initMetroStation(MetroStation *metroStation, int radius, int xCenter, int yCenter, Uint32 color);
+
 
 void freeSDLButton(SDLButtons *sdlbuttonElement);
 void freeSDLText(SDLText *sdlTextElement);

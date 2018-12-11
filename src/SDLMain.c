@@ -7,6 +7,7 @@
 #include <SDLObjectsStructures.h>
 #include <SDLObjects.h>
 #include <SDLMain.h>
+#include <SDLDraw.h>
 
 #include <SDL.h>
 #include <SDL_ttf.h>
@@ -20,6 +21,8 @@ int SDLMainMenuLoop(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer, SDLConf
     int sizeArrayButtons=4; 
     int dbConnectionStatus;
     int saveButton=-1;
+    int currentTime=0;
+    int pastTime=0;
         
     SDLBackground *backgroundHostMenu;
     SDLContainer *containerHostMenu;
@@ -30,9 +33,10 @@ int SDLMainMenuLoop(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer, SDLConf
 
     dbConnectionStatus=(mysql_get_host_info(dbConnection)!=NULL);//Status de connexion vaut 1 si fonction retourne une valeur différente à NULL
 
-    SDL_SetRenderDrawColor(mainRenderer,255,255,255,255);
-    SDL_RenderPresent(mainRenderer);
-    SDL_SetRenderTarget(mainRenderer,NULL);
+    // SDL_RenderClear(mainRenderer);
+    // SDL_SetRenderDrawColor(mainRenderer,255,255,255,255);
+    // SDL_RenderPresent(mainRenderer);
+    // SDL_SetRenderTarget(mainRenderer,NULL);
     backgroundHostMenu=malloc(sizeof(SDLBackground));
     containerHostMenu=malloc(sizeof(SDLContainer));
     buttonsHostMenu=malloc(sizeof(SDLButtons*)*sizeArrayButtons);
@@ -43,10 +47,13 @@ int SDLMainMenuLoop(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer, SDLConf
         buttonsHostMenu[counterButton]->text=malloc(sizeof(SDLText));
 
     }
-     
+    
+   
+    
     initBackgroundHostMenu(mainWindow,backgroundHostMenu);
     SDLCreateBackgroundHostMenu(mainRenderer,backgroundHostMenu);
 
+    
     initContainerHostMenu(mainWindow,containerHostMenu);
     SDLCreateContainerHostMenu(mainRenderer,containerHostMenu);
 
@@ -77,7 +84,7 @@ int SDLMainMenuLoop(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer, SDLConf
    
                             saveButton=counterButton;
                             saveColor=buttonsHostMenu[counterButton]->color;
-                            buttonHoverEffect(mainRenderer,buttonsHostMenu[counterButton],SDLchangeRGBColor(buttonsHostMenu[counterButton]->color.r+10,buttonsHostMenu[counterButton]->color.g+10,buttonsHostMenu[counterButton]->color.b+10,255));
+                            buttonHoverEffect(mainRenderer,buttonsHostMenu[counterButton],SDLChangeRGBColor(buttonsHostMenu[counterButton]->color.r+10,buttonsHostMenu[counterButton]->color.g+10,buttonsHostMenu[counterButton]->color.b+10,255));
 
                         }
                     }
@@ -109,7 +116,9 @@ int SDLMainMenuLoop(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer, SDLConf
                         
                     }
                 }
-            break;           
+            break; 
+
+                     
         }
         SDL_RenderPresent(mainRenderer);
 
@@ -169,17 +178,6 @@ int SDLMainMenuLoop(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer, SDLConf
 // void changeButtonsParameterMenu(SDL_Renderer *mainRenderer, SDLButtons* button, SDL_Color buttonColor)
 
 
-SDL_Color SDLchangeRGBColor(Uint8 r, Uint8 g, Uint8 b , Uint8 a ){
-
-    SDL_Color RGBColor;
-
-    RGBColor.r=r;
-    RGBColor.g=g;
-    RGBColor.b=b;
-    RGBColor.a=a;
-
-    return RGBColor;
-}
 // Uint32 SDLPixelColor(int r, int g, int b, int a){
 
 //    return r << 24 | g << 16 | b << 8 | a;
@@ -193,83 +191,57 @@ SDL_Color SDLchangeRGBColor(Uint8 r, Uint8 g, Uint8 b , Uint8 a ){
 //     setPixel(x, y, coul);
 // }
 
- void SDLAnimateBackgroundHostMenu( SDL_Surface *surface, SDL_Color newColor ){
+//  void SDLAnimateBackgroundHostMenu( SDL_Surface **surface, SDL_Color newColor ){
 
-    Uint32 *pixels;
-    Uint32 pixelColor;
-    int wSurface;
-    int hSurface;
-    int r,g,b,a;
-    size_t counterHeight,counterWidth;
+//     Uint32 *pixels;
+//     Uint32 pixelColor;
+//     int wSurface;
+//     int hSurface;
+//     size_t counterHeight,counterWidth;
 
-    wSurface=surface->w;
-    hSurface=surface->h;
+//     wSurface=(*surface)->w;
+//     hSurface=(*surface)->h;
     
-    if(SDL_LockSurface(surface)!=0){
-        printf("bug");
-    }
-
-    pixelColor=SDL_MapRGBA(surface->format,(Uint8) newColor.r, (Uint8) newColor.g, (Uint8) newColor.b, (Uint8) newColor.a);
-
-    pixels = surface->pixels;
-
-    // printf("%d\n",sizeof(pixels));
-    for(counterHeight = 0; counterHeight < (size_t)hSurface-1000; counterHeight++){
-        for(counterWidth = 0; counterWidth < (size_t)wSurface-1900; counterWidth++){
+//     if(SDL_LockSurface((*surface))!=0){
+//         printf("bug");
+//     }
 
 
-            printf("\n%p",&pixels[counterHeight * (size_t)wSurface + counterWidth]);
-            SDL_GetRGBA(pixels[counterHeight * (size_t)wSurface + counterWidth],surface->format,r,g,b,a);
-            //cercle(&pixels[counterHeight *(size_t)wSurface + counterWidth],counterWidth,counterHeight,100,wSurface,hSurface,pixelColor);
-            pixels[counterHeight * (size_t)wSurface + counterWidth]=pixelColor;
-            printf("%d",r);
-        }
-    }
-    
+//     pixelColor=SDL_MapRGBA((*surface)->format,newColor.r,0,0, newColor.a);
+
+//     pixels = (*surface)->pixels;
+
+//     printf("%d\n",sizeof(pixels));
+//     for(counterHeight = 100; counterHeight < (size_t)hSurface-100; counterHeight++){
+//         for(counterWidth = 100; counterWidth < (size_t)wSurface-100; counterWidth++){
+
+//             // printf("\n%p",&pixels[counterHeight * (size_t)wSurface + counterWidth]);
+//             // SDL_GetRGBA(pixels[counterHeight * (size_t)wSurface + counterWidth],(*surface)->format,&r,&g,&b,&a);
+//             // printf("%d\n rouge",r);
+//             if(counterHeight%100==0 && counterWidth%1000==0){
+
+//                 printf("OK");
+//                 printf(" counterHeight %d \n",counterHeight);
+//                 printf("counterWidth %d \n",counterWidth);
+//                 drawCircle(&pixels,(int)counterWidth,(int)counterHeight,40,wSurface,hSurface,pixelColor);
+//             }
+            
+            
+//             // printf("%d",r);
+//         }
+//     }
+
+//     drawCircle(&pixels,100,100,40,wSurface,hSurface,pixelColor);
+
+//     printf("%p\n",&pixels[1*wSurface+3]);
+   
+//     // cercle(pixels,counterWidth,counterHeight,300,1000,h,pixelColor);
     	
-    SDL_UnlockSurface(surface);
+//     SDL_UnlockSurface(*surface);
     
-}
-
-// Vérifie si un pixel n'est pas positionné en dehors de la fenêtre de jeu.
-void controlPixelPosition(Uint32 *pixel, int xPixel, int yPixel, int wSurface, int hSurface, Uint32 pixelColor){
-
-  if (xPixel >= 0 && xPixel < wSurface && yPixel >= 0 && yPixel < hSurface){
-      printf("%p\n",pixel);
-      *pixel=pixelColor;
-  } 
-}
+// }
 
 
-
-void cercle(Uint32 *pixel,int cx, int cy, int rayon,int wSurface, int hSurface, Uint32 pixelColor)
-{
-  int d, y, x;
- 
-  d = 3 - (2 * rayon);
-  x = 0;
-  y = rayon;
-
-  while (y >= x) {
-    controlPixelPosition(pixel,cx + x, cy + y,wSurface,hSurface, pixelColor);
-    controlPixelPosition(pixel,cx + y, cy + x,wSurface,hSurface, pixelColor);
-    controlPixelPosition(pixel,cx - x, cy + y,wSurface,hSurface, pixelColor);
-    controlPixelPosition(pixel,cx - y, cy + x,wSurface,hSurface, pixelColor);
-    controlPixelPosition(pixel,cx + x, cy - y,wSurface,hSurface, pixelColor);
-    controlPixelPosition(pixel,cx + y, cy - x,wSurface,hSurface, pixelColor);
-    controlPixelPosition(pixel,cx - x, cy - y,wSurface,hSurface, pixelColor);
-    controlPixelPosition(pixel,cx - y, cy - x,wSurface,hSurface, pixelColor);
- 
-    if (d < 0)
-      d = d + (4 * x) + 6;
-    else {
-      d = d + 4 * (x - y) + 10;
-      y--;
-    }
- 
-    x++;
-  }
-}
 
 void buttonHoverEffect(SDL_Renderer *mainRenderer, SDLButtons* button, SDL_Color buttonColor){
 
@@ -281,3 +253,4 @@ void buttonHoverEffect(SDL_Renderer *mainRenderer, SDLButtons* button, SDL_Color
 }
 
 
+// void updateBackgroundMenu(SDLBackground *backgroundMenu)

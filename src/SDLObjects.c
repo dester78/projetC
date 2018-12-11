@@ -60,17 +60,23 @@ SDL_Renderer* SDLCreateMainRenderer(SDL_Window *mainWindow, long int rendererFla
 
 void SDLCreateBackgroundHostMenu(SDL_Renderer *mainRenderer, SDLBackground *background){
 
-
+    
     if((background->surface=SDL_CreateRGBSurfaceWithFormat(0, background->rect.w,background->rect.h, 32, SDL_PIXELFORMAT_RGBA8888))!=NULL){
-        
-        SDLAnimateBackgroundHostMenu( background->surface, background->color );
-        background->texture=SDL_CreateTextureFromSurface(mainRenderer,background->surface);
-        if(SDL_RenderCopy(mainRenderer,background->texture,NULL,&background->rect)==0){
-                SDL_RenderPresent(mainRenderer);
+
+        if((SDL_FillRect(background->surface,&background->rect,SDL_MapRGBA(background->surface->format,255,255,255,255)))==0){
+            // SDLAnimateBackgroundHostMenu( &background->surface, background->color ); 
+            if((background->texture=SDL_CreateTextureFromSurface(mainRenderer,background->surface))!=NULL){
+
+                if(SDL_RenderCopy(mainRenderer,background->texture,NULL,&background->rect)==0){
+                    SDL_RenderPresent(mainRenderer);
+                }
+                else{fprintf(stderr,"Echec lors de la copie de texture dans le rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
             }
-        else{fprintf(stderr,"Echec lors de la copie de texture dans le rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
+            else{fprintf(stderr,"Echec lors de la convertion de la surface en texture dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
+        }
+        else{fprintf(stderr,"Echec lors du remplissage de la surface par un rectangle dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
     }
-    else{fprintf(stderr,"Echec lors la creation de la texture dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
+    else{fprintf(stderr,"Echec lors la creation de la surface dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
 }
 
 
@@ -149,29 +155,29 @@ void SDLCreateContainerHostMenu(SDL_Renderer *mainRenderer,SDLContainer *contain
     
     if((containerHostMenu->texture=SDL_CreateTexture(mainRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,containerHostMenu->rect.w,containerHostMenu->rect.h))!=NULL){
 
-        if(SDL_RenderClear(mainRenderer)==0){   
+        // if(SDL_RenderClear(mainRenderer)==0){   
             if(SDL_SetTextureBlendMode(containerHostMenu->texture,SDL_BLENDMODE_BLEND)==0){
                 if(SDL_SetRenderTarget(mainRenderer, containerHostMenu->texture)==0){
-                    if(SDL_SetRenderDrawColor(mainRenderer,containerHostMenu->color.r,containerHostMenu->color.g,containerHostMenu->color.b,containerHostMenu->color.a)==0){
+                    //if(SDL_SetRenderDrawColor(mainRenderer,containerHostMenu->color.r,containerHostMenu->color.g,containerHostMenu->color.b,containerHostMenu->color.a)==0){
                         if(SDL_SetRenderTarget(mainRenderer, NULL)==0){
-                            if(SDL_QueryTexture(containerHostMenu->texture, NULL, NULL, &containerHostMenu->rect.w, &containerHostMenu->rect.h)==0){
+                            // if(SDL_QueryTexture(containerHostMenu->texture, NULL, NULL, &containerHostMenu->rect.w, &containerHostMenu->rect.h)==0){
 
                                 if(SDL_RenderCopy(mainRenderer,containerHostMenu->texture,NULL,&containerHostMenu->rect)==0){
                                     SDL_RenderPresent(mainRenderer);
                                 }
                                 else{fprintf(stderr,"Echec lors de la copie de texture dans le rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
-                            }
-                            else{fprintf(stderr,"Echec lors du la récupération des attributs de la texture dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
+                            // }
+                            // else{fprintf(stderr,"Echec lors du la récupération des attributs de la texture dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
                         } 
                         else{fprintf(stderr,"Echec lors du deciblage de la texture par le renderer dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());}                   
-                    } 
-                    else{fprintf(stderr,"Echec lors du reglage de la couleur de rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
+                    // } 
+                    // else{fprintf(stderr,"Echec lors du reglage de la couleur de rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
                 }
                 else{fprintf(stderr,"Echec lors du ciblage de la texture par le renderer dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
             }
             else{fprintf(stderr,"Echec lors dde la mise en place du blend mode sur la texture dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
-        }
-        else{fprintf(stderr,"Echec lors du remplissage du renderer par la couleur de rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());}
+        // }
+        // else{fprintf(stderr,"Echec lors du remplissage du renderer par la couleur de rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());}
     }
     else{fprintf(stderr,"Echec lors la creation de la texture dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
 }

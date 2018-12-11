@@ -3,6 +3,7 @@
 
 #include <SDLConfigStructures.h>
 #include <fileManager.h>
+#include <formatString.h>
 
 #include <SDL.h>
 

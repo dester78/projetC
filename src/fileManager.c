@@ -64,9 +64,9 @@ void returnFileParameters(FILE *configFile, int *lastRow, char ***arrayParameter
     if(((*arrayParameters)=malloc(sizeof(char*)*sizeArrayParameters))!=NULL){
 
         for(counterFileRow=0;counterFileRow<*lastRow;counterFileRow++){
-            
-            if((fileRow=malloc(sizeof(char)*((arrayRowChar[counterFileRow])+1)))!=NULL){
-
+   
+            if((fileRow=calloc(((arrayRowChar[counterFileRow])+1),sizeof(char)))!=NULL){
+                
                 if(arrayRowChar[counterFileRow]!=-1){
                     
                     if(arrayRowChar[counterFileRow] <= 1 && arrayRowChar[counterFileRow] < *lastRow - 1){   //Utile dans le cas d'une ligne compose seulement d'un \n
@@ -80,9 +80,9 @@ void returnFileParameters(FILE *configFile, int *lastRow, char ***arrayParameter
                             
                             deleteLineFeed(&fileRow);
                             deleteEndSpace(&fileRow);
+                            
 
                             if(((*arrayParameters)[counterParameters] = malloc( sizeof( char ) * ( strlen( fileRow ) + 1) ))!=NULL){
-
                                 strcpy( (*arrayParameters)[counterParameters],fileRow); //Copie la ligne de paramètre dans le tableau de lignes de paramètre
                             }  
                             else{createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);}
@@ -91,6 +91,7 @@ void returnFileParameters(FILE *configFile, int *lastRow, char ***arrayParameter
                         }  
                     }   
                 }
+
                 free(fileRow);//Désalloue la ligne
             }
             else{createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);

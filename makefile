@@ -26,25 +26,25 @@ EXEC=main
 
 all: $(EXEC)
 
-$(EXEC): dbManager.o  fileManager.o structures.o SDLMain.o main.o formatString.o SDLConfigStructures.o SDLObjectsStructures.o SDLObjects.o
-	$(CC) $(CFLAGS) -o $(EXEC)  formatString.o fileManager.o structures.o dbManager.o SDLMain.o SDLConfigStructures.o  SDLObjectsStructures.o SDLObjects.o main.o  $(LDFLAGS) $(CPPFLAGS)  $(LDLIBS)
+$(EXEC): dbManager.o  fileManager.o structures.o SDLMain.o main.o formatString.o SDLConfigStructures.o SDLObjectsStructures.o SDLObjects.o SDLDraw.o
+	$(CC) $(CFLAGS) -o $(EXEC)  formatString.o fileManager.o structures.o dbManager.o SDLMain.o SDLConfigStructures.o  SDLObjectsStructures.o SDLObjects.o SDLDraw.o main.o  $(LDFLAGS) $(CPPFLAGS)  $(LDLIBS)
 
 main.o: $(S_DIR)/main.c $(H_DIR)/fileManager.h $(H_DIR)/structures.h $(H_DIR)/dbManager.h  $(H_DIR)/SDLConfigStructures.h $(H_DIR)/SDLObjects.h
 	$(CC)  -o main.o -c $(S_DIR)/main.c $(CFLAGS) $(CPPFLAGS) 
 
-SDLMain.o: $(H_DIR)/SDLmain.h $(S_DIR)/SDLmain.c $(H_DIR)/structures.h  $(H_DIR)/SDLConfigStructures.h  $(H_DIR)/SDLObjectsStructures.h $(H_DIR)/SDLObjects.h
+SDLMain.o: $(H_DIR)/SDLmain.h $(S_DIR)/SDLmain.c $(H_DIR)/structures.h  $(H_DIR)/SDLConfigStructures.h  $(H_DIR)/SDLObjectsStructures.h $(H_DIR)/SDLObjects.h $(H_DIR)/SDLDraw.h
 	$(CC)   -o SDLmain.o -c $(S_DIR)/SDLmain.c $(CFLAGS) $(CPPFLAGS)
 
 dbManager.o: $(H_DIR)/dbManager.h $(S_DIR)/dbManager.c $(H_DIR)/structures.h 
 	$(CC)   -o dbManager.o -c $(S_DIR)/dbManager.c $(CFLAGS) $(CPPFLAGS)
 
-SDLObjects.o: $(H_DIR)/SDLObjects.h $(S_DIR)/SDLObjects.c  $(H_DIR)/SDLConfigStructures.h  $(H_DIR)/SDLObjectsStructures.h  $(H_DIR)/SDLMain.h
+SDLObjects.o: $(H_DIR)/SDLObjects.h $(S_DIR)/SDLObjects.c  $(H_DIR)/SDLConfigStructures.h  $(H_DIR)/SDLObjectsStructures.h  $(H_DIR)/SDLDraw.h
 	$(CC)   -o SDLObjects.o -c $(S_DIR)/SDLObjects.c $(CFLAGS) $(CPPFLAGS)
 
-SDLConfigStructures.o: $(H_DIR)/SDLConfigStructures.h $(S_DIR)/SDLConfigStructures.c  $(H_DIR)/fileManager.h
+SDLConfigStructures.o: $(H_DIR)/SDLConfigStructures.h $(S_DIR)/SDLConfigStructures.c  $(H_DIR)/fileManager.h $(H_DIR)/formatString.h
 	$(CC)   -o SDLConfigStructures.o -c $(S_DIR)/SDLConfigStructures.c $(CFLAGS) $(CPPFLAGS)
 
-SDLObjectsStructures.o: $(H_DIR)/SDLObjectsStructures.h $(S_DIR)/SDLObjectsStructures.c $(H_DIR)/fileManager.h $(H_DIR)/SDLConfigStructures.h  $(H_DIR)/SDLMain.h 
+SDLObjectsStructures.o: $(H_DIR)/SDLObjectsStructures.h $(S_DIR)/SDLObjectsStructures.c $(H_DIR)/fileManager.h $(H_DIR)/SDLConfigStructures.h  $(H_DIR)/SDLDraw.h 
 	$(CC)   -o SDLObjectsStructures.o -c $(S_DIR)/SDLObjectsStructures.c $(CFLAGS) $(CPPFLAGS)
 
 structures.o: $(H_DIR)/structures.h $(S_DIR)/structures.c $(H_DIR)/fileManager.h $(H_DIR)/formatString.h 
@@ -56,6 +56,8 @@ fileManager.o: $(S_DIR)/fileManager.c $(H_DIR)/fileManager.h $(H_DIR)/structures
 formatString.o: $(S_DIR)/formatString.c $(H_DIR)/formatString.h $(H_DIR)/fileManager.h 
 	$(CC)   -o formatString.o -c $(S_DIR)/formatString.c $(CFLAGS) $(CPPFLAGS)
 
+SDLDraw.o: $(H_DIR)/SDLDraw.h $(S_DIR)/SDLDraw.c 
+	$(CC)   -o SDLDraw.o -c $(S_DIR)/SDLDraw.c $(CFLAGS) $(CPPFLAGS)
 
 clean:
 	rm *.o core

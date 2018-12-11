@@ -1,10 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <string.h>
 
+#include <SDLDraw.h>
 #include <fileManager.h>
 #include <SDLObjectsStructures.h>
 #include <SDLConfigStructures.h>
-#include <SDLMain.h>
+
 
 #include <SDL.h>
 
@@ -41,28 +43,28 @@ void initButtonsHostMenu(SDL_Window  *mainWindow, SDLContainer *containerHostMen
         switch(counterButton){
 
             case 0 : 
-                buttonsHostMenu[counterButton]->color=connectionState==1?SDLchangeRGBColor(242,201,49,255):SDLchangeRGBColor(0,0,0,255);
+                buttonsHostMenu[counterButton]->color=connectionState==1?SDLChangeRGBColor(242,201,49,255):SDLChangeRGBColor(0,0,0,255);
                 if((buttonsHostMenu[counterButton]->text->content=malloc(sizeof(char)*(strlen("CONNEXION") + 1)))!=NULL){
                     strcpy(buttonsHostMenu[counterButton]->text->content,"CONNEXION");
                 }
             break;
 
             case 1 : 
-                buttonsHostMenu[counterButton]->color=SDLchangeRGBColor(137,199,214,255);
+                buttonsHostMenu[counterButton]->color=SDLChangeRGBColor(137,199,214,255);
                 if((buttonsHostMenu[counterButton]->text->content=malloc(sizeof(char)*(strlen("JOUER") + 1)))!=NULL){
                     strcpy(buttonsHostMenu[counterButton]->text->content,"JOUER");
                 }
             break;
 
             case 2 : 
-                buttonsHostMenu[counterButton]->color=SDLchangeRGBColor(50,142,91,255);
+                buttonsHostMenu[counterButton]->color=SDLChangeRGBColor(50,142,91,255);
                 if((buttonsHostMenu[counterButton]->text->content=malloc(sizeof(char)*(strlen("PARAMETRES") + 1)))!=NULL){
                     strcpy(buttonsHostMenu[counterButton]->text->content,"PARAMETRES");
                 }
             break;
             
             case 3 : 
-                buttonsHostMenu[counterButton]->color=SDLchangeRGBColor(222,139,83,255);
+                buttonsHostMenu[counterButton]->color=SDLChangeRGBColor(222,139,83,255);
                 if((buttonsHostMenu[counterButton]->text->content=malloc(sizeof(char)*(strlen("QUITTER") + 1)))!=NULL){
                     strcpy(buttonsHostMenu[counterButton]->text->content,"QUITTER");
                 }
@@ -76,7 +78,7 @@ void initButtonsHostMenu(SDL_Window  *mainWindow, SDLContainer *containerHostMen
 
         buttonsHostMenu[counterButton]->text->fontPath=malloc(sizeof(char)*(strlen(fontPath)+1));
         strcpy(buttonsHostMenu[counterButton]->text->fontPath,fontPath);
-        buttonsHostMenu[counterButton]->text->color=SDLchangeRGBColor(255,255,255,255);
+        buttonsHostMenu[counterButton]->text->color=SDLChangeRGBColor(255,255,255,255);
         buttonsHostMenu[counterButton]->text->sizeFont=60;
         buttonsHostMenu[counterButton]->text->rect.w=buttonsHostMenu[counterButton]->rect.w;
         buttonsHostMenu[counterButton]->text->rect.h=buttonsHostMenu[counterButton]->rect.h;
@@ -119,12 +121,18 @@ void initBackgroundHostMenu(SDL_Window *mainWindow,SDLBackground *backgroundHost
 
     backgroundHostMenu->rect.w = wWindow;
     backgroundHostMenu->rect.h = hWindow;
-    backgroundHostMenu->rect.x = 100;
-    backgroundHostMenu->rect.y = 100;
+    backgroundHostMenu->rect.x = 0;
+    backgroundHostMenu->rect.y = 0;
 
 }
 
+void initMetroStation(MetroStation *metroStation, int radius, int xCenter, int yCenter, Uint32 color){
 
+    metroStation->radius=radius;
+    metroStation->xCenter=xCenter;
+    metroStation->yCenter=yCenter,
+    metroStation->color=color;
+}
 
 void freeSDLButton(SDLButtons *sdlButtonElement){
 
@@ -141,3 +149,4 @@ void freeSDLText(SDLText *sdlTextElement){
     SDL_DestroyTexture(sdlTextElement->texture);
     TTF_CloseFont(sdlTextElement->font);
 }
+

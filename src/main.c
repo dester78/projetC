@@ -33,6 +33,7 @@ int main(int argc, char **argv) {
 
     
     arrayFiles=malloc(sizeof(Files*));
+    
   
     // arrayFiles[0]=returnFileElement("errorLog.txt","a+");
     arrayFiles[0]=returnFileElement("popTube.cfg","r+");
@@ -40,18 +41,19 @@ int main(int argc, char **argv) {
     // arrayFiles[1].filePointer=malloc(sizeof(FILE*));
 
     //if((arrayFiles[0].filePointer=openFluxFile(arrayFiles[0].fullName,arrayFiles[0].openMode))!=NULL){
-
+        
         if((arrayFiles[0]->filePointer=openFile(arrayFiles[0]->fullName,arrayFiles[0]->openMode))!=NULL){
             returnFileParameters(arrayFiles[0]->filePointer,&lastRow,&arrayParameters); 
 
         }        
 
         else{
+            printf("toto");
             createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
             return 0;    
         }   
    // }
-
+    
     if(initDbConfig(&dbConfigElement,arrayParameters,lastRow)!=-1){
         
 

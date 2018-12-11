@@ -18,7 +18,12 @@
 			"sdlmain.h": "c",
 			"filemanager.h": "c",
 			"sdlconfigstructures.h": "c",
-			"dbmanager.h": "c"
+			"dbmanager.h": "c",
+			"formatstring.h": "c",
+			"sdl_version.h": "c",
+			"sdl_video.h": "c",
+			"sdldraw.h": "c",
+			"sdldrawfunctions.h": "c"
 		}
 	}
 }
