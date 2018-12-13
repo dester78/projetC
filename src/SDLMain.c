@@ -1,5 +1,10 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <time.h>
+
+#define TRIANGLE 3
+#define SQUARE 2 
+#define CIRCLE 1
 
 #include <structures.h> 
 #include <fileManager.h>
@@ -30,6 +35,8 @@ int SDLMainMenuLoop(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer, SDLConf
     SDL_Event event;
 
     SDL_Color saveColor;
+
+    srand(time(NULL));//Initailisation du générateur de nombre aléatoire
 
     dbConnectionStatus=(mysql_get_host_info(dbConnection)!=NULL);//Status de connexion vaut 1 si fonction retourne une valeur différente à NULL
 
@@ -77,6 +84,8 @@ int SDLMainMenuLoop(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer, SDLConf
 
             case SDL_MOUSEMOTION : 
 
+               
+
                 for(int counterButton=0; counterButton<sizeArrayButtons; counterButton++){
 
                     if(saveButton == -1){
@@ -117,10 +126,33 @@ int SDLMainMenuLoop(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer, SDLConf
                     }
                 }
             break; 
-
-                     
+            
+            
+             
+                        
         }
+
+        currentTime = SDL_GetTicks();
+        if (currentTime - pastTime > 100) /* Si 30 ms se sont écoulées depuis le dernier tour de boucle */{
+            
+            if(updateBackgroundMenu(mainRenderer,backgroundHostMenu)){
+
+                 for(int i=0 ; i<4; i++){
+
+                    buttonHoverEffect(mainRenderer,buttonsHostMenu[i],buttonsHostMenu[i]->color);
+                    
+                 }
+            }
+            
+            // if(event.motion.x < buttonsHostMenu[saveButton]->rect.x || event.motion.x > buttonsHostMenu[saveButton]->rect.w+buttonsHostMenu[saveButton]->rect.x || event.motion.y < buttonsHostMenu[saveButton]->rect.y || event.motion.y > buttonsHostMenu[saveButton]->rect.h+buttonsHostMenu[saveButton]->rect.y){ 
+            // } 
+
+            pastTime = currentTime; /* Le temps "actuel" devient le temps "precedent" pour nos futurs calculs */
+        }
+
+        SDL_SetRenderTarget(mainRenderer,backgroundHostMenu->texture);
         SDL_RenderPresent(mainRenderer);
+        
 
     }
 
@@ -137,6 +169,124 @@ int SDLMainMenuLoop(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer, SDLConf
     
     return 0;
 }
+
+
+
+void buttonHoverEffect(SDL_Renderer *mainRenderer, SDLButtons* button, SDL_Color buttonColor){
+
+    button->color=buttonColor;
+    SDL_DestroyTexture(button->texture);
+    SDLCreateButton(mainRenderer,button);
+    SDL_DestroyTexture(button->text->texture);
+    SDLCreateTextButton(mainRenderer,button); 
+}
+
+
+
+int  updateBackgroundMenu(SDL_Renderer *mainRenderer, SDLBackground *backgroundMenu){
+
+    int xPosition;
+    int yPosition; 
+    SDL_Rect rectStation;
+    int maxSize=100;
+    int minSize=20;
+    int geometricShape=0;
+
+    if(backgroundMenu->sizeArrMetroStations<1){
+    SDL_DestroyTexture(backgroundMenu->texture);
+
+    printf("%d",backgroundMenu->rect.w);
+
+    
+        
+        rectStation.x=rand() % (backgroundMenu->rect.w-maxSize); 
+        // rectStation.x = rectStation.x > maxSize ? rectStation.x : maxSize; 
+        rectStation.y=rand() % (backgroundMenu->rect.h-maxSize);
+        // rectStation.y = rand() % rectStation.y > maxSize ? rectStation.y : maxSize; 
+        rectStation.w = minSize;
+
+        geometricShape= (rand()%3) +1;
+
+        printf("\n%d\n",geometricShape);
+
+        backgroundMenu->arrMetroStations=realloc(backgroundMenu->arrMetroStations,sizeof(MetroStation*) * (++backgroundMenu->sizeArrMetroStations));
+
+        printf("pointeur metroStation array : %p \n",&backgroundMenu->arrMetroStations[backgroundMenu->sizeArrMetroStations-1]);
+        initMetroStation(&backgroundMenu->arrMetroStations[backgroundMenu->sizeArrMetroStations-1],geometricShape,rectStation,maxSize,SDL_MapRGBA(backgroundMenu->surface->format,0,0,0,255));
+
+        
+
+        //backgroundMenu->arrMetroStations[counterMetroStations].triangle.
+        
+        //  100,100,60,SDL_MapRGBA(backgroundMenu->surface->format,0,0,0,255));
+
+    
+
+    for(int counterMetroStations=0; counterMetroStations<backgroundMenu->sizeArrMetroStations; counterMetroStations++){
+
+
+        
+        
+        SDLCreateMetroStation(&backgroundMenu->arrMetroStations[counterMetroStations]);
+
+        printf("%p\n ",&backgroundMenu->arrMetroStations[counterMetroStations]->surface);
+        printf("SIMON");
+        
+        switch(backgroundMenu->arrMetroStations[counterMetroStations]->geometricShape){
+
+            case TRIANGLE : 
+
+                backgroundMenu->arrMetroStations[counterMetroStations]->triangle.rect.h = drawFillTriangle(
+                    &backgroundMenu->arrMetroStations[counterMetroStations]->surface,
+                    backgroundMenu->arrMetroStations[counterMetroStations]->triangle.rect.x,
+                    backgroundMenu->arrMetroStations[counterMetroStations]->triangle.rect.y,
+                    backgroundMenu->arrMetroStations[counterMetroStations]->triangle.rect.w,
+                    backgroundMenu->arrMetroStations[counterMetroStations]->color);
+
+            break;
+
+            // case CIRCLE : 
+
+            //     drawFillCircle(
+            //         &backgroundMenu->arrMetroStations[counterMetroStations]->surface,
+            //         backgroundMenu->arrMetroStations[counterMetroStations].circle.xCenter,
+            //         backgroundMenu->arrMetroStations[counterMetroStations].circle.yCenter,
+            //         backgroundMenu->arrMetroStations[counterMetroStations].circle.radius,
+            //         backgroundMenu->arrMetroStations[counterMetroStations].color
+            //     );
+
+            // break;
+
+            // case SQUARE :
+
+            // drawVariableRect(
+            //         &backgroundMenu->arrMetroStations[counterMetroStations]->surface,
+            //         backgroundMenu->arrMetroStations[counterMetroStations].square.rect.x,
+            //         backgroundMenu->arrMetroStations[counterMetroStations].square.rect.y,
+            //         backgroundMenu->arrMetroStations[counterMetroStations].square.rect.w,
+            //         backgroundMenu->arrMetroStations[counterMetroStations].square.rect.w,
+            //         backgroundMenu->arrMetroStations[counterMetroStations].color
+            //     );
+            // break;
+
+        }
+
+        backgroundMenu->arrMetroStations[counterMetroStations]->texture=SDL_CreateTextureFromSurface(mainRenderer,backgroundMenu->arrMetroStations[counterMetroStations]->surface);
+        SDL_RenderCopy(mainRenderer,backgroundMenu->arrMetroStations[counterMetroStations]->texture,NULL,&backgroundMenu->arrMetroStations[counterMetroStations]->rect);
+    }
+
+    
+
+ 
+
+    return 1;
+    }
+
+    return 0; 
+
+}
+
+
 
 
 
@@ -191,66 +341,55 @@ int SDLMainMenuLoop(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer, SDLConf
 //     setPixel(x, y, coul);
 // }
 
-//  void SDLAnimateBackgroundHostMenu( SDL_Surface **surface, SDL_Color newColor ){
+ void SDLAnimateBackgroundHostMenu( SDL_Surface **surface, SDL_Color newColor ){
 
-//     Uint32 *pixels;
-//     Uint32 pixelColor;
-//     int wSurface;
-//     int hSurface;
-//     size_t counterHeight,counterWidth;
+    Uint32 *pixels;
+    Uint32 pixelColor;
+    int wSurface;
+    int hSurface;
+    size_t counterHeight,counterWidth;
 
-//     wSurface=(*surface)->w;
-//     hSurface=(*surface)->h;
+    wSurface=(*surface)->w;
+    hSurface=(*surface)->h;
     
-//     if(SDL_LockSurface((*surface))!=0){
-//         printf("bug");
-//     }
+    if(SDL_LockSurface((*surface))!=0){
+        printf("bug");
+    }
 
 
-//     pixelColor=SDL_MapRGBA((*surface)->format,newColor.r,0,0, newColor.a);
+    pixelColor=SDL_MapRGBA((*surface)->format,newColor.r,0,0, newColor.a);
 
-//     pixels = (*surface)->pixels;
+    pixels = (*surface)->pixels;
 
-//     printf("%d\n",sizeof(pixels));
-//     for(counterHeight = 100; counterHeight < (size_t)hSurface-100; counterHeight++){
-//         for(counterWidth = 100; counterWidth < (size_t)wSurface-100; counterWidth++){
+    printf("%d\n",sizeof(pixels));
+    for(counterHeight = 100; counterHeight < (size_t)hSurface-100; counterHeight++){
+        for(counterWidth = 100; counterWidth < (size_t)wSurface-100; counterWidth++){
 
-//             // printf("\n%p",&pixels[counterHeight * (size_t)wSurface + counterWidth]);
-//             // SDL_GetRGBA(pixels[counterHeight * (size_t)wSurface + counterWidth],(*surface)->format,&r,&g,&b,&a);
-//             // printf("%d\n rouge",r);
-//             if(counterHeight%100==0 && counterWidth%1000==0){
+            // printf("\n%p",&pixels[counterHeight * (size_t)wSurface + counterWidth]);
+            // SDL_GetRGBA(pixels[counterHeight * (size_t)wSurface + counterWidth],(*surface)->format,&r,&g,&b,&a);
+            // printf("%d\n rouge",r);
+            if(counterHeight%100==0 && counterWidth%1000==0){
 
-//                 printf("OK");
-//                 printf(" counterHeight %d \n",counterHeight);
-//                 printf("counterWidth %d \n",counterWidth);
-//                 drawCircle(&pixels,(int)counterWidth,(int)counterHeight,40,wSurface,hSurface,pixelColor);
-//             }
+                printf("OK");
+                printf(" counterHeight %d \n",counterHeight);
+                printf("counterWidth %d \n",counterWidth);
+                drawCircle(&pixels,(int)counterWidth,(int)counterHeight,40,wSurface,hSurface,pixelColor);
+            }
             
             
-//             // printf("%d",r);
-//         }
-//     }
+            // printf("%d",r);
+        }
+    }
 
-//     drawCircle(&pixels,100,100,40,wSurface,hSurface,pixelColor);
+    drawCircle(&pixels,100,100,40,wSurface,hSurface,pixelColor);
 
-//     printf("%p\n",&pixels[1*wSurface+3]);
+    printf("%p\n",&pixels[1*wSurface+3]);
    
-//     // cercle(pixels,counterWidth,counterHeight,300,1000,h,pixelColor);
+    // cercle(pixels,counterWidth,counterHeight,300,1000,h,pixelColor);
     	
-//     SDL_UnlockSurface(*surface);
+    SDL_UnlockSurface(*surface);
     
-// }
-
-
-
-void buttonHoverEffect(SDL_Renderer *mainRenderer, SDLButtons* button, SDL_Color buttonColor){
-
-    button->color=buttonColor;
-    SDL_DestroyTexture(button->texture);
-    SDLCreateButton(mainRenderer,button);
-    SDL_DestroyTexture(button->text->texture);
-    SDLCreateTextButton(mainRenderer,button); 
 }
 
 
-// void updateBackgroundMenu(SDLBackground *backgroundMenu)
+

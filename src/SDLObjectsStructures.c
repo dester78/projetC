@@ -2,6 +2,11 @@
 #include <stdio.h>
 #include <string.h>
 
+#define TRIANGLE 3
+#define SQUARE 2 
+#define CIRCLE 1
+
+
 #include <SDLDraw.h>
 #include <fileManager.h>
 #include <SDLObjectsStructures.h>
@@ -116,6 +121,7 @@ void initBackgroundHostMenu(SDL_Window *mainWindow,SDLBackground *backgroundHost
 
     SDL_Color backgroundColor={0,0,0,255};
     backgroundHostMenu->color=backgroundColor;
+    backgroundHostMenu->sizeArrMetroStations=0;
 
     SDL_GetWindowSize(mainWindow,&wWindow,&hWindow);
 
@@ -124,14 +130,70 @@ void initBackgroundHostMenu(SDL_Window *mainWindow,SDLBackground *backgroundHost
     backgroundHostMenu->rect.x = 0;
     backgroundHostMenu->rect.y = 0;
 
+
 }
 
-void initMetroStation(MetroStation *metroStation, int radius, int xCenter, int yCenter, Uint32 color){
+void initMetroStation(MetroStation *metroStation, int geometricShape, SDL_Rect rect, int maxSize, Uint32 color){
 
-    metroStation->radius=radius;
-    metroStation->xCenter=xCenter;
-    metroStation->yCenter=yCenter,
+    printf(" initMetroStation : %p\n",metroStation);
+
+    switch(geometricShape){
+
+        case TRIANGLE : 
+            metroStation->triangle=initTriangle(rect,maxSize);
+        break; 
+
+        case CIRCLE : 
+            metroStation->circle=initCircle(rect,maxSize);
+        break;
+
+        case SQUARE : 
+            metroStation->square=initSquare(rect,maxSize);
+        break;
+    }
+
+    metroStation->rect=rect;
+    metroStation->geometricShape=geometricShape;
     metroStation->color=color;
+}
+
+Triangle initTriangle(SDL_Rect rect, int maxSize){
+
+    Triangle triangle; 
+
+    triangle.rect.w=rect.w;
+    triangle.rect.x=rect.x;
+    triangle.rect.y=rect.y;
+    triangle.rect.h=0;
+
+    triangle.maxSize=maxSize;
+
+    return triangle;
+
+}
+
+Square initSquare(SDL_Rect rect, int maxSize){
+    
+    Square square; 
+
+    square.rect=rect;
+    square.maxSize=maxSize;
+
+    return square;
+
+}
+
+Circle initCircle(SDL_Rect rect, int maxSize){
+
+    Circle circle;
+
+    circle.radius=rect.w/2;
+    circle.maxRadius=maxSize/2;
+    circle.xCenter=rect.x;
+    circle.yCenter=rect.y;
+
+    return circle;
+
 }
 
 void freeSDLButton(SDLButtons *sdlButtonElement){

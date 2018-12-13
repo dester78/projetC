@@ -19,5 +19,7 @@
     
     void SDLAnimateBackgroundHostMenu( SDL_Surface **surface, SDL_Color newColor );
 
+    int updateBackgroundMenu(SDL_Renderer *mainRenderer, SDLBackground *backgroundMenu);
+
     
 #endif

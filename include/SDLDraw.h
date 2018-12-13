@@ -16,6 +16,9 @@ void drawFillCircle(SDL_Surface **surface, int xCenter, int yCenter, int radius,
 //Créer un rectangle de taille variable  
 void drawVariableRect(SDL_Surface **surface, int xRect,int yRect,int wRect,int hRect, Uint32 colorRect);
 
+//Créer un triangle rempli et renvoie sa hauteur
+int drawFillTriangle(SDL_Surface **surface, int xLeftRoot, int yLeftRoot, int wRoot, Uint32 color ); 
+
 // Vérifie si un pixel n'est pas positionné en dehors des coordonnées wSurface et hSurface et lui affecte une couleur donnée
 void controlPixelPosition(Uint32 *pixel, int xPixel, int yPixel, int wTexture, int hTexture, Uint32 pixelColor);
 

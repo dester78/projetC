@@ -54,6 +54,7 @@ void drawCircle(Uint32 **pixels,int xCenter, int yCenter, int radius,int wSurfac
 }
 
 
+
 void drawFillCircle(SDL_Surface **surface, int xCenter, int yCenter, int radius, Uint32 color){
 
     int diameter, y, x;
@@ -61,9 +62,11 @@ void drawFillCircle(SDL_Surface **surface, int xCenter, int yCenter, int radius,
     diameter = 3 - (2 * radius);
     x = 0;
     y = radius;
-    
+
     while (y >= x) {
 
+        // printf("\n%p\n",surface);
+        // printf("xCenter : %d\n",xCenter);
         drawVariableRect(surface, xCenter - x, yCenter - y, 2 * x + 1,1, color);
         drawVariableRect(surface, xCenter - x, yCenter + y, 2 * x + 1,1, color);
         drawVariableRect(surface, xCenter - y, yCenter - x, 2 * y + 1,1, color);
@@ -95,3 +98,21 @@ void drawVariableRect(SDL_Surface **surface, int xRect,int yRect,int wRect,int h
     SDL_FillRect(*surface, &rect, colorRect);
 }
  
+int drawFillTriangle(SDL_Surface **surface, int xLeftRoot, int yLeftRoot, int wRoot, Uint32 color ){
+
+    int counterLine;
+    
+    counterLine = 0;
+
+    wRoot = wRoot % 2 == 0 ? wRoot+1 : wRoot;//Vérifie que la base du triangle est bien un nombre impaire
+
+    while(counterLine!=(wRoot/2 + 1 )){
+
+        drawVariableRect(surface, xLeftRoot+counterLine, yLeftRoot-counterLine, wRoot-(counterLine*2),1, color);
+        counterLine++;
+    }
+
+    return counterLine;
+
+}
+
