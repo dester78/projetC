@@ -16,15 +16,13 @@
 #include <SDL.h>
 
 
-
-
-void initButtonsHostMenu(SDL_Window  *mainWindow, SDLContainer *containerHostMenu,SDLButtons** buttonsHostMenu, char *fontPath, int *sizeArrayButtons, int connectionState){
+void initButtonsHostMenu(SDL_Window  **mainWindow, SDLContainer *containerHostMenu,SDLButtons** buttonsHostMenu, char *fontPath, unsigned short *sizeArrayButtons, short connectionState){
 
     int wWindow;
     int hWindow;
     double yButtonFactor;
     
-    SDL_GetWindowSize(mainWindow,&wWindow,&hWindow);
+    SDL_GetWindowSize(*mainWindow,&wWindow,&hWindow);
 
     //Règle le placement vertical des boutons en fonction de l'affichage la fenêtre
     switch(hWindow){
@@ -43,7 +41,7 @@ void initButtonsHostMenu(SDL_Window  *mainWindow, SDLContainer *containerHostMen
 
     }
 
-    for(int counterButton=0;counterButton<*sizeArrayButtons;counterButton++){//Boucle permettant de créer des bouttons pour le menu d'accueil
+    for(unsigned short counterButton=0;counterButton<*sizeArrayButtons;counterButton++){//Boucle permettant de créer des bouttons pour le menu d'accueil
 
         switch(counterButton){
 
@@ -98,7 +96,7 @@ void initButtonsHostMenu(SDL_Window  *mainWindow, SDLContainer *containerHostMen
 }
 
 
-void initContainerHostMenu(SDL_Window* mainWindow,SDLContainer *containerHostMenu){
+void initContainerHostMenu(SDL_Window** mainWindow,SDLContainer *containerHostMenu){
 
     int wWindow;
     int hWindow;
@@ -106,7 +104,7 @@ void initContainerHostMenu(SDL_Window* mainWindow,SDLContainer *containerHostMen
     SDL_Color containerColor={249,249,249,0};
     containerHostMenu->color=containerColor;
 
-    SDL_GetWindowSize(mainWindow,&wWindow,&hWindow);//Récupère les dimensions de la fenêtre pour le centrage du conteneur
+    SDL_GetWindowSize(*mainWindow,&wWindow,&hWindow);//Récupère les dimensions de la fenêtre pour le centrage du conteneur
 
     containerHostMenu->rect.w = wWindow/1.5;
     containerHostMenu->rect.h = hWindow/1.1;
@@ -114,28 +112,31 @@ void initContainerHostMenu(SDL_Window* mainWindow,SDLContainer *containerHostMen
     containerHostMenu->rect.y = (hWindow/2)-(containerHostMenu->rect.h/2);//Pemet de centrer le conteneur verticalement
 }
 
-void initBackgroundHostMenu(SDL_Window *mainWindow,SDLBackground *backgroundHostMenu){
+void initBackgroundHostMenu(SDL_Window **mainWindow,SDLBackground **backgroundHostMenu){
     
     int wWindow;
     int hWindow;
 
     SDL_Color backgroundColor={0,0,0,255};
-    backgroundHostMenu->color=backgroundColor;
-    backgroundHostMenu->sizeArrMetroStations=0;
+    (*backgroundHostMenu)->color=backgroundColor;
+    (*backgroundHostMenu)->sizeArrMetroStations=0;
 
-    SDL_GetWindowSize(mainWindow,&wWindow,&hWindow);
+    SDL_GetWindowSize(*mainWindow,&wWindow,&hWindow);
 
-    backgroundHostMenu->rect.w = wWindow;
-    backgroundHostMenu->rect.h = hWindow;
-    backgroundHostMenu->rect.x = 0;
-    backgroundHostMenu->rect.y = 0;
+    (*backgroundHostMenu)->rect.w = wWindow;
+    (*backgroundHostMenu)->rect.h = hWindow;
+    (*backgroundHostMenu)->rect.x = 0;
+    (*backgroundHostMenu)->rect.y = 0;
 
 
 }
 
-void initMetroStation(MetroStation *metroStation, int geometricShape, SDL_Rect rect, int maxSize, Uint32 color){
+void initMetroStation(MetroStation *metroStation, unsigned short geometricShape, SDL_Rect rect, unsigned short maxSize, Uint32 color){
 
-    printf(" initMetroStation : %p\n",metroStation);
+    metroStation->rect=rect;
+
+    rect.x=0;
+    rect.y=0;
 
     switch(geometricShape){
 
@@ -144,6 +145,8 @@ void initMetroStation(MetroStation *metroStation, int geometricShape, SDL_Rect r
         break; 
 
         case CIRCLE : 
+            rect.x=rect.w/2;
+            rect.y=rect.h/2;
             metroStation->circle=initCircle(rect,maxSize);
         break;
 
@@ -152,18 +155,19 @@ void initMetroStation(MetroStation *metroStation, int geometricShape, SDL_Rect r
         break;
     }
 
-    metroStation->rect=rect;
+    metroStation->maxSize=maxSize;
+    metroStation->overlapRisk=0;
     metroStation->geometricShape=geometricShape;
     metroStation->color=color;
 }
 
-Triangle initTriangle(SDL_Rect rect, int maxSize){
+Triangle initTriangle(SDL_Rect rect, unsigned short maxSize){
 
     Triangle triangle; 
 
     triangle.rect.w=rect.w;
     triangle.rect.x=rect.x;
-    triangle.rect.y=rect.y;
+    triangle.rect.y=rect.w;
     triangle.rect.h=0;
 
     triangle.maxSize=maxSize;
@@ -172,7 +176,7 @@ Triangle initTriangle(SDL_Rect rect, int maxSize){
 
 }
 
-Square initSquare(SDL_Rect rect, int maxSize){
+Square initSquare(SDL_Rect rect, unsigned short maxSize){
     
     Square square; 
 
@@ -183,7 +187,7 @@ Square initSquare(SDL_Rect rect, int maxSize){
 
 }
 
-Circle initCircle(SDL_Rect rect, int maxSize){
+Circle initCircle(SDL_Rect rect, unsigned short maxSize){
 
     Circle circle;
 
@@ -198,12 +202,11 @@ Circle initCircle(SDL_Rect rect, int maxSize){
 
 void freeSDLButton(SDLButtons *sdlButtonElement){
 
-    printf("%d",sdlButtonElement->color.r);
-
     SDL_DestroyTexture(sdlButtonElement->texture);
     freeSDLText(sdlButtonElement->text);
 
 }
+
 
 void freeSDLText(SDLText *sdlTextElement){
 

@@ -16,32 +16,36 @@ typedef struct SDLContainer{
 typedef struct Triangle{
 
     SDL_Rect rect;
-    int maxSize;
+    unsigned short maxSize;
 
 }Triangle;
 
 typedef struct Square{
 
     SDL_Rect rect;
-    int maxSize;
+    unsigned short maxSize;
 
 }Square; 
 
 typedef struct Circle{
 
-    int radius;
-    int xCenter;
-    int yCenter;
-    int maxRadius; 
+    unsigned short radius;
+    unsigned int xCenter;
+    unsigned int yCenter;
+    unsigned short maxRadius; 
 
 }Circle;
 
 typedef struct MetroStation{
 
-    int geometricShape;
+    unsigned short geometricShape;
+    unsigned short maxSize;
+    unsigned short overlapRisk;
+
     SDL_Surface *surface;
     SDL_Texture *texture;
     SDL_Rect rect;
+    SDL_Rect overlapRect;
 
     Triangle triangle;
     Circle circle;
@@ -58,7 +62,7 @@ typedef struct SDLBackground{
     SDL_Texture *texture; 
     SDL_Rect rect;
     SDL_Color color;
-    short sizeArrMetroStations;
+    unsigned short sizeArrMetroStations;
     MetroStation **arrMetroStations;
 
 }SDLBackground;
@@ -80,21 +84,20 @@ typedef struct SDLText{
     TTF_Font *font;
     SDL_Color color; 
     SDL_Rect rect;
-    int sizeFont;
+    unsigned short sizeFont;
     char *fontPath;
     char *content;
 }SDLText;
 
 
 
-void initBackgroundHostMenu(SDL_Window *mainWindow,SDLBackground *backgroundHostMenu);
-void initContainerHostMenu(SDL_Window* mainWindow,SDLContainer *containerHostMenu);
-void initButtonsHostMenu(SDL_Window  *mainWindow, SDLContainer *containerHostMenu,SDLButtons** buttonsHostMenu, char *fontPath, int *sizeArrayButtons, int connectionState);
-void initMetroStation(MetroStation *metroStation, int geometricShape, SDL_Rect rect, int maxSize, Uint32 color);
-Triangle initTriangle(SDL_Rect rect, int maxSize);
-Circle initCircle(SDL_Rect rect, int maxSize);
-Square initSquare(SDL_Rect rect, int maxSize);
-
+void initBackgroundHostMenu(SDL_Window **mainWindow,SDLBackground **backgroundHostMenu);
+void initContainerHostMenu(SDL_Window** mainWindow,SDLContainer *containerHostMenu);
+void initButtonsHostMenu(SDL_Window  **mainWindow, SDLContainer *containerHostMenu,SDLButtons** buttonsHostMenu, char *fontPath, unsigned short *sizeArrayButtons, short connectionState);
+void initMetroStation(MetroStation *metroStation, unsigned short geometricShape, SDL_Rect rect, unsigned short maxSize, Uint32 color);
+Triangle initTriangle(SDL_Rect rect, unsigned short maxSize);
+Circle initCircle(SDL_Rect rect, unsigned short maxSize);
+Square initSquare(SDL_Rect rect, unsigned short maxSize);
 
 void freeSDLButton(SDLButtons *sdlbuttonElement);
 void freeSDLText(SDLText *sdlTextElement);

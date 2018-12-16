@@ -20,14 +20,15 @@
 
 
 
-int SDLMainMenuLoop(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer, SDLConfig *SDLConfigElement,DbConfig *dbConfigElement,MYSQL *dbConnection, Files **arrayFiles){
+int SDLMainMenuLoop(SDL_Window  **mainWindow, SDL_Renderer **mainRenderer, SDLConfig *SDLConfigElement,DbConfig *dbConfigElement,MYSQL *dbConnection, Files **arrayFiles){
 
-    int windowLoop;
-    int sizeArrayButtons=4; 
-    int dbConnectionStatus;
-    int saveButton=-1;
-    int currentTime=0;
-    int pastTime=0;
+    short windowLoop;
+    unsigned short sizeArrayButtons=4; 
+    unsigned short countMetroStation=0;
+    short dbConnectionStatus;
+    short saveButton=-1;
+    unsigned int currentTime=0;
+    unsigned int pastTime=0;
         
     SDLBackground *backgroundHostMenu;
     SDLContainer *containerHostMenu;
@@ -36,33 +37,31 @@ int SDLMainMenuLoop(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer, SDLConf
 
     SDL_Color saveColor;
 
+    printf("adresse renderer : %p \n",*mainRenderer);
+
     srand(time(NULL));//Initailisation du générateur de nombre aléatoire
 
     dbConnectionStatus=(mysql_get_host_info(dbConnection)!=NULL);//Status de connexion vaut 1 si fonction retourne une valeur différente à NULL
 
-    // SDL_RenderClear(mainRenderer);
-    // SDL_SetRenderDrawColor(mainRenderer,255,255,255,255);
-    // SDL_RenderPresent(mainRenderer);
-    // SDL_SetRenderTarget(mainRenderer,NULL);
     backgroundHostMenu=malloc(sizeof(SDLBackground));
     containerHostMenu=malloc(sizeof(SDLContainer));
     buttonsHostMenu=malloc(sizeof(SDLButtons*)*sizeArrayButtons);
+
 
     for(int counterButton=0; counterButton<sizeArrayButtons; counterButton++){
         
         buttonsHostMenu[counterButton]=malloc(sizeof(SDLButtons));
         buttonsHostMenu[counterButton]->text=malloc(sizeof(SDLText));
-
     }
     
-   
+    initBackgroundHostMenu(mainWindow,&backgroundHostMenu);
+    backgroundHostMenu->sizeArrMetroStations=12;
+    backgroundHostMenu->arrMetroStations=calloc(backgroundHostMenu->sizeArrMetroStations,sizeof(MetroStation*));
     
-    initBackgroundHostMenu(mainWindow,backgroundHostMenu);
-    SDLCreateBackgroundHostMenu(mainRenderer,backgroundHostMenu);
+    SDLCreateBackgroundHostMenu(mainRenderer,&backgroundHostMenu);
 
-    
     initContainerHostMenu(mainWindow,containerHostMenu);
-    SDLCreateContainerHostMenu(mainRenderer,containerHostMenu);
+    // SDLCreateContainerHostMenu(mainRenderer,containerHostMenu);Pas nécessaire pour l'instant
 
     initButtonsHostMenu(mainWindow,containerHostMenu,buttonsHostMenu, SDLConfigElement->ttf->fontMenu, &sizeArrayButtons, dbConnectionStatus);
 
@@ -72,19 +71,19 @@ int SDLMainMenuLoop(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer, SDLConf
         SDLCreateTextButton(mainRenderer,buttonsHostMenu[counterButton]);
     }
 
+    updateBackgroundMenu(mainRenderer,&backgroundHostMenu,buttonsHostMenu,sizeArrayButtons,backgroundHostMenu->sizeArrMetroStations);
+
     while(windowLoop){
 
         SDL_PollEvent(&event);
 
         switch(event.type){
-
+            
             case SDL_QUIT : 
             windowLoop = 0;
             break;
 
             case SDL_MOUSEMOTION : 
-
-               
 
                 for(int counterButton=0; counterButton<sizeArrayButtons; counterButton++){
 
@@ -126,45 +125,48 @@ int SDLMainMenuLoop(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer, SDLConf
                     }
                 }
             break; 
+                                              
+        }
+
+        // currentTime = SDL_GetTicks();
+        // if (currentTime - pastTime > 1000) /* Si 30 ms se sont écoulées depuis le dernier tour de boucle */{
             
-            
-             
+        //     if(countMetroStation<backgroundHostMenu->sizeArrMetroStations){
+
+        //         countMetroStation++;
+        //         if(updateBackgroundMenu(mainRenderer,&backgroundHostMenu,buttonsHostMenu,sizeArrayButtons,countMetroStation)){
+
+        //             //  for(int i=0 ; i<4; i++){
+
+        //             //     buttonHoverEffect(mainRenderer,buttonsHostMenu[i],buttonsHostMenu[i]->color);
                         
-        }
-
-        currentTime = SDL_GetTicks();
-        if (currentTime - pastTime > 100) /* Si 30 ms se sont écoulées depuis le dernier tour de boucle */{
-            
-            if(updateBackgroundMenu(mainRenderer,backgroundHostMenu)){
-
-                 for(int i=0 ; i<4; i++){
-
-                    buttonHoverEffect(mainRenderer,buttonsHostMenu[i],buttonsHostMenu[i]->color);
-                    
-                 }
-            }
-            
-            // if(event.motion.x < buttonsHostMenu[saveButton]->rect.x || event.motion.x > buttonsHostMenu[saveButton]->rect.w+buttonsHostMenu[saveButton]->rect.x || event.motion.y < buttonsHostMenu[saveButton]->rect.y || event.motion.y > buttonsHostMenu[saveButton]->rect.h+buttonsHostMenu[saveButton]->rect.y){ 
-            // } 
-
-            pastTime = currentTime; /* Le temps "actuel" devient le temps "precedent" pour nos futurs calculs */
-        }
-
-        SDL_SetRenderTarget(mainRenderer,backgroundHostMenu->texture);
-        SDL_RenderPresent(mainRenderer);
+        //             //  }
+        //         }
+        //         pastTime = currentTime; 
+        //     }
+        //     /* Le temps "actuel" devient le temps "precedent" pour nos futurs calculs */
+        // }
+        
+        SDL_RenderPresent(*mainRenderer);
         
 
     }
 
 
     for(int counterButton=0;counterButton<sizeArrayButtons;counterButton++){
-        printf("freeSDLButton\n");
-        printf("%d",buttonsHostMenu[counterButton]->text->sizeFont);
+        // printf("freeSDLButton\n");
+        // printf("%d",buttonsHostMenu[counterButton]->text->sizeFont);
         freeSDLButton(buttonsHostMenu[counterButton]);
         
-    }   
+    } 
 
-    
+    for(int counterMetroStations=0;backgroundHostMenu->sizeArrMetroStations; countMetroStation++){
+
+        free(backgroundHostMenu->arrMetroStations[counterMetroStations]);
+    }
+
+    free(backgroundHostMenu->arrMetroStations);
+
     free(buttonsHostMenu);
     
     return 0;
@@ -172,7 +174,7 @@ int SDLMainMenuLoop(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer, SDLConf
 
 
 
-void buttonHoverEffect(SDL_Renderer *mainRenderer, SDLButtons* button, SDL_Color buttonColor){
+void buttonHoverEffect(SDL_Renderer **mainRenderer, SDLButtons* button, SDL_Color buttonColor){
 
     button->color=buttonColor;
     SDL_DestroyTexture(button->texture);
@@ -183,108 +185,163 @@ void buttonHoverEffect(SDL_Renderer *mainRenderer, SDLButtons* button, SDL_Color
 
 
 
-int  updateBackgroundMenu(SDL_Renderer *mainRenderer, SDLBackground *backgroundMenu){
+short  updateBackgroundMenu(SDL_Renderer **mainRenderer, SDLBackground **backgroundMenu,SDLButtons **buttonsHostMenu, unsigned short sizeArrayButtons ,unsigned short countMetroStation){
 
-    int xPosition;
-    int yPosition; 
     SDL_Rect rectStation;
     int maxSize=100;
-    int minSize=20;
+    int minSize=60;
     int geometricShape=0;
+    unsigned short counterButton=0;
 
-    if(backgroundMenu->sizeArrMetroStations<1){
-    SDL_DestroyTexture(backgroundMenu->texture);
+        for(unsigned short counterMetroStations=0; counterMetroStations<(countMetroStation-1); counterMetroStations++){
+  
+            if((*backgroundMenu)->arrMetroStations[counterMetroStations]==0){
 
-    printf("%d",backgroundMenu->rect.w);
+                (*backgroundMenu)->arrMetroStations[counterMetroStations]=malloc(sizeof(MetroStation));
 
-    
-        
-        rectStation.x=rand() % (backgroundMenu->rect.w-maxSize); 
-        // rectStation.x = rectStation.x > maxSize ? rectStation.x : maxSize; 
-        rectStation.y=rand() % (backgroundMenu->rect.h-maxSize);
-        // rectStation.y = rand() % rectStation.y > maxSize ? rectStation.y : maxSize; 
-        rectStation.w = minSize;
+                // rectStation=SDLChangeRect((rand() % ((*backgroundMenu)->rect.w-maxSize)),(rand() % ((*backgroundMenu)->rect.h-maxSize)), minSize, maxSize);
+                rectStation.x=rand() % ((*backgroundMenu)->rect.w-maxSize);
+                rectStation.y=rand() % ((*backgroundMenu)->rect.h-maxSize);
+                rectStation.w = minSize;
+                rectStation.h = minSize;
 
-        geometricShape= (rand()%3) +1;
+                geometricShape=(rand()%3)+1;
 
-        printf("\n%d\n",geometricShape);
+                initMetroStation((*backgroundMenu)->arrMetroStations[counterMetroStations],geometricShape,rectStation,maxSize,SDL_MapRGBA((*backgroundMenu)->surface->format,0,255,0,255));
+                (*backgroundMenu)->arrMetroStations[counterMetroStations]->texture=NULL;
 
-        backgroundMenu->arrMetroStations=realloc(backgroundMenu->arrMetroStations,sizeof(MetroStation*) * (++backgroundMenu->sizeArrMetroStations));
-
-        printf("pointeur metroStation array : %p \n",&backgroundMenu->arrMetroStations[backgroundMenu->sizeArrMetroStations-1]);
-        initMetroStation(&backgroundMenu->arrMetroStations[backgroundMenu->sizeArrMetroStations-1],geometricShape,rectStation,maxSize,SDL_MapRGBA(backgroundMenu->surface->format,0,0,0,255));
-
-        
-
-        //backgroundMenu->arrMetroStations[counterMetroStations].triangle.
-        
-        //  100,100,60,SDL_MapRGBA(backgroundMenu->surface->format,0,0,0,255));
-
-    
-
-    for(int counterMetroStations=0; counterMetroStations<backgroundMenu->sizeArrMetroStations; counterMetroStations++){
+                SDL_Rect riskRect;
+                riskRect.w=maxSize;
+                riskRect.h=maxSize;
+                riskRect.y=rectStation.y;
+                riskRect.x=rectStation.x;
 
 
-        
-        
-        SDLCreateMetroStation(&backgroundMenu->arrMetroStations[counterMetroStations]);
+                
+                //Indique si la station risque de chevaucher un bouton du menu pour controler seulement les stations à risque lors des mises à jour. 
+                for(counterButton=0; (*backgroundMenu)->arrMetroStations[counterMetroStations]->overlapRisk==0 && counterButton<sizeArrayButtons ; counterButton++){
+                    
+                    (*backgroundMenu)->arrMetroStations[counterMetroStations]->overlapRisk=createOverlapRect(&(buttonsHostMenu[counterButton]->rect),&riskRect,&(*backgroundMenu)->arrMetroStations[counterMetroStations]->overlapRect);
+                }
+            }
 
-        printf("%p\n ",&backgroundMenu->arrMetroStations[counterMetroStations]->surface);
-        printf("SIMON");
-        
-        switch(backgroundMenu->arrMetroStations[counterMetroStations]->geometricShape){
+            SDLCreateMetroStation(&(*backgroundMenu)->arrMetroStations[counterMetroStations]);
 
-            case TRIANGLE : 
+            switch((*backgroundMenu)->arrMetroStations[counterMetroStations]->geometricShape){
 
-                backgroundMenu->arrMetroStations[counterMetroStations]->triangle.rect.h = drawFillTriangle(
-                    &backgroundMenu->arrMetroStations[counterMetroStations]->surface,
-                    backgroundMenu->arrMetroStations[counterMetroStations]->triangle.rect.x,
-                    backgroundMenu->arrMetroStations[counterMetroStations]->triangle.rect.y,
-                    backgroundMenu->arrMetroStations[counterMetroStations]->triangle.rect.w,
-                    backgroundMenu->arrMetroStations[counterMetroStations]->color);
+                case 3 : 
+                    (*backgroundMenu)->arrMetroStations[counterMetroStations]->triangle.rect.h = drawFillTriangle(
+                        &(*backgroundMenu)->arrMetroStations[counterMetroStations]->surface,
+                        (*backgroundMenu)->arrMetroStations[counterMetroStations]->triangle.rect.x,
+                        (*backgroundMenu)->arrMetroStations[counterMetroStations]->triangle.rect.y,
+                        (*backgroundMenu)->arrMetroStations[counterMetroStations]->triangle.rect.w,
+                        (*backgroundMenu)->arrMetroStations[counterMetroStations]->color);
+                break;
 
-            break;
+                case 1 : 
+                    drawFillCircle(
+                        &(*backgroundMenu)->arrMetroStations[counterMetroStations]->surface,
+                        (*backgroundMenu)->arrMetroStations[counterMetroStations]->circle.xCenter,
+                        (*backgroundMenu)->arrMetroStations[counterMetroStations]->circle.yCenter,
+                        (*backgroundMenu)->arrMetroStations[counterMetroStations]->circle.radius,
+                        (*backgroundMenu)->arrMetroStations[counterMetroStations]->color
+                    );
+                break;
 
-            // case CIRCLE : 
+                case 2 :
+                drawVariableRect(
+                        &(*backgroundMenu)->arrMetroStations[counterMetroStations]->surface,
+                        (*backgroundMenu)->arrMetroStations[counterMetroStations]->square.rect.x,
+                        (*backgroundMenu)->arrMetroStations[counterMetroStations]->square.rect.y,
+                        (*backgroundMenu)->arrMetroStations[counterMetroStations]->square.rect.w,
+                        (*backgroundMenu)->arrMetroStations[counterMetroStations]->square.rect.w,
+                        (*backgroundMenu)->arrMetroStations[counterMetroStations]->color
+                    );
+                break;
+            }
+     
+            SDL_DestroyTexture((*backgroundMenu)->arrMetroStations[counterMetroStations]->texture);
+            
+            if((*backgroundMenu)->arrMetroStations[counterMetroStations]->overlapRisk){
 
-            //     drawFillCircle(
-            //         &backgroundMenu->arrMetroStations[counterMetroStations]->surface,
-            //         backgroundMenu->arrMetroStations[counterMetroStations].circle.xCenter,
-            //         backgroundMenu->arrMetroStations[counterMetroStations].circle.yCenter,
-            //         backgroundMenu->arrMetroStations[counterMetroStations].circle.radius,
-            //         backgroundMenu->arrMetroStations[counterMetroStations].color
-            //     );
+                for(counterButton=0; counterButton<sizeArrayButtons; counterButton++){
 
-            // break;
+                    if(createOverlapRect(&(buttonsHostMenu[counterButton]->rect),&(*backgroundMenu)->arrMetroStations[counterMetroStations]->rect,&(*backgroundMenu)->arrMetroStations[counterMetroStations]->overlapRect)){
 
-            // case SQUARE :
+                        drawVariableRect(
+                        &(*backgroundMenu)->arrMetroStations[counterMetroStations]->surface,
+                        (*backgroundMenu)->arrMetroStations[counterMetroStations]->overlapRect.x,
+                        (*backgroundMenu)->arrMetroStations[counterMetroStations]->overlapRect.y,
+                        (*backgroundMenu)->arrMetroStations[counterMetroStations]->overlapRect.w,
+                        (*backgroundMenu)->arrMetroStations[counterMetroStations]->overlapRect.h,
+                        SDL_MapRGBA((*backgroundMenu)->surface->format,255,0,0,0)
+                        );
+                    } 
+                }  
+            }
+            
+            (*backgroundMenu)->arrMetroStations[counterMetroStations]->texture=SDL_CreateTextureFromSurface((*mainRenderer),(*backgroundMenu)->arrMetroStations[counterMetroStations]->surface);
 
-            // drawVariableRect(
-            //         &backgroundMenu->arrMetroStations[counterMetroStations]->surface,
-            //         backgroundMenu->arrMetroStations[counterMetroStations].square.rect.x,
-            //         backgroundMenu->arrMetroStations[counterMetroStations].square.rect.y,
-            //         backgroundMenu->arrMetroStations[counterMetroStations].square.rect.w,
-            //         backgroundMenu->arrMetroStations[counterMetroStations].square.rect.w,
-            //         backgroundMenu->arrMetroStations[counterMetroStations].color
-            //     );
-            // break;
-
+            if(SDL_RenderCopy((*mainRenderer),(*backgroundMenu)->arrMetroStations[counterMetroStations]->texture,NULL,&(*backgroundMenu)->arrMetroStations[counterMetroStations]->rect)==0){
+                
+                SDL_FreeSurface((*backgroundMenu)->arrMetroStations[counterMetroStations]->surface); 
+                
+            }
         }
 
-        backgroundMenu->arrMetroStations[counterMetroStations]->texture=SDL_CreateTextureFromSurface(mainRenderer,backgroundMenu->arrMetroStations[counterMetroStations]->surface);
-        SDL_RenderCopy(mainRenderer,backgroundMenu->arrMetroStations[counterMetroStations]->texture,NULL,&backgroundMenu->arrMetroStations[counterMetroStations]->rect);
-    }
+    return (short)1;
+}
 
-    
+
+// void drawVariableRect(SDL_Surface **surface, int xRect,int yRect,int wRect,int hRect, Uint32 colorRect){
+
+//     SDL_Rect rect;
+
+//     rect.x = xRect;
+//     rect.y = yRect;
+//     rect.w = wRect;
+//     rect.h = hRect;
+
+//     SDL_FillRect(*surface, &rect, colorRect);
+// }
+
+
+
+
+
+// void drawCircle(Uint32 **pixels,int xCenter, int yCenter, int radius,int wSurface, int hSurface, Uint32 pixelColor){
+
+//   int diameter, y, x;
 
  
+//   diameter = 3 - (2 * radius);
+//   x = 0;
+//   y = radius;
 
-    return 1;
-    }
+//   while (y >= x) {
+    
+    
+//     controlPixelPosition(&(*pixels)[(xCenter + x) * wSurface + (yCenter + y)],xCenter + x, yCenter + y,wSurface,hSurface, pixelColor);//Premier quart de cercle
+//     controlPixelPosition(&(*pixels)[(xCenter + y) * wSurface + (yCenter + x)],xCenter + y, yCenter + x,wSurface,hSurface, pixelColor);
+//     controlPixelPosition(&(*pixels)[(xCenter - x) * wSurface + (yCenter + y)],xCenter - x, yCenter + y,wSurface,hSurface, pixelColor);//Deuxième quart de cercle
+//     controlPixelPosition(&(*pixels)[(xCenter - y) * wSurface + (yCenter + x)],xCenter - y, yCenter + x,wSurface,hSurface, pixelColor);
+//     controlPixelPosition(&(*pixels)[(xCenter + x) * wSurface + (yCenter - y)],xCenter + x, yCenter - y,wSurface,hSurface, pixelColor);//Troisième quart de cercle
+//     controlPixelPosition(&(*pixels)[(xCenter + y) * wSurface + (yCenter - x)],xCenter + y, yCenter - x,wSurface,hSurface, pixelColor);
+//     controlPixelPosition(&(*pixels)[(xCenter - x) * wSurface + (yCenter - y)],xCenter - x, yCenter - y,wSurface,hSurface, pixelColor);//Quatrième quart de cercle
+//     controlPixelPosition(&(*pixels)[(xCenter - y) * wSurface + (yCenter - x)],xCenter - y, yCenter - x,wSurface,hSurface, pixelColor);
+ 
+//     if (diameter < 0)
+//       diameter = diameter + (4 * x) + 6;
+//     else {
+//       diameter = diameter + 4 * (x - y) + 10;
+//       y--;
+//     }
+//     x++;
+//   }
+// }
 
-    return 0; 
 
-}
+
 
 
 
@@ -341,55 +398,6 @@ int  updateBackgroundMenu(SDL_Renderer *mainRenderer, SDLBackground *backgroundM
 //     setPixel(x, y, coul);
 // }
 
- void SDLAnimateBackgroundHostMenu( SDL_Surface **surface, SDL_Color newColor ){
-
-    Uint32 *pixels;
-    Uint32 pixelColor;
-    int wSurface;
-    int hSurface;
-    size_t counterHeight,counterWidth;
-
-    wSurface=(*surface)->w;
-    hSurface=(*surface)->h;
-    
-    if(SDL_LockSurface((*surface))!=0){
-        printf("bug");
-    }
-
-
-    pixelColor=SDL_MapRGBA((*surface)->format,newColor.r,0,0, newColor.a);
-
-    pixels = (*surface)->pixels;
-
-    printf("%d\n",sizeof(pixels));
-    for(counterHeight = 100; counterHeight < (size_t)hSurface-100; counterHeight++){
-        for(counterWidth = 100; counterWidth < (size_t)wSurface-100; counterWidth++){
-
-            // printf("\n%p",&pixels[counterHeight * (size_t)wSurface + counterWidth]);
-            // SDL_GetRGBA(pixels[counterHeight * (size_t)wSurface + counterWidth],(*surface)->format,&r,&g,&b,&a);
-            // printf("%d\n rouge",r);
-            if(counterHeight%100==0 && counterWidth%1000==0){
-
-                printf("OK");
-                printf(" counterHeight %d \n",counterHeight);
-                printf("counterWidth %d \n",counterWidth);
-                drawCircle(&pixels,(int)counterWidth,(int)counterHeight,40,wSurface,hSurface,pixelColor);
-            }
-            
-            
-            // printf("%d",r);
-        }
-    }
-
-    drawCircle(&pixels,100,100,40,wSurface,hSurface,pixelColor);
-
-    printf("%p\n",&pixels[1*wSurface+3]);
-   
-    // cercle(pixels,counterWidth,counterHeight,300,1000,h,pixelColor);
-    	
-    SDL_UnlockSurface(*surface);
-    
-}
 
 
 

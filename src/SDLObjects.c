@@ -42,11 +42,11 @@ SDL_Window* SDLCreateMainWindow(SDLWindowConfig *windowConfigElement){
     }
 }
 
-SDL_Renderer* SDLCreateMainRenderer(SDL_Window *mainWindow, long int rendererFlag){
+SDL_Renderer* SDLCreateMainRenderer(SDL_Window **mainWindow, long int rendererFlag){
 
     SDL_Renderer  *mainRenderer;
 
-    if((mainRenderer=SDL_CreateRenderer(mainWindow,-1,rendererFlag))!=NULL){    
+    if((mainRenderer=SDL_CreateRenderer(*mainWindow,-1,rendererFlag))!=NULL){    
         return mainRenderer;
     }
 
@@ -58,16 +58,17 @@ SDL_Renderer* SDLCreateMainRenderer(SDL_Window *mainWindow, long int rendererFla
 
 
 
-void SDLCreateBackgroundHostMenu(SDL_Renderer *mainRenderer, SDLBackground *background){
+void SDLCreateBackgroundHostMenu(SDL_Renderer **mainRenderer, SDLBackground **background){
+
    
-    if((background->surface=SDL_CreateRGBSurfaceWithFormat(0, background->rect.w,background->rect.h, 32, SDL_PIXELFORMAT_RGBA8888))!=NULL){
+    if(((*background)->surface=SDL_CreateRGBSurfaceWithFormat(0, (*background)->rect.w,(*background)->rect.h, 32, SDL_PIXELFORMAT_RGBA8888))!=NULL){
 
-        if((SDL_FillRect(background->surface,&background->rect,SDL_MapRGBA(background->surface->format,255,255,255,255)))==0){
+        if((SDL_FillRect((*background)->surface,&(*background)->rect,SDL_MapRGBA((*background)->surface->format,255,255,255,255)))==0){
 
-            if((background->texture=SDL_CreateTextureFromSurface(mainRenderer,background->surface))!=NULL){
+            if(((*background)->texture=SDL_CreateTextureFromSurface(*mainRenderer,(*background)->surface))!=NULL){
 
-                if(SDL_RenderCopy(mainRenderer,background->texture,NULL,&background->rect)==0){
-                    SDL_RenderPresent(mainRenderer);
+                if(SDL_RenderCopy(*mainRenderer,(*background)->texture,NULL,&(*background)->rect)==0){
+                    SDL_RenderPresent(*mainRenderer);
                 }
                 else{fprintf(stderr,"Echec lors de la copie de texture dans le rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
             }
@@ -78,12 +79,11 @@ void SDLCreateBackgroundHostMenu(SDL_Renderer *mainRenderer, SDLBackground *back
     else{fprintf(stderr,"Echec lors la creation de la surface dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
 }
 
-void SDLCreateMetroStation(MetroStation *metroStation){
+void SDLCreateMetroStation(MetroStation **metroStation){
    
-    
-    if((metroStation->surface=SDL_CreateRGBSurfaceWithFormat(0, metroStation->rect.w,metroStation->rect.w, 32, SDL_PIXELFORMAT_RGBA8888))!=NULL){
-
-        printf("metro station avant surface : %p \n ",metroStation->surface);
+    if(((*metroStation)->surface=SDL_CreateRGBSurfaceWithFormat(0, (*metroStation)->rect.w,(*metroStation)->rect.w, 32, SDL_PIXELFORMAT_RGBA8888))!=NULL){
+        //  printf("metro station avant surface : %p \n ",metroStation->surface);
+       
         // if((SDL_FillRect(metroStation->surface,&metroStation->rect,SDL_MapRGBA(metroStation->surface->format,255,255,255,255)))==0){
 
         //     if((metroStation->texture=SDL_CreateTextureFromSurface(mainRenderer,metroStation->surface))!=NULL){
@@ -139,7 +139,7 @@ void SDLCreateMetroStation(MetroStation *metroStation){
 
 // }
 
-void SDLCreateTextButton(SDL_Renderer *mainRenderer, SDLButtons* buttonHostMenu){
+void SDLCreateTextButton(SDL_Renderer **mainRenderer, SDLButtons* buttonHostMenu){
 
     int wText;
     int hText;
@@ -148,15 +148,15 @@ void SDLCreateTextButton(SDL_Renderer *mainRenderer, SDLButtons* buttonHostMenu)
 
     if((buttonHostMenu->text->font=TTF_OpenFont(buttonHostMenu->text->fontPath,buttonHostMenu->text->sizeFont))!=NULL){
         if((buttonHostMenu->text->surface=TTF_RenderText_Blended(buttonHostMenu->text->font,buttonHostMenu->text->content,buttonHostMenu->text->color))!=NULL){
-            if((buttonHostMenu->text->texture=SDL_CreateTextureFromSurface(mainRenderer,buttonHostMenu->text->surface))!=NULL){
+            if((buttonHostMenu->text->texture=SDL_CreateTextureFromSurface(*mainRenderer,buttonHostMenu->text->surface))!=NULL){
                 SDL_FreeSurface(buttonHostMenu->text->surface);
 
                 if(SDL_QueryTexture(buttonHostMenu->text->texture, NULL, NULL, &buttonHostMenu->text->rect.w, &buttonHostMenu->text->rect.h)==0){
                     if(TTF_SizeText(buttonHostMenu->text->font,buttonHostMenu->text->content,&wText,&hText)==0){
                         buttonHostMenu->text->rect.x=buttonHostMenu->rect.x+buttonHostMenu->rect.w/2 - wText/2;
                         buttonHostMenu->text->rect.y=buttonHostMenu->rect.y+buttonHostMenu->rect.h/2 - hText/2;
-                        if(SDL_RenderCopy(mainRenderer,buttonHostMenu->text->texture,NULL,&buttonHostMenu->text->rect)==0){
-                            SDL_RenderPresent(mainRenderer);
+                        if(SDL_RenderCopy(*mainRenderer,buttonHostMenu->text->texture,NULL,&buttonHostMenu->text->rect)==0){
+                            SDL_RenderPresent(*mainRenderer);
                         }
                         else{fprintf(stderr,"Echec lors de la copie de texture dans le rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());}
                     }
@@ -172,20 +172,20 @@ void SDLCreateTextButton(SDL_Renderer *mainRenderer, SDLButtons* buttonHostMenu)
 }
 
 
-void SDLCreateContainerHostMenu(SDL_Renderer *mainRenderer,SDLContainer *containerHostMenu){
+void SDLCreateContainerHostMenu(SDL_Renderer **mainRenderer,SDLContainer *containerHostMenu){
 
     
-    if((containerHostMenu->texture=SDL_CreateTexture(mainRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,containerHostMenu->rect.w,containerHostMenu->rect.h))!=NULL){
+    if((containerHostMenu->texture=SDL_CreateTexture(*mainRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,containerHostMenu->rect.w,containerHostMenu->rect.h))!=NULL){
 
-        // if(SDL_RenderClear(mainRenderer)==0){   
+        // if(SDL_RenderClear(*mainRenderer)==0){   
             if(SDL_SetTextureBlendMode(containerHostMenu->texture,SDL_BLENDMODE_BLEND)==0){
-                if(SDL_SetRenderTarget(mainRenderer, containerHostMenu->texture)==0){
-                    //if(SDL_SetRenderDrawColor(mainRenderer,containerHostMenu->color.r,containerHostMenu->color.g,containerHostMenu->color.b,containerHostMenu->color.a)==0){
-                        if(SDL_SetRenderTarget(mainRenderer, NULL)==0){
+                if(SDL_SetRenderTarget(*mainRenderer, containerHostMenu->texture)==0){
+                    //if(SDL_SetRenderDrawColor(*mainRenderer,containerHostMenu->color.r,containerHostMenu->color.g,containerHostMenu->color.b,containerHostMenu->color.a)==0){
+                        if(SDL_SetRenderTarget(*mainRenderer, NULL)==0){
                             // if(SDL_QueryTexture(containerHostMenu->texture, NULL, NULL, &containerHostMenu->rect.w, &containerHostMenu->rect.h)==0){
 
-                                if(SDL_RenderCopy(mainRenderer,containerHostMenu->texture,NULL,&containerHostMenu->rect)==0){
-                                    SDL_RenderPresent(mainRenderer);
+                                if(SDL_RenderCopy(*mainRenderer,containerHostMenu->texture,NULL,&containerHostMenu->rect)==0){
+                                    SDL_RenderPresent(*mainRenderer);
                                 }
                                 else{fprintf(stderr,"Echec lors de la copie de texture dans le rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
                             // }
@@ -205,19 +205,19 @@ void SDLCreateContainerHostMenu(SDL_Renderer *mainRenderer,SDLContainer *contain
 }
 
 
-void SDLCreateButton(SDL_Renderer *mainRenderer,SDLButtons* button){
+void SDLCreateButton(SDL_Renderer **mainRenderer,SDLButtons* button){
 
-    if((button->texture=SDL_CreateTexture(mainRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,button->rect.w,button->rect.h))!=NULL){
-        if(SDL_SetRenderTarget(mainRenderer,button->texture)==0){
-            if(SDL_SetRenderDrawColor(mainRenderer,button->color.r, button->color.g, button->color.b, button->color.a )==0){
-                if(SDL_RenderClear(mainRenderer)==0){
-                    if(SDL_SetRenderTarget(mainRenderer,NULL)==0){
+    if((button->texture=SDL_CreateTexture(*mainRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,button->rect.w,button->rect.h))!=NULL){
+        if(SDL_SetRenderTarget(*mainRenderer,button->texture)==0){
+            if(SDL_SetRenderDrawColor(*mainRenderer,button->color.r, button->color.g, button->color.b, button->color.a )==0){
+                if(SDL_RenderClear(*mainRenderer)==0){
+                    if(SDL_SetRenderTarget(*mainRenderer,NULL)==0){
                         if(SDL_QueryTexture(button->texture, NULL, NULL, &button->rect.w, &button->rect.h)==0){
 
-                            if(SDL_RenderCopy(mainRenderer,button->texture,NULL,&button->rect)==0){
+                            if(SDL_RenderCopy(*mainRenderer,button->texture,NULL,&button->rect)==0){
                                 
-                                SDL_RenderPresent(mainRenderer);
-                                SDL_SetRenderTarget(mainRenderer,NULL);
+                                SDL_RenderPresent(*mainRenderer);
+                                SDL_SetRenderTarget(*mainRenderer,NULL);
                             }
 
                             else{fprintf(stderr,"Echec lors de la copie de texture dans le rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 

@@ -83,10 +83,11 @@ int main(int argc, char **argv) {
     }
     else{
         if((mainWindow=SDLCreateMainWindow(SDLConfigElement.window))!=NULL){
-            if((mainRenderer=SDLCreateMainRenderer(mainWindow,SDLConfigElement.renderer->rendererFlag))!=NULL){
+            if((mainRenderer=SDLCreateMainRenderer(&mainWindow,SDLConfigElement.renderer->rendererFlag))!=NULL){
 
+                printf("mainRenderer : %p\n",mainRenderer);
                 while(SDLMainMenuLoop(
-                mainWindow,mainRenderer,
+                &mainWindow,&mainRenderer,
                 &SDLConfigElement,
                 &dbConfigElement,
                 &dbConnection,
