@@ -27,6 +27,12 @@ SDL_Rect SDLChangeRect(int x , int y , int w , int h){
     return newRect;
 }
 
+SDL_Color returnRandomColor(SDL_Color **arrColors){
+
+
+
+}
+
 
 void controlPixelPosition(Uint32 *pixel, int xPixel, int yPixel, int wSurface, int hSurface, Uint32 pixelColor){
 
@@ -163,64 +169,99 @@ void changeOverlapColorSurfaces(SDL_Rect *foreGroundRect, SDL_Surface **backGrou
 //Fonction qui renvoie 1 si le foregroundRect a des coordonnées en commun avec le backgroundRect et modifie le overlapRect pour récupérer les coordonnées de chevauchement
 unsigned short createOverlapRect(SDL_Rect *foregroundRect, SDL_Rect *backgroundRect, SDL_Rect *overlapRect){
 
-    unsigned int xCounter ,yCounter;
+    int xCounter ,yCounter;
     unsigned short overlapRisk=0;
+    SDL_Rect tmpRect;
 
-    overlapRect->w=0;
-    overlapRect->h=0;
+    tmpRect.w=0;
+    tmpRect.h=0;
 
-    if((backgroundRect->x >= foregroundRect->x && backgroundRect->x + backgroundRect->w <= foregroundRect->x + foregroundRect->w) || (backgroundRect->x >= foregroundRect->x && backgroundRect->x <= foregroundRect->w + foregroundRect->x && backgroundRect->x + backgroundRect->w >=  foregroundRect->x + foregroundRect->w ) || (backgroundRect->x <= foregroundRect->x && backgroundRect->x + backgroundRect->w >= foregroundRect->x && backgroundRect->x + backgroundRect->w <=  foregroundRect->x + foregroundRect->w)){
+    if((backgroundRect->x >= foregroundRect->x && backgroundRect->x + backgroundRect->w <= foregroundRect->x + foregroundRect->w) || (backgroundRect->y > foregroundRect->y && backgroundRect->y < foregroundRect->h + foregroundRect->y) || (backgroundRect->y < foregroundRect->y && backgroundRect->y + backgroundRect->h > foregroundRect->y)){
 
-        if(backgroundRect->y >= foregroundRect->y && backgroundRect->y + backgroundRect->h <= foregroundRect->y + foregroundRect->h  ){
-                overlapRect->y=0;
-                overlapRect->h=backgroundRect->h;
-                overlapRisk=1;
-        }
-
-        else if(backgroundRect->y >= foregroundRect->y && backgroundRect->y <= foregroundRect->h + foregroundRect->y && backgroundRect->y + backgroundRect->h >=  foregroundRect->y + foregroundRect->h  ){
-
-            for(yCounter = 0 ; backgroundRect->y + yCounter <= foregroundRect->y + foregroundRect->h && yCounter < backgroundRect->h ; yCounter++)
-
-            overlapRect->y=0;
-            overlapRect->h=yCounter;
+        
+        if(backgroundRect->y >= foregroundRect->y && backgroundRect->y + backgroundRect->h <= foregroundRect->y + foregroundRect->h ){
+            tmpRect.y=0;
+            tmpRect.h=backgroundRect->h;
             overlapRisk=1;
         }
 
-        else if(backgroundRect->y <= foregroundRect->y && backgroundRect->y + backgroundRect->h >= foregroundRect->y && backgroundRect->y + backgroundRect->h <=  foregroundRect->y + foregroundRect->h){
+        else if(backgroundRect->y > foregroundRect->y && backgroundRect->y < foregroundRect->h + foregroundRect->y){
 
-            for(yCounter = 0; backgroundRect->y + yCounter <=  foregroundRect->y && yCounter < backgroundRect->h  ; yCounter++)
-            overlapRect->y=yCounter;
-            overlapRect->h=backgroundRect->h - yCounter;
+            for(yCounter = 0 ; backgroundRect->y + yCounter <foregroundRect->y + foregroundRect->h && yCounter <backgroundRect->h ; yCounter++){}
+            tmpRect.y=0;
+            tmpRect.h=yCounter;
+            overlapRisk=1;
+        }
+
+        else if(backgroundRect->y < foregroundRect->y && backgroundRect->y + backgroundRect->h > foregroundRect->y){
+
+            for(yCounter = 0; backgroundRect->y + yCounter <  foregroundRect->y && yCounter < backgroundRect->h  ; yCounter++){}
+            tmpRect.y=yCounter;
+            tmpRect.h=backgroundRect->h - yCounter + 1;
             overlapRisk=1;
         }
     }
 
-    if((backgroundRect->y >= foregroundRect->y && backgroundRect->y + backgroundRect->h <= foregroundRect->y + foregroundRect->h) || (backgroundRect->y >= foregroundRect->y && backgroundRect->y <= foregroundRect->h + foregroundRect->y && backgroundRect->y + backgroundRect->h >=  foregroundRect->y + foregroundRect->h) || (backgroundRect->y <= foregroundRect->y && backgroundRect->y + backgroundRect->h >= foregroundRect->y && backgroundRect->y + backgroundRect->h <=  foregroundRect->y + foregroundRect->h) ){
+    if((backgroundRect->y >= foregroundRect->y && backgroundRect->y + backgroundRect->h <= foregroundRect->y + foregroundRect->h) || (backgroundRect->x > foregroundRect->x && backgroundRect->x < foregroundRect->w + foregroundRect->x ) ||(backgroundRect->x < foregroundRect->x && backgroundRect->x + backgroundRect->w > foregroundRect->x )){
         
-        if(backgroundRect->x >= foregroundRect->x && backgroundRect->x + backgroundRect->w <= foregroundRect->x + foregroundRect->w  ){
-                overlapRect->x=0;
-                overlapRect->w=backgroundRect->w;
-                overlapRisk=1;
-        }
-
-        else if(backgroundRect->x >= foregroundRect->x && backgroundRect->x <= foregroundRect->w + foregroundRect->x && backgroundRect->x + backgroundRect->w >=  foregroundRect->x + foregroundRect->w  ){
-
-            for(xCounter = 0 ; backgroundRect->x + xCounter <= foregroundRect->x + foregroundRect->w && xCounter < backgroundRect->w ; xCounter++)
-
-            overlapRect->x=0;
-            overlapRect->w=xCounter;
+        if(backgroundRect->x > foregroundRect->x && backgroundRect->x + backgroundRect->w <= foregroundRect->x + foregroundRect->w){
+            tmpRect.x=0;
+            tmpRect.w=backgroundRect->w;
             overlapRisk=1;
         }
 
-        else if(backgroundRect->x <= foregroundRect->x && backgroundRect->x + backgroundRect->w >= foregroundRect->x && backgroundRect->x + backgroundRect->w <=  foregroundRect->x + foregroundRect->w){
+        else if(backgroundRect->x > foregroundRect->x && backgroundRect->x < foregroundRect->w + foregroundRect->x ){
 
-            for(xCounter = 0; backgroundRect->x + xCounter <=  foregroundRect->x && xCounter < backgroundRect->w  ; xCounter++)
-            overlapRect->x=xCounter;
-            overlapRect->w=backgroundRect->w - xCounter;
+            for(xCounter = 0 ; backgroundRect->x + xCounter < foregroundRect->x + foregroundRect->w && xCounter < backgroundRect->w ; xCounter++){}
+            tmpRect.x=0;
+            tmpRect.w=xCounter;
             overlapRisk=1;
         }
+
+        else if(backgroundRect->x < foregroundRect->x && backgroundRect->x + backgroundRect->w > foregroundRect->x ){
+
+            for(xCounter = 0; backgroundRect->x + xCounter <  foregroundRect->x && xCounter < backgroundRect->w  ; xCounter++){}
+            tmpRect.x=xCounter;
+            tmpRect.w=backgroundRect->w - xCounter+1;
+            overlapRisk=1;
+        }
+    }
+    if(overlapRect!=NULL){
+        *overlapRect=tmpRect;
     }
     
     return overlapRisk;
+}
+
+
+void createLineRect(SDL_Rect *srcRect, SDL_Rect *dstRect, SDL_Rect *lineRect, SDL_Point *srcPoint, SDL_Point *dstPoint){
+
+    if(srcRect->x < dstRect->x){
+
+        lineRect->x=srcRect->x + srcRect->w / 2; 
+        lineRect->w=(dstRect->x + dstRect->w / 2) - (srcRect->x + srcRect->w / 2);
+        dstPoint->x=lineRect->w;
+        srcPoint->x=0;
+
+    if(srcRect->x > dstRect->x){
+        lineRect->x = dstRect->x + dstRect->w / 2; 
+        lineRect->w = (srcRect->x + srcRect->w / 2) - (dstRect->x + dstRect->w/2);
+        srcPoint->x = lineRect->w;
+        dstPoint->x = 0;
+    }
+
+    if(srcRect->y < dstRect->y){
+
+        lineRect->x=srcRect->y + srcRect->h / 2; 
+        lineRect->h=(dstRect->y+ dstRect->h / 2) - (srcRect->y + srcRect->h / 2);
+        dstPoint->x=lineRect->h;
+        srcPoint->x=0;
+
+    if(srcRect->y> dstRect->y){
+        lineRect->y= dstRect->y+ dstRect->h / 2; 
+        lineRect->h = (srcRect->y+ srcRect->h / 2) - (dstRect->y+ dstRect->h/2);
+        srcPoint->y= lineRect->h;
+        dstPoint->y= 0;
+    }
 }
 

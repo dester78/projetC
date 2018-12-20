@@ -55,9 +55,6 @@ int SDLMainMenuLoop(SDL_Window  **mainWindow, SDL_Renderer **mainRenderer, SDLCo
     }
     
     initBackgroundHostMenu(mainWindow,&backgroundHostMenu);
-    backgroundHostMenu->sizeArrMetroStations=12;
-    backgroundHostMenu->arrMetroStations=calloc(backgroundHostMenu->sizeArrMetroStations,sizeof(MetroStation*));
-    
     SDLCreateBackgroundHostMenu(mainRenderer,&backgroundHostMenu);
 
     initContainerHostMenu(mainWindow,containerHostMenu);
@@ -71,7 +68,6 @@ int SDLMainMenuLoop(SDL_Window  **mainWindow, SDL_Renderer **mainRenderer, SDLCo
         SDLCreateTextButton(mainRenderer,buttonsHostMenu[counterButton]);
     }
 
-    updateBackgroundMenu(mainRenderer,&backgroundHostMenu,buttonsHostMenu,sizeArrayButtons,backgroundHostMenu->sizeArrMetroStations);
 
     while(windowLoop){
 
@@ -128,24 +124,24 @@ int SDLMainMenuLoop(SDL_Window  **mainWindow, SDL_Renderer **mainRenderer, SDLCo
                                               
         }
 
-        // currentTime = SDL_GetTicks();
-        // if (currentTime - pastTime > 1000) /* Si 30 ms se sont écoulées depuis le dernier tour de boucle */{
+        currentTime = SDL_GetTicks();
+        if (currentTime - pastTime > 20) /* Si 30 ms se sont écoulées depuis le dernier tour de boucle */{
             
-        //     if(countMetroStation<backgroundHostMenu->sizeArrMetroStations){
+            if(countMetroStation<backgroundHostMenu->sizeArrMetroStations){
 
-        //         countMetroStation++;
-        //         if(updateBackgroundMenu(mainRenderer,&backgroundHostMenu,buttonsHostMenu,sizeArrayButtons,countMetroStation)){
+                countMetroStation++;
+                if(updateBackgroundMenu(mainRenderer,&backgroundHostMenu,buttonsHostMenu,sizeArrayButtons,countMetroStation)){
 
-        //             //  for(int i=0 ; i<4; i++){
+                    //  for(int i=0 ; i<4; i++){
 
-        //             //     buttonHoverEffect(mainRenderer,buttonsHostMenu[i],buttonsHostMenu[i]->color);
+                    //     buttonHoverEffect(mainRenderer,buttonsHostMenu[i],buttonsHostMenu[i]->color);
                         
-        //             //  }
-        //         }
-        //         pastTime = currentTime; 
-        //     }
-        //     /* Le temps "actuel" devient le temps "precedent" pour nos futurs calculs */
-        // }
+                    //  }
+                }
+                pastTime = currentTime; 
+            }
+            /* Le temps "actuel" devient le temps "precedent" pour nos futurs calculs */
+        }
         
         SDL_RenderPresent(*mainRenderer);
         
@@ -187,46 +183,17 @@ void buttonHoverEffect(SDL_Renderer **mainRenderer, SDLButtons* button, SDL_Colo
 
 short  updateBackgroundMenu(SDL_Renderer **mainRenderer, SDLBackground **backgroundMenu,SDLButtons **buttonsHostMenu, unsigned short sizeArrayButtons ,unsigned short countMetroStation){
 
-    SDL_Rect rectStation;
-    int maxSize=100;
-    int minSize=60;
     int geometricShape=0;
     unsigned short counterButton=0;
 
-        for(unsigned short counterMetroStations=0; counterMetroStations<(countMetroStation-1); counterMetroStations++){
-  
-            if((*backgroundMenu)->arrMetroStations[counterMetroStations]==0){
+        SDLCreateMetroStationsMenu(backgroundMenu,buttonsHostMenu,sizeArrayButtons,countMetroStation );
+        for(unsigned short counterMetroStations=0; counterMetroStations<countMetroStation; counterMetroStations++){
 
-                (*backgroundMenu)->arrMetroStations[counterMetroStations]=malloc(sizeof(MetroStation));
-
-                // rectStation=SDLChangeRect((rand() % ((*backgroundMenu)->rect.w-maxSize)),(rand() % ((*backgroundMenu)->rect.h-maxSize)), minSize, maxSize);
-                rectStation.x=rand() % ((*backgroundMenu)->rect.w-maxSize);
-                rectStation.y=rand() % ((*backgroundMenu)->rect.h-maxSize);
-                rectStation.w = minSize;
-                rectStation.h = minSize;
-
-                geometricShape=(rand()%3)+1;
-
-                initMetroStation((*backgroundMenu)->arrMetroStations[counterMetroStations],geometricShape,rectStation,maxSize,SDL_MapRGBA((*backgroundMenu)->surface->format,0,255,0,255));
-                (*backgroundMenu)->arrMetroStations[counterMetroStations]->texture=NULL;
-
-                SDL_Rect riskRect;
-                riskRect.w=maxSize;
-                riskRect.h=maxSize;
-                riskRect.y=rectStation.y;
-                riskRect.x=rectStation.x;
-
-
-                
-                //Indique si la station risque de chevaucher un bouton du menu pour controler seulement les stations à risque lors des mises à jour. 
-                for(counterButton=0; (*backgroundMenu)->arrMetroStations[counterMetroStations]->overlapRisk==0 && counterButton<sizeArrayButtons ; counterButton++){
-                    
-                    (*backgroundMenu)->arrMetroStations[counterMetroStations]->overlapRisk=createOverlapRect(&(buttonsHostMenu[counterButton]->rect),&riskRect,&(*backgroundMenu)->arrMetroStations[counterMetroStations]->overlapRect);
-                }
+            if(((*backgroundMenu)->arrMetroStations[counterMetroStations]->surface=SDL_CreateRGBSurfaceWithFormat(0, (*backgroundMenu)->arrMetroStations[counterMetroStations]->rect.w,(*backgroundMenu)->arrMetroStations[counterMetroStations]->rect.w, 32, SDL_PIXELFORMAT_RGBA8888))!=NULL){
+ 
             }
-
-            SDLCreateMetroStation(&(*backgroundMenu)->arrMetroStations[counterMetroStations]);
-
+            else{fprintf(stderr,"Echec lors la creation de la surface dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
+  
             switch((*backgroundMenu)->arrMetroStations[counterMetroStations]->geometricShape){
 
                 case 3 : 
@@ -262,7 +229,7 @@ short  updateBackgroundMenu(SDL_Renderer **mainRenderer, SDLBackground **backgro
      
             SDL_DestroyTexture((*backgroundMenu)->arrMetroStations[counterMetroStations]->texture);
             
-            if((*backgroundMenu)->arrMetroStations[counterMetroStations]->overlapRisk){
+            if((*backgroundMenu)->arrMetroStations[counterMetroStations]->overlapRisk==1){
 
                 for(counterButton=0; counterButton<sizeArrayButtons; counterButton++){
 
@@ -291,6 +258,15 @@ short  updateBackgroundMenu(SDL_Renderer **mainRenderer, SDLBackground **backgro
 
     return (short)1;
 }
+
+
+int randInRange(int lowerValue, int higherValue){
+
+    return rand()%(higherValue-lowerValue)+lowerValue;
+
+}
+
+
 
 
 // void drawVariableRect(SDL_Surface **surface, int xRect,int yRect,int wRect,int hRect, Uint32 colorRect){

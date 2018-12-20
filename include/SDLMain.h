@@ -22,5 +22,8 @@
     short updateBackgroundMenu(SDL_Renderer **mainRenderer, SDLBackground **backgroundMenu,SDLButtons **buttonsHostMenu, unsigned short sizeArrayButtons ,unsigned short countMetroStation);
     
     SDL_Rect createCropRect(SDL_Rect foregroundRect, SDL_Rect backGroundRect);
+
+    int randInRange(int lowerValue, int higherValue);
+
      
 #endif

@@ -46,6 +46,7 @@ typedef struct MetroStation{
     SDL_Texture *texture;
     SDL_Rect rect;
     SDL_Rect overlapRect;
+    Uint32 *arrLinesColor;
 
     Triangle triangle;
     Circle circle;
@@ -55,6 +56,19 @@ typedef struct MetroStation{
 
 }MetroStation;
 
+typedef struct MetroLine{
+
+    unsigned short width;
+
+    SDL_Texture *texture;
+    SDL_Rect rect; 
+    SDL_Point srcPoint; 
+    SDL_Point dstPoint; 
+    
+    Uint32 color;
+
+}MetroLine;
+
 
 typedef struct SDLBackground{
 
@@ -62,8 +76,14 @@ typedef struct SDLBackground{
     SDL_Texture *texture; 
     SDL_Rect rect;
     SDL_Color color;
+
+    unsigned short sizeArrMetroLinesColor; 
     unsigned short sizeArrMetroStations;
+    unsigned short sizeArrMetroLines;
+
+    Uint32 *arrMetroLinesColor;
     MetroStation **arrMetroStations;
+    MetroLine **arrMetroLines;
 
 }SDLBackground;
 

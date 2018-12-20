@@ -4,6 +4,7 @@
 #include <SDLConfigStructures.h>
 #include <SDLObjects.h>
 #include <SDLMain.h>
+#include <SDLDraw.h>
 
 #include <SDL.h>
 #include <SDL_ttf.h>
@@ -56,6 +57,60 @@ SDL_Renderer* SDLCreateMainRenderer(SDL_Window **mainWindow, long int rendererFl
     }
 }
 
+void SDLCreateMetroStationsMenu(SDLBackground **backgroundMenu,SDLButtons **buttonsHostMenu, unsigned short sizeArrayButtons ,unsigned short countMetroStation){
+
+SDL_Rect rectStation;
+SDL_Rect riskRect;
+int maxSize;
+int minSize=30;
+int geometricShape;
+unsigned char controlCounterMetroStation;
+
+    maxSize=3*minSize;
+
+    for(unsigned short counterMetroStations=0; counterMetroStations<countMetroStation; counterMetroStations++){
+
+        if((*backgroundMenu)->arrMetroStations[counterMetroStations]==0){
+
+            (*backgroundMenu)->arrMetroStations[counterMetroStations]=malloc(sizeof(MetroStation));
+            (*backgroundMenu)->arrMetroStations[countMetroStation]->arrLinesColor=calloc((*backgroundMenu)->sizeArrMetroLinesColor,sizeof(Uint32));
+
+            geometricShape=(rand()%3)+1;
+
+            riskRect=SDLChangeRect(randInRange(maxSize,(*backgroundMenu)->rect.w-maxSize),randInRange(maxSize,(*backgroundMenu)->rect.h-maxSize), maxSize, maxSize);   
+
+            //Vérifie si des stations de métro ne risquent pas de se chevaucher, recalcul la position de la station de métro si c'est le cas
+            if(counterMetroStations>0){
+
+                for(controlCounterMetroStation=0; controlCounterMetroStation<counterMetroStations; controlCounterMetroStation++){
+                    if(createOverlapRect(&(*backgroundMenu)->arrMetroStations[controlCounterMetroStation]->rect,&riskRect,NULL)==1){
+
+                        riskRect=SDLChangeRect(randInRange(maxSize,(*backgroundMenu)->rect.w-maxSize),randInRange(maxSize,(*backgroundMenu)->rect.h-maxSize), maxSize, maxSize);   
+                        controlCounterMetroStation=0;
+                    }
+                }
+            }
+
+            rectStation=SDLChangeRect(riskRect.x,riskRect.y,minSize,minSize);
+            initMetroStation((*backgroundMenu)->arrMetroStations[counterMetroStations],geometricShape,rectStation,maxSize,SDL_MapRGBA((*backgroundMenu)->surface->format,0,255,0,255));
+            
+            //Indique si la station risque de chevaucher un bouton du menu pour controler seulement les stations à risque lors des mises à jour. 
+            for(unsigned char counterButton=0; (*backgroundMenu)->arrMetroStations[counterMetroStations]->overlapRisk==0 && counterButton<sizeArrayButtons ; counterButton++){
+                (*backgroundMenu)->arrMetroStations[counterMetroStations]->overlapRisk=createOverlapRect(&(buttonsHostMenu[counterButton]->rect),&riskRect,NULL);
+            }
+        }
+    }
+}
+
+void createMetroLine(SDLBackground **backgroundMenu,SDLButtons **buttonsHostMenu, unsigned short sizeArrayButtons ,unsigned short countMetroStation){
+
+    if((*backgroundMenu)->sizeArrMetroLines>0){
+        (*backgroundMenu)->arrMetroLines=realloc((*backgroundMenu)->arrMetroLines,sizeof(MetroLine*)*(*backgroundMenu)->sizeArrMetroLines);
+    }
+
+
+
+}
 
 
 void SDLCreateBackgroundHostMenu(SDL_Renderer **mainRenderer, SDLBackground **background){
@@ -78,28 +133,6 @@ void SDLCreateBackgroundHostMenu(SDL_Renderer **mainRenderer, SDLBackground **ba
     }
     else{fprintf(stderr,"Echec lors la creation de la surface dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
 }
-
-void SDLCreateMetroStation(MetroStation **metroStation){
-   
-    if(((*metroStation)->surface=SDL_CreateRGBSurfaceWithFormat(0, (*metroStation)->rect.w,(*metroStation)->rect.w, 32, SDL_PIXELFORMAT_RGBA8888))!=NULL){
-        //  printf("metro station avant surface : %p \n ",metroStation->surface);
-       
-        // if((SDL_FillRect(metroStation->surface,&metroStation->rect,SDL_MapRGBA(metroStation->surface->format,255,255,255,255)))==0){
-
-        //     if((metroStation->texture=SDL_CreateTextureFromSurface(mainRenderer,metroStation->surface))!=NULL){
-
-        //         if(SDL_RenderCopy(mainRenderer,metroStation->texture,NULL,&metroStation->rect)==0){
-        //             SDL_RenderPresent(mainRenderer);
-        //         }
-        //         else{fprintf(stderr,"Echec lors de la copie de texture dans le rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
-        //     }
-        //     else{fprintf(stderr,"Echec lors de la convertion de la surface en texture dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
-        // }
-        // else{fprintf(stderr,"Echec lors du remplissage de la surface par un rectangle dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
-    }
-    else{fprintf(stderr,"Echec lors la creation de la surface dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
-}
-
 
 
 // void SDLCreateBackgroundHostMenu(SDL_Renderer *mainRenderer, SDLBackground *background){

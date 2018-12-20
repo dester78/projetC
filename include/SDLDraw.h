@@ -31,5 +31,6 @@ unsigned short createOverlapRect(SDL_Rect *foregroundRect, SDL_Rect *backgroundR
 //Fonction qui permet de modifier pixel par pixel la couleur des zones de chevauchement de deux surfaces, précis mais à utiliser seulement sur des petites surfaces
 void changeOverlapColorSurfaces(SDL_Rect *foreGroundRect, SDL_Surface **backGroundSurface, SDL_Rect *backGroundRect, Uint32 overlapColor);
 
-
+//Modifie un SDL_Rect afin d'y tracer une ligne à l'intérieur par la suite, le point de départ de la ligne et son arrivée sont renseignés
+void createLineRect(SDL_Rect *srcRect, SDL_Rect *dstRect, SDL_Rect *lineRect, SDL_Point *srcPoint, SDL_Point *dstPoint);
 #endif

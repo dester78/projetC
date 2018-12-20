@@ -119,7 +119,10 @@ void initBackgroundHostMenu(SDL_Window **mainWindow,SDLBackground **backgroundHo
 
     SDL_Color backgroundColor={0,0,0,255};
     (*backgroundHostMenu)->color=backgroundColor;
-    (*backgroundHostMenu)->sizeArrMetroStations=0;
+    (*backgroundHostMenu)->sizeArrMetroLines=0;
+
+    (*backgroundHostMenu)->sizeArrMetroStations=20;
+    (*backgroundHostMenu)->sizeArrMetroLinesColor=6;
 
     SDL_GetWindowSize(*mainWindow,&wWindow,&hWindow);
 
@@ -127,6 +130,9 @@ void initBackgroundHostMenu(SDL_Window **mainWindow,SDLBackground **backgroundHo
     (*backgroundHostMenu)->rect.h = hWindow;
     (*backgroundHostMenu)->rect.x = 0;
     (*backgroundHostMenu)->rect.y = 0;
+
+
+    (*backgroundHostMenu)->arrMetroStations=calloc((*backgroundHostMenu)->sizeArrMetroStations,sizeof(MetroStation*));
 
 
 }
@@ -155,6 +161,8 @@ void initMetroStation(MetroStation *metroStation, unsigned short geometricShape,
         break;
     }
 
+    
+    metroStation->texture=NULL;
     metroStation->maxSize=maxSize;
     metroStation->overlapRisk=0;
     metroStation->geometricShape=geometricShape;
@@ -198,6 +206,14 @@ Circle initCircle(SDL_Rect rect, unsigned short maxSize){
 
     return circle;
 
+}
+
+
+void initMetroStation(MetroLine *metroLine, SDL_Rect rect, unsigned short maxSize, Uint32 color){
+
+    metroLine->rect=rect;
+    metroLine->texture=NULL;
+    metroLine->color=color;
 }
 
 void freeSDLButton(SDLButtons *sdlButtonElement){

@@ -25,7 +25,8 @@
     //Fonction appliquant du texte aux bouttons du menu principal
     void SDLCreateTextButton(SDL_Renderer **mainRenderer, SDLButtons* buttonHostMenu);
 
-    void SDLCreateMetroStation(MetroStation **metroStation);
+    void SDLCreateMetroStationsMenu(SDLBackground **backgroundMenu,SDLButtons **buttonsHostMenu, unsigned short sizeArrayButtons ,unsigned short countMetroStation);
+
 
 
 #endif
