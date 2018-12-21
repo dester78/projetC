@@ -1,0 +1,27 @@
+{
+<<<<<<< HEAD
+    "files.associations": {
+        "filemanager.h": "c",
+        "sdl_image.h": "c",
+        "cstdlib": "c"
+    }
+=======
+    "C_Cpp.intelliSenseEngineFallback": "Disabled",
+    "files.associations": {
+        "sdl.h": "c",
+        "stdlib.h": "c",
+        "stdio.h": "c",
+        "structures.h": "c",
+        "string.h": "c",
+        "sdl_ttf.h": "c",
+        "sdl_main.h": "c",
+        "winsock.h": "c",
+        "mysql.h": "c",
+        "sdlmain.h": "c",
+        "filemanager.h": "c",
+        "sdlconfigstructures.h": "c",
+        "dbmanager.h": "c"
+    },
+    "C_Cpp.errorSquiggles": "Enabled"
+>>>>>>> master
+}
