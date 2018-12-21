@@ -1,6 +1,11 @@
-#include <SDL.h>
-#include <SDLDraw.h>
+
 #include <stdio.h>
+#include <stdlib.h>
+
+#include <SDLDraw.h>
+
+#include <SDL.h>
+
 
 
 SDL_Color SDLChangeRGBColor(Uint8 r, Uint8 g, Uint8 b , Uint8 a ){
@@ -15,6 +20,14 @@ SDL_Color SDLChangeRGBColor(Uint8 r, Uint8 g, Uint8 b , Uint8 a ){
     return RGBColor;
 }
 
+short SDLCompareColor(SDL_Color *firstColor, SDL_Color *secondColor){
+
+    if(firstColor->r==secondColor->r&&firstColor->g==secondColor->g&&firstColor->b==secondColor->b&&firstColor->a==secondColor->a){
+        return 1;
+    }
+    return 0;
+}
+
 SDL_Rect SDLChangeRect(int x , int y , int w , int h){
 
     SDL_Rect newRect; 
@@ -27,10 +40,47 @@ SDL_Rect SDLChangeRect(int x , int y , int w , int h){
     return newRect;
 }
 
-SDL_Color returnRandomColor(SDL_Color **arrColors){
+void returnRandomColor(SDL_Color **arrColors, unsigned short sizeArrColor){
 
+    SDL_Color tmpColor;
+    
 
+    for(unsigned short counterColor=0; counterColor < sizeArrColor; counterColor++ ){
 
+        short unikColor=1;
+        switch((rand()%sizeArrColor)+1){
+
+            case 1 :
+                tmpColor=SDLChangeRGBColor(35,63,68,255);
+            break; 
+
+            case 2 : 
+                tmpColor=SDLChangeRGBColor(165,93,8,255);
+            break; 
+
+            case 3 : 
+                tmpColor=SDLChangeRGBColor(143,17,91,255);
+            break; 
+
+            default : 
+                tmpColor=SDLChangeRGBColor((rand()%255)+1,(rand()%255)+1,(rand()%255)+1,255);
+            break;
+        }
+
+        if(SDLCompareColor(&(*arrColors)[counterColor],&tmpColor)==0){
+
+            for(short counterColorBis=counterColor-1; counterColorBis>=0 ; counterColorBis-- ){
+                
+                if(SDLCompareColor(&(*arrColors)[counterColorBis],&tmpColor)){
+                    unikColor=0;
+                    break;
+                }
+            }
+            if(unikColor){
+                (*arrColors)[counterColor]=SDLChangeRGBColor(143,17,91,255);
+            }
+        } 
+    }
 }
 
 
@@ -242,6 +292,7 @@ void createLineRect(SDL_Rect *srcRect, SDL_Rect *dstRect, SDL_Rect *lineRect, SD
         lineRect->w=(dstRect->x + dstRect->w / 2) - (srcRect->x + srcRect->w / 2);
         dstPoint->x=lineRect->w;
         srcPoint->x=0;
+    }
 
     if(srcRect->x > dstRect->x){
         lineRect->x = dstRect->x + dstRect->w / 2; 
@@ -256,6 +307,7 @@ void createLineRect(SDL_Rect *srcRect, SDL_Rect *dstRect, SDL_Rect *lineRect, SD
         lineRect->h=(dstRect->y+ dstRect->h / 2) - (srcRect->y + srcRect->h / 2);
         dstPoint->x=lineRect->h;
         srcPoint->x=0;
+    }
 
     if(srcRect->y> dstRect->y){
         lineRect->y= dstRect->y+ dstRect->h / 2; 
@@ -264,4 +316,3 @@ void createLineRect(SDL_Rect *srcRect, SDL_Rect *dstRect, SDL_Rect *lineRect, SD
         dstPoint->y= 0;
     }
 }
-

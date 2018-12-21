@@ -14,9 +14,18 @@
 
 
 #include <SDL.h>
+#include <mysql.h>
 
 
-void initButtonsHostMenu(SDL_Window  **mainWindow, SDLContainer *containerHostMenu,SDLButtons** buttonsHostMenu, char *fontPath, unsigned short *sizeArrayButtons, short connectionState){
+void initGUIHostMenu(SDL_Window  **mainWindow,SDLGUI *guiHostMenu, SDLConfig *SDLConfigElement,MYSQL *dbConnection){
+
+
+    guiHostMenu->container=malloc(sizeof(SDLContainer));
+
+    initContainerHostMenu(mainWindow,guiHostMenu->container,SDLConfigElement,dbConnection);
+}
+
+void initButtonsHostMenu(SDL_Window  **mainWindow, SDLContainer *containerHostMenu,SDLButtons** buttonsHostMenu, char *fontPath, unsigned short sizeArrayButtons, short connectionState){
 
     int wWindow;
     int hWindow;
@@ -41,7 +50,7 @@ void initButtonsHostMenu(SDL_Window  **mainWindow, SDLContainer *containerHostMe
 
     }
 
-    for(unsigned short counterButton=0;counterButton<*sizeArrayButtons;counterButton++){//Boucle permettant de créer des bouttons pour le menu d'accueil
+    for(unsigned short counterButton=0;counterButton<sizeArrayButtons;counterButton++){//Boucle permettant de créer des bouttons pour le menu d'accueil
 
         switch(counterButton){
 
@@ -96,13 +105,15 @@ void initButtonsHostMenu(SDL_Window  **mainWindow, SDLContainer *containerHostMe
 }
 
 
-void initContainerHostMenu(SDL_Window** mainWindow,SDLContainer *containerHostMenu){
+void initContainerHostMenu(SDL_Window** mainWindow,SDLContainer *containerHostMenu,SDLConfig *SDLConfigElement,MYSQL *dbConnection){
 
     int wWindow;
     int hWindow;
+    short dbConnectionStatus;
 
-    SDL_Color containerColor={249,249,249,0};
-    containerHostMenu->color=containerColor;
+    dbConnectionStatus=(mysql_get_host_info(dbConnection)!=NULL);//Status de connexion vaut 1 si fonction retourne une valeur différente à NULL
+    containerHostMenu->color=SDLChangeRGBColor(249,249,249,0);
+    containerHostMenu->sizeArrayButtons=4;
 
     SDL_GetWindowSize(*mainWindow,&wWindow,&hWindow);//Récupère les dimensions de la fenêtre pour le centrage du conteneur
 
@@ -110,6 +121,20 @@ void initContainerHostMenu(SDL_Window** mainWindow,SDLContainer *containerHostMe
     containerHostMenu->rect.h = hWindow/1.1;
     containerHostMenu->rect.x = (wWindow/2)-(containerHostMenu->rect.w/2);//Permet de centrer le conteneur horizontalement
     containerHostMenu->rect.y = (hWindow/2)-(containerHostMenu->rect.h/2);//Pemet de centrer le conteneur verticalement
+
+    containerHostMenu->arrayButtons=malloc(sizeof(SDLButtons*)*containerHostMenu->sizeArrayButtons);
+
+    for(unsigned short counterButton=0; counterButton<containerHostMenu->sizeArrayButtons; counterButton++){
+        
+        containerHostMenu->arrayButtons[counterButton]=malloc(sizeof(SDLButtons));
+        containerHostMenu->arrayButtons[counterButton]->text=malloc(sizeof(SDLText));
+    }
+
+    
+    initButtonsHostMenu(mainWindow,containerHostMenu,containerHostMenu->arrayButtons, SDLConfigElement->ttf->fontMenu, containerHostMenu->sizeArrayButtons, dbConnectionStatus);
+
+    
+
 }
 
 void initBackgroundHostMenu(SDL_Window **mainWindow,SDLBackground **backgroundHostMenu){
@@ -120,11 +145,11 @@ void initBackgroundHostMenu(SDL_Window **mainWindow,SDLBackground **backgroundHo
     SDL_Color backgroundColor={0,0,0,255};
     (*backgroundHostMenu)->color=backgroundColor;
     (*backgroundHostMenu)->sizeArrMetroLines=0;
-
     (*backgroundHostMenu)->sizeArrMetroStations=20;
-    (*backgroundHostMenu)->sizeArrMetroLinesColor=6;
-
+    (*backgroundHostMenu)->sizeArrMetroLinesColor=3;
+    
     SDL_GetWindowSize(*mainWindow,&wWindow,&hWindow);
+
 
     (*backgroundHostMenu)->rect.w = wWindow;
     (*backgroundHostMenu)->rect.h = hWindow;
@@ -133,7 +158,9 @@ void initBackgroundHostMenu(SDL_Window **mainWindow,SDLBackground **backgroundHo
 
 
     (*backgroundHostMenu)->arrMetroStations=calloc((*backgroundHostMenu)->sizeArrMetroStations,sizeof(MetroStation*));
+    (*backgroundHostMenu)->arrMetroLinesColor=calloc((*backgroundHostMenu)->sizeArrMetroLinesColor,sizeof(SDL_Color));
 
+    returnRandomColor(&(*backgroundHostMenu)->arrMetroLinesColor,(*backgroundHostMenu)->sizeArrMetroLinesColor);
 
 }
 
@@ -209,7 +236,7 @@ Circle initCircle(SDL_Rect rect, unsigned short maxSize){
 }
 
 
-void initMetroStation(MetroLine *metroLine, SDL_Rect rect, unsigned short maxSize, Uint32 color){
+void initMetroLine(MetroLine *metroLine, SDL_Rect rect, Uint32 color){
 
     metroLine->rect=rect;
     metroLine->texture=NULL;

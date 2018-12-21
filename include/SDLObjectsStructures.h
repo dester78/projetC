@@ -1,17 +1,61 @@
 #ifndef SDLOBJECTSSTRUCTURES
 #define SDLOBJECTSSTRUCTURES
 
+#include<SDLConfigStructures.h>
+
 #include <SDL.h>
+#include <mysql.h>
 #include <SDL_ttf.h>
 
 
+
+
+typedef struct SDLText{
+
+    SDL_Surface *surface;
+    SDL_Texture *texture;
+    TTF_Font *font;
+    SDL_Color color; 
+    SDL_Rect rect;
+
+    unsigned short sizeFont;
+    char *fontPath;
+    char *content;
+}SDLText;
+
+
+typedef struct SDLButtons{
+
+    SDL_Texture *texture; 
+    SDL_Rect rect;
+    SDL_Color color;
+
+    SDLText *text;
+    
+}SDLButtons;
+
+
 typedef struct SDLContainer{
+
+    unsigned short sizeArrayButtons;
+    unsigned short sizeArrayText;
+
+    SDLButtons **arrayButtons;
+    SDLText *text;
 
     SDL_Texture *texture; 
     SDL_Rect rect;
     SDL_Color color;
 
 }SDLContainer;
+
+
+typedef struct SDLGUI{
+
+    SDLContainer *container;
+    
+}SDLGUI;
+
 
 typedef struct Triangle{
 
@@ -46,7 +90,7 @@ typedef struct MetroStation{
     SDL_Texture *texture;
     SDL_Rect rect;
     SDL_Rect overlapRect;
-    Uint32 *arrLinesColor;
+    SDL_Color *arrLinesColor;
 
     Triangle triangle;
     Circle circle;
@@ -81,40 +125,23 @@ typedef struct SDLBackground{
     unsigned short sizeArrMetroStations;
     unsigned short sizeArrMetroLines;
 
-    Uint32 *arrMetroLinesColor;
+    SDL_Color *arrMetroLinesColor;
     MetroStation **arrMetroStations;
     MetroLine **arrMetroLines;
 
 }SDLBackground;
 
 
-typedef struct SDLButtons{
-
-    SDL_Texture *texture; 
-    SDL_Rect rect;
-    SDL_Color color;
-    struct SDLText *text;
-    
-}SDLButtons;
-
-typedef struct SDLText{
-
-    SDL_Surface *surface;
-    SDL_Texture *texture;
-    TTF_Font *font;
-    SDL_Color color; 
-    SDL_Rect rect;
-    unsigned short sizeFont;
-    char *fontPath;
-    char *content;
-}SDLText;
 
 
-
+void initGUIHostMenu(SDL_Window  **mainWindow,SDLGUI *guiHostMenu, SDLConfig *SDLConfigElement,MYSQL *dbConnection);
 void initBackgroundHostMenu(SDL_Window **mainWindow,SDLBackground **backgroundHostMenu);
-void initContainerHostMenu(SDL_Window** mainWindow,SDLContainer *containerHostMenu);
-void initButtonsHostMenu(SDL_Window  **mainWindow, SDLContainer *containerHostMenu,SDLButtons** buttonsHostMenu, char *fontPath, unsigned short *sizeArrayButtons, short connectionState);
+void initContainerHostMenu(SDL_Window** mainWindow,SDLContainer *containerHostMenu,SDLConfig *SDLConfigElement,MYSQL *dbConnection);
+void initButtonsHostMenu(SDL_Window  **mainWindow, SDLContainer *containerHostMenu,SDLButtons** buttonsHostMenu, char *fontPath, unsigned short sizeArrayButtons, short connectionState);
 void initMetroStation(MetroStation *metroStation, unsigned short geometricShape, SDL_Rect rect, unsigned short maxSize, Uint32 color);
+void initMetroLine(MetroLine *metroLine, SDL_Rect rect, Uint32 color);
+
+
 Triangle initTriangle(SDL_Rect rect, unsigned short maxSize);
 Circle initCircle(SDL_Rect rect, unsigned short maxSize);
 Square initSquare(SDL_Rect rect, unsigned short maxSize);

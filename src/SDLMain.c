@@ -23,52 +23,36 @@
 int SDLMainMenuLoop(SDL_Window  **mainWindow, SDL_Renderer **mainRenderer, SDLConfig *SDLConfigElement,DbConfig *dbConfigElement,MYSQL *dbConnection, Files **arrayFiles){
 
     short windowLoop;
-    unsigned short sizeArrayButtons=4; 
+
     unsigned short countMetroStation=0;
-    short dbConnectionStatus;
     short saveButton=-1;
     unsigned int currentTime=0;
     unsigned int pastTime=0;
         
     SDLBackground *backgroundHostMenu;
-    SDLContainer *containerHostMenu;
-    SDLButtons **buttonsHostMenu;
-    SDL_Event event;
+    SDLGUI *guiHostMenu;
 
+    SDL_Event event;
     SDL_Color saveColor;
 
-    printf("adresse renderer : %p \n",*mainRenderer);
-
-    srand(time(NULL));//Initailisation du générateur de nombre aléatoire
-
-    dbConnectionStatus=(mysql_get_host_info(dbConnection)!=NULL);//Status de connexion vaut 1 si fonction retourne une valeur différente à NULL
+    srand(time(NULL));//Initailisation du générateur de nombre aléatoire    
 
     backgroundHostMenu=malloc(sizeof(SDLBackground));
-    containerHostMenu=malloc(sizeof(SDLContainer));
-    buttonsHostMenu=malloc(sizeof(SDLButtons*)*sizeArrayButtons);
+    guiHostMenu=malloc(sizeof(SDLGUI));
 
-
-    for(int counterButton=0; counterButton<sizeArrayButtons; counterButton++){
-        
-        buttonsHostMenu[counterButton]=malloc(sizeof(SDLButtons));
-        buttonsHostMenu[counterButton]->text=malloc(sizeof(SDLText));
-    }
-    
+    initGUIHostMenu(mainWindow,guiHostMenu,SDLConfigElement,dbConnection);    
     initBackgroundHostMenu(mainWindow,&backgroundHostMenu);
-    SDLCreateBackgroundHostMenu(mainRenderer,&backgroundHostMenu);
 
-    initContainerHostMenu(mainWindow,containerHostMenu);
+    SDLCreateBackgroundHostMenu(mainRenderer,&backgroundHostMenu);
     // SDLCreateContainerHostMenu(mainRenderer,containerHostMenu);Pas nécessaire pour l'instant
 
-    initButtonsHostMenu(mainWindow,containerHostMenu,buttonsHostMenu, SDLConfigElement->ttf->fontMenu, &sizeArrayButtons, dbConnectionStatus);
-
-    for(int counterButton=0; counterButton<sizeArrayButtons; counterButton++){
+    for(int counterButton=0; counterButton<guiHostMenu->container->sizeArrayButtons; counterButton++){
         
-        SDLCreateButton(mainRenderer,buttonsHostMenu[counterButton]);
-        SDLCreateTextButton(mainRenderer,buttonsHostMenu[counterButton]);
+        SDLCreateButton(mainRenderer,guiHostMenu->container->arrayButtons[counterButton]);
+        SDLCreateTextButton(mainRenderer,guiHostMenu->container->arrayButtons[counterButton]);
     }
 
-
+    
     while(windowLoop){
 
         SDL_PollEvent(&event);
@@ -81,23 +65,23 @@ int SDLMainMenuLoop(SDL_Window  **mainWindow, SDL_Renderer **mainRenderer, SDLCo
 
             case SDL_MOUSEMOTION : 
 
-                for(int counterButton=0; counterButton<sizeArrayButtons; counterButton++){
+                for(int counterButton=0; counterButton<guiHostMenu->container->sizeArrayButtons; counterButton++){
 
                     if(saveButton == -1){
-                        if(event.motion.x >= buttonsHostMenu[counterButton]->rect.x && event.motion.x <= buttonsHostMenu[counterButton]->rect.w+buttonsHostMenu[counterButton]->rect.x && event.motion.y >= buttonsHostMenu[counterButton]->rect.y && event.motion.y <= buttonsHostMenu[counterButton]->rect.h+buttonsHostMenu[counterButton]->rect.y){
+                        if(event.motion.x >= guiHostMenu->container->arrayButtons[counterButton]->rect.x && event.motion.x <= guiHostMenu->container->arrayButtons[counterButton]->rect.w+guiHostMenu->container->arrayButtons[counterButton]->rect.x && event.motion.y >= guiHostMenu->container->arrayButtons[counterButton]->rect.y && event.motion.y <= guiHostMenu->container->arrayButtons[counterButton]->rect.h+guiHostMenu->container->arrayButtons[counterButton]->rect.y){
    
                             saveButton=counterButton;
-                            saveColor=buttonsHostMenu[counterButton]->color;
-                            buttonHoverEffect(mainRenderer,buttonsHostMenu[counterButton],SDLChangeRGBColor(buttonsHostMenu[counterButton]->color.r+10,buttonsHostMenu[counterButton]->color.g+10,buttonsHostMenu[counterButton]->color.b+10,255));
+                            saveColor=guiHostMenu->container->arrayButtons[counterButton]->color;
+                            buttonHoverEffect(mainRenderer,guiHostMenu->container->arrayButtons[counterButton],SDLChangeRGBColor(guiHostMenu->container->arrayButtons[counterButton]->color.r+10,guiHostMenu->container->arrayButtons[counterButton]->color.g+10,guiHostMenu->container->arrayButtons[counterButton]->color.b+10,255));
 
                         }
                     }
 
                     if(saveButton != -1){
-                        if(event.motion.x < buttonsHostMenu[saveButton]->rect.x || event.motion.x > buttonsHostMenu[saveButton]->rect.w+buttonsHostMenu[saveButton]->rect.x || event.motion.y < buttonsHostMenu[saveButton]->rect.y || event.motion.y > buttonsHostMenu[saveButton]->rect.h+buttonsHostMenu[saveButton]->rect.y){
+                        if(event.motion.x < guiHostMenu->container->arrayButtons[saveButton]->rect.x || event.motion.x > guiHostMenu->container->arrayButtons[saveButton]->rect.w+guiHostMenu->container->arrayButtons[saveButton]->rect.x || event.motion.y < guiHostMenu->container->arrayButtons[saveButton]->rect.y || event.motion.y > guiHostMenu->container->arrayButtons[saveButton]->rect.h+guiHostMenu->container->arrayButtons[saveButton]->rect.y){
                             
-                            buttonsHostMenu[saveButton]->color=saveColor;
-                            buttonHoverEffect(mainRenderer,buttonsHostMenu[saveButton],buttonsHostMenu[saveButton]->color);
+                            guiHostMenu->container->arrayButtons[saveButton]->color=saveColor;
+                            buttonHoverEffect(mainRenderer,guiHostMenu->container->arrayButtons[saveButton],guiHostMenu->container->arrayButtons[saveButton]->color);
                             saveButton= -1;
                         }  
                     }
@@ -108,14 +92,14 @@ int SDLMainMenuLoop(SDL_Window  **mainWindow, SDL_Renderer **mainRenderer, SDLCo
             case SDL_MOUSEBUTTONUP: 
 
                 
-                if(event.button.x >= buttonsHostMenu[3]->rect.x && event.button.x <= buttonsHostMenu[3]->rect.w+buttonsHostMenu[3]->rect.x){
-                    if(event.button.y >= buttonsHostMenu[3]->rect.y && event.button.y <= buttonsHostMenu[3]->rect.h+buttonsHostMenu[3]->rect.y){
+                if(event.button.x >= guiHostMenu->container->arrayButtons[3]->rect.x && event.button.x <= guiHostMenu->container->arrayButtons[3]->rect.w+guiHostMenu->container->arrayButtons[3]->rect.x){
+                    if(event.button.y >= guiHostMenu->container->arrayButtons[3]->rect.y && event.button.y <= guiHostMenu->container->arrayButtons[3]->rect.h+guiHostMenu->container->arrayButtons[3]->rect.y){
                         event.type=SDL_QUIT;
                     }
                 }
 
-                else if(event.button.x >= buttonsHostMenu[2]->rect.x && event.button.x <= buttonsHostMenu[2]->rect.w+buttonsHostMenu[2]->rect.x){
-                    if(event.button.y >= buttonsHostMenu[2]->rect.y && event.button.y <= buttonsHostMenu[2]->rect.h+buttonsHostMenu[2]->rect.y){
+                else if(event.button.x >= guiHostMenu->container->arrayButtons[2]->rect.x && event.button.x <= guiHostMenu->container->arrayButtons[2]->rect.w+guiHostMenu->container->arrayButtons[2]->rect.x){
+                    if(event.button.y >= guiHostMenu->container->arrayButtons[2]->rect.y && event.button.y <= guiHostMenu->container->arrayButtons[2]->rect.h+guiHostMenu->container->arrayButtons[2]->rect.y){
                         
                         
                     }
@@ -130,11 +114,11 @@ int SDLMainMenuLoop(SDL_Window  **mainWindow, SDL_Renderer **mainRenderer, SDLCo
             if(countMetroStation<backgroundHostMenu->sizeArrMetroStations){
 
                 countMetroStation++;
-                if(updateBackgroundMenu(mainRenderer,&backgroundHostMenu,buttonsHostMenu,sizeArrayButtons,countMetroStation)){
+                if(updateBackgroundMenu(mainRenderer,&backgroundHostMenu,guiHostMenu->container->arrayButtons,guiHostMenu->container->sizeArrayButtons,countMetroStation)){
 
                     //  for(int i=0 ; i<4; i++){
 
-                    //     buttonHoverEffect(mainRenderer,buttonsHostMenu[i],buttonsHostMenu[i]->color);
+                    //     buttonHoverEffect(mainRenderer,guiHostMenu->container->arrayButtons[i],guiHostMenu->container->arrayButtons[i]->color);
                         
                     //  }
                 }
@@ -143,16 +127,16 @@ int SDLMainMenuLoop(SDL_Window  **mainWindow, SDL_Renderer **mainRenderer, SDLCo
             /* Le temps "actuel" devient le temps "precedent" pour nos futurs calculs */
         }
         
+
         SDL_RenderPresent(*mainRenderer);
         
 
     }
 
 
-    for(int counterButton=0;counterButton<sizeArrayButtons;counterButton++){
-        // printf("freeSDLButton\n");
-        // printf("%d",buttonsHostMenu[counterButton]->text->sizeFont);
-        freeSDLButton(buttonsHostMenu[counterButton]);
+    for(int counterButton=0;counterButton<guiHostMenu->container->sizeArrayButtons;counterButton++){
+
+        freeSDLButton(guiHostMenu->container->arrayButtons[counterButton]);
         
     } 
 
@@ -163,7 +147,7 @@ int SDLMainMenuLoop(SDL_Window  **mainWindow, SDL_Renderer **mainRenderer, SDLCo
 
     free(backgroundHostMenu->arrMetroStations);
 
-    free(buttonsHostMenu);
+    free(guiHostMenu->container->arrayButtons);
     
     return 0;
 }

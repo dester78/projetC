@@ -33,4 +33,10 @@ void changeOverlapColorSurfaces(SDL_Rect *foreGroundRect, SDL_Surface **backGrou
 
 //Modifie un SDL_Rect afin d'y tracer une ligne à l'intérieur par la suite, le point de départ de la ligne et son arrivée sont renseignés
 void createLineRect(SDL_Rect *srcRect, SDL_Rect *dstRect, SDL_Rect *lineRect, SDL_Point *srcPoint, SDL_Point *dstPoint);
+
+void returnRandomColor(SDL_Color **arrColors, unsigned short sizeArrColor);
+
+short SDLCompareColor(SDL_Color *firstColor, SDL_Color *secondColor);
+
+
 #endif

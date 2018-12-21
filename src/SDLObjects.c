@@ -73,7 +73,7 @@ unsigned char controlCounterMetroStation;
         if((*backgroundMenu)->arrMetroStations[counterMetroStations]==0){
 
             (*backgroundMenu)->arrMetroStations[counterMetroStations]=malloc(sizeof(MetroStation));
-            (*backgroundMenu)->arrMetroStations[countMetroStation]->arrLinesColor=calloc((*backgroundMenu)->sizeArrMetroLinesColor,sizeof(Uint32));
+            (*backgroundMenu)->arrMetroStations[counterMetroStations]->arrLinesColor=calloc((*backgroundMenu)->sizeArrMetroLinesColor,sizeof(SDL_Color));
 
             geometricShape=(rand()%3)+1;
 
