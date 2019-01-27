@@ -18,33 +18,33 @@
 #include <mysql.h>
 
 int main(int argc, char **argv) {
-     
-    
+        
     MYSQL dbConnection;
     SDL_Window  *mainWindow;
     SDL_Renderer *mainRenderer;
     
     int lastRow=0;
+    short SDLLoop=0;
     char **arrayParameters;
 
     SDLConfig SDLConfigElement;
     DbConfig dbConfigElement;
-    Files **arrayFiles;
+    FileIndex *fileIndex;
+
+    fileIndex=initFileIndex();
 
     
-    arrayFiles=malloc(sizeof(Files*));
-    
-  
     // arrayFiles[0]=returnFileElement("errorLog.txt","a+");
-    arrayFiles[0]=returnFileElement("popTube.cfg","r+");
+
     // printf("%d",)
     // arrayFiles[1].filePointer=malloc(sizeof(FILE*));
 
     //if((arrayFiles[0].filePointer=openFluxFile(arrayFiles[0].fullName,arrayFiles[0].openMode))!=NULL){
         
-        if((arrayFiles[0]->filePointer=openFile(arrayFiles[0]->fullName,arrayFiles[0]->openMode))!=NULL){
-            returnFileParameters(arrayFiles[0]->filePointer,&lastRow,&arrayParameters); 
-
+        if((fileIndex->config->filePointer=openFile(fileIndex->config->fullName,fileIndex->config->openMode))!=NULL){
+            returnConfigFileParameters(fileIndex->config->filePointer,&lastRow,&arrayParameters); 
+            fclose(fileIndex->config->filePointer);
+            fileIndex->config->filePointer=NULL;
         }        
 
         else{
@@ -70,49 +70,53 @@ int main(int argc, char **argv) {
         }
     }
 
-    
-    
-
     if (SDL_Init( SDLConfigElement.init->initFlag ) != 0 ){
         fprintf(stderr,"Echec de l'initialisation de la SDL (%s)\n",SDL_GetError());
         return 0;
     }
-    else if(TTF_Init()==-1) {
+    if(TTF_Init()==-1) {
         fprintf(stderr,"Echec de l'initialisation de l'extension SDL_ttf (%s)\n",TTF_GetError());
         return 0;
     }
-    else{
+
+    if(IMG_Init(IMG_INIT_PNG)==0) {
+        fprintf(stderr,"Echec de l'initialisation de l'extension SDL_Image (%s)\n",IMG_GetError());
+        return 0;
+    }
+
+    while(SDLLoop!=-1){
+
         if((mainWindow=SDLCreateMainWindow(SDLConfigElement.window))!=NULL){
-            if((mainRenderer=SDLCreateMainRenderer(&mainWindow,SDLConfigElement.renderer->rendererFlag))!=NULL){
 
-                printf("mainRenderer : %p\n",mainRenderer);
-                while(SDLMainMenuLoop(
-                &mainWindow,&mainRenderer,
-                &SDLConfigElement,
-                &dbConfigElement,
-                &dbConnection,
-                arrayFiles) != 0){
+            initIMGConfig(SDLConfigElement.img,arrayParameters,lastRow,SDLConfigElement.window->windowWidth,SDLConfigElement.window->windowWidth);
 
-                }
+            if((mainRenderer=SDLCreateMainRenderer(mainWindow,SDLConfigElement.renderer->rendererFlag))!=NULL){
+
+                SDLLoop=SDLMainMenuLoop(mainWindow,mainRenderer,&SDLConfigElement,&dbConfigElement,&dbConnection,fileIndex);
+                SDL_DestroyWindow(mainWindow);
+                SDL_DestroyRenderer(mainRenderer);
             }
         }  
     }
+        
+
     
-    freeDbConfigElement(&dbConfigElement);
-    
-    freeSDLConfigElement(&SDLConfigElement);
-    
-    freeFileElement(arrayFiles[0]);
+    freeDbConfigElement(&dbConfigElement);  
+    freeSDLConfigElement(&SDLConfigElement);   
+    printf("avant free fileindex");
+
+    freeFileIndex(fileIndex);
+    printf("apre");
     
     // freeFileElement(arrayFiles[1]);
     // perror(createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__));
-    free(arrayFiles);
+    free(fileIndex);
     freeCharArray(&arrayParameters,lastRow);
     mysql_close(&dbConnection);
+    IMG_Quit();
     TTF_Quit();
     SDL_Quit();
     mysql_library_end();
-
   
 
     return 0;

@@ -3,9 +3,11 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include <SDLColor.h>
 #include <structures.h>
 #include <fileManager.h>
 #include <formatString.h>
+#include <SDL.h>
 
 
 
@@ -13,6 +15,8 @@
 FILE *openFile(char *fileName, char *openMode){
 
     FILE *file;
+
+    printf("%s",openMode);
 
     if((file=fopen(fileName,openMode))!=NULL){
         return file;
@@ -52,7 +56,7 @@ FILE *openFluxFile(char *fileName, char *openMode){
 }
 
 
-void returnFileParameters(FILE *configFile, int *lastRow, char ***arrayParameters){
+void returnConfigFileParameters(FILE *configFile, int *lastRow, char ***arrayParameters){
 
     char *fileRow; 
     int counterFileRow;
@@ -103,7 +107,23 @@ void returnFileParameters(FILE *configFile, int *lastRow, char ***arrayParameter
     free(arrayRowChar);
 
     *lastRow=counterParameters;
+}
 
+
+void loadMetroLineColor(FILE *filePointer, char *city, SDL_Color **arrColors, unsigned short *sizeArrColor){
+
+    char tmpCity[20];
+    int r,g,b;
+
+    fscanf(filePointer,"%s",tmpCity);
+    if(strncmp(city,tmpCity,strlen(city))==0){
+        while(fscanf(filePointer,"%d %d %d",&r,&g,&b),feof(filePointer)==0){
+            (*sizeArrColor)++;
+            (*arrColors)=realloc((*arrColors), *sizeArrColor*sizeof(SDL_Color));
+            (*arrColors)[*sizeArrColor-1]=SDLChangeRGBColor(r,g,b,255);
+        }
+
+    }
 }
 
 //Fonction parcourant un fichier passe en paramètre afin de compter le nombres de lignes et le nombre de caractères/ligne. Renvoie ensuite un tableau contenant ces informations.

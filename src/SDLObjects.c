@@ -1,13 +1,10 @@
 #include <stdio.h>
 
-#include <SDLObjectsStructures.h>
 #include <SDLConfigStructures.h>
 #include <SDLObjects.h>
-#include <SDLMain.h>
-#include <SDLDraw.h>
 
 #include <SDL.h>
-#include <SDL_ttf.h>
+
 
 
 
@@ -29,6 +26,8 @@ SDL_Window* SDLCreateMainWindow(SDLWindowConfig *windowConfigElement){
     else{
         if(SDL_GetCurrentDisplayMode(0,&currentDisplayMode)==0){
             if( (mainWindow = SDL_CreateWindow("PopTube",SDL_WINDOWPOS_UNDEFINED,SDL_WINDOWPOS_UNDEFINED,currentDisplayMode.w,currentDisplayMode.h,windowConfigElement->windowFlag))!=NULL){   
+                windowConfigElement->windowWidth=currentDisplayMode.w;
+                windowConfigElement->windowHeight=currentDisplayMode.h;
                 return mainWindow;
             }
             else{
@@ -43,11 +42,11 @@ SDL_Window* SDLCreateMainWindow(SDLWindowConfig *windowConfigElement){
     }
 }
 
-SDL_Renderer* SDLCreateMainRenderer(SDL_Window **mainWindow, long int rendererFlag){
+SDL_Renderer* SDLCreateMainRenderer(SDL_Window *mainWindow, long int rendererFlag){
 
     SDL_Renderer  *mainRenderer;
 
-    if((mainRenderer=SDL_CreateRenderer(*mainWindow,-1,rendererFlag))!=NULL){    
+    if((mainRenderer=SDL_CreateRenderer(mainWindow,-1,rendererFlag))!=NULL){    
         return mainRenderer;
     }
 
@@ -57,82 +56,8 @@ SDL_Renderer* SDLCreateMainRenderer(SDL_Window **mainWindow, long int rendererFl
     }
 }
 
-void SDLCreateMetroStationsMenu(SDLBackground **backgroundMenu,SDLButtons **buttonsHostMenu, unsigned short sizeArrayButtons ,unsigned short countMetroStation){
-
-SDL_Rect rectStation;
-SDL_Rect riskRect;
-int maxSize;
-int minSize=30;
-int geometricShape;
-unsigned char controlCounterMetroStation;
-
-    maxSize=3*minSize;
-
-    for(unsigned short counterMetroStations=0; counterMetroStations<countMetroStation; counterMetroStations++){
-
-        if((*backgroundMenu)->arrMetroStations[counterMetroStations]==0){
-
-            (*backgroundMenu)->arrMetroStations[counterMetroStations]=malloc(sizeof(MetroStation));
-            (*backgroundMenu)->arrMetroStations[counterMetroStations]->arrLinesColor=calloc((*backgroundMenu)->sizeArrMetroLinesColor,sizeof(SDL_Color));
-
-            geometricShape=(rand()%3)+1;
-
-            riskRect=SDLChangeRect(randInRange(maxSize,(*backgroundMenu)->rect.w-maxSize),randInRange(maxSize,(*backgroundMenu)->rect.h-maxSize), maxSize, maxSize);   
-
-            //Vérifie si des stations de métro ne risquent pas de se chevaucher, recalcul la position de la station de métro si c'est le cas
-            if(counterMetroStations>0){
-
-                for(controlCounterMetroStation=0; controlCounterMetroStation<counterMetroStations; controlCounterMetroStation++){
-                    if(createOverlapRect(&(*backgroundMenu)->arrMetroStations[controlCounterMetroStation]->rect,&riskRect,NULL)==1){
-
-                        riskRect=SDLChangeRect(randInRange(maxSize,(*backgroundMenu)->rect.w-maxSize),randInRange(maxSize,(*backgroundMenu)->rect.h-maxSize), maxSize, maxSize);   
-                        controlCounterMetroStation=0;
-                    }
-                }
-            }
-
-            rectStation=SDLChangeRect(riskRect.x,riskRect.y,minSize,minSize);
-            initMetroStation((*backgroundMenu)->arrMetroStations[counterMetroStations],geometricShape,rectStation,maxSize,SDL_MapRGBA((*backgroundMenu)->surface->format,0,255,0,255));
-            
-            //Indique si la station risque de chevaucher un bouton du menu pour controler seulement les stations à risque lors des mises à jour. 
-            for(unsigned char counterButton=0; (*backgroundMenu)->arrMetroStations[counterMetroStations]->overlapRisk==0 && counterButton<sizeArrayButtons ; counterButton++){
-                (*backgroundMenu)->arrMetroStations[counterMetroStations]->overlapRisk=createOverlapRect(&(buttonsHostMenu[counterButton]->rect),&riskRect,NULL);
-            }
-        }
-    }
-}
-
-void createMetroLine(SDLBackground **backgroundMenu,SDLButtons **buttonsHostMenu, unsigned short sizeArrayButtons ,unsigned short countMetroStation){
-
-    if((*backgroundMenu)->sizeArrMetroLines>0){
-        (*backgroundMenu)->arrMetroLines=realloc((*backgroundMenu)->arrMetroLines,sizeof(MetroLine*)*(*backgroundMenu)->sizeArrMetroLines);
-    }
 
 
-
-}
-
-
-void SDLCreateBackgroundHostMenu(SDL_Renderer **mainRenderer, SDLBackground **background){
-
-   
-    if(((*background)->surface=SDL_CreateRGBSurfaceWithFormat(0, (*background)->rect.w,(*background)->rect.h, 32, SDL_PIXELFORMAT_RGBA8888))!=NULL){
-
-        if((SDL_FillRect((*background)->surface,&(*background)->rect,SDL_MapRGBA((*background)->surface->format,255,255,255,255)))==0){
-
-            if(((*background)->texture=SDL_CreateTextureFromSurface(*mainRenderer,(*background)->surface))!=NULL){
-
-                if(SDL_RenderCopy(*mainRenderer,(*background)->texture,NULL,&(*background)->rect)==0){
-                    SDL_RenderPresent(*mainRenderer);
-                }
-                else{fprintf(stderr,"Echec lors de la copie de texture dans le rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
-            }
-            else{fprintf(stderr,"Echec lors de la convertion de la surface en texture dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
-        }
-        else{fprintf(stderr,"Echec lors du remplissage de la surface par un rectangle dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
-    }
-    else{fprintf(stderr,"Echec lors la creation de la surface dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
-}
 
 
 // void SDLCreateBackgroundHostMenu(SDL_Renderer *mainRenderer, SDLBackground *background){
@@ -171,102 +96,6 @@ void SDLCreateBackgroundHostMenu(SDL_Renderer **mainRenderer, SDLBackground **ba
     
 
 // }
-
-void SDLCreateTextButton(SDL_Renderer **mainRenderer, SDLButtons* buttonHostMenu){
-
-    int wText;
-    int hText;
-
-    //Règle le placement vertical des boutons en fonction de l'affichage la fenêtre
-
-    if((buttonHostMenu->text->font=TTF_OpenFont(buttonHostMenu->text->fontPath,buttonHostMenu->text->sizeFont))!=NULL){
-        if((buttonHostMenu->text->surface=TTF_RenderText_Blended(buttonHostMenu->text->font,buttonHostMenu->text->content,buttonHostMenu->text->color))!=NULL){
-            if((buttonHostMenu->text->texture=SDL_CreateTextureFromSurface(*mainRenderer,buttonHostMenu->text->surface))!=NULL){
-                SDL_FreeSurface(buttonHostMenu->text->surface);
-
-                if(SDL_QueryTexture(buttonHostMenu->text->texture, NULL, NULL, &buttonHostMenu->text->rect.w, &buttonHostMenu->text->rect.h)==0){
-                    if(TTF_SizeText(buttonHostMenu->text->font,buttonHostMenu->text->content,&wText,&hText)==0){
-                        buttonHostMenu->text->rect.x=buttonHostMenu->rect.x+buttonHostMenu->rect.w/2 - wText/2;
-                        buttonHostMenu->text->rect.y=buttonHostMenu->rect.y+buttonHostMenu->rect.h/2 - hText/2;
-                        if(SDL_RenderCopy(*mainRenderer,buttonHostMenu->text->texture,NULL,&buttonHostMenu->text->rect)==0){
-                            SDL_RenderPresent(*mainRenderer);
-                        }
-                        else{fprintf(stderr,"Echec lors de la copie de texture dans le rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());}
-                    }
-                    else{fprintf(stderr,"Echec lors de la récupération de la taille de police dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,TTF_GetError());}
-                }
-                else{fprintf(stderr,"Echec lors du la récupération des attributs de la texture dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
-            }
-            else{fprintf(stderr,"Echec lors la creation de la texture dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
-        } 
-        else{fprintf(stderr,"Echec lors la creation la création de la surface de texte dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,TTF_GetError());}
-    }
-    else{fprintf(stderr,"Echec lors de l'ouverture de la police dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,TTF_GetError());}
-}
-
-
-void SDLCreateContainerHostMenu(SDL_Renderer **mainRenderer,SDLContainer *containerHostMenu){
-
-    
-    if((containerHostMenu->texture=SDL_CreateTexture(*mainRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,containerHostMenu->rect.w,containerHostMenu->rect.h))!=NULL){
-
-        // if(SDL_RenderClear(*mainRenderer)==0){   
-            if(SDL_SetTextureBlendMode(containerHostMenu->texture,SDL_BLENDMODE_BLEND)==0){
-                if(SDL_SetRenderTarget(*mainRenderer, containerHostMenu->texture)==0){
-                    //if(SDL_SetRenderDrawColor(*mainRenderer,containerHostMenu->color.r,containerHostMenu->color.g,containerHostMenu->color.b,containerHostMenu->color.a)==0){
-                        if(SDL_SetRenderTarget(*mainRenderer, NULL)==0){
-                            // if(SDL_QueryTexture(containerHostMenu->texture, NULL, NULL, &containerHostMenu->rect.w, &containerHostMenu->rect.h)==0){
-
-                                if(SDL_RenderCopy(*mainRenderer,containerHostMenu->texture,NULL,&containerHostMenu->rect)==0){
-                                    SDL_RenderPresent(*mainRenderer);
-                                }
-                                else{fprintf(stderr,"Echec lors de la copie de texture dans le rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
-                            // }
-                            // else{fprintf(stderr,"Echec lors du la récupération des attributs de la texture dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
-                        } 
-                        else{fprintf(stderr,"Echec lors du deciblage de la texture par le renderer dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());}                   
-                    // } 
-                    // else{fprintf(stderr,"Echec lors du reglage de la couleur de rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
-                }
-                else{fprintf(stderr,"Echec lors du ciblage de la texture par le renderer dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
-            }
-            else{fprintf(stderr,"Echec lors dde la mise en place du blend mode sur la texture dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
-        // }
-        // else{fprintf(stderr,"Echec lors du remplissage du renderer par la couleur de rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());}
-    }
-    else{fprintf(stderr,"Echec lors la creation de la texture dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
-}
-
-
-void SDLCreateButton(SDL_Renderer **mainRenderer,SDLButtons* button){
-
-    if((button->texture=SDL_CreateTexture(*mainRenderer, SDL_PIXELFORMAT_RGBA8888, SDL_TEXTUREACCESS_TARGET,button->rect.w,button->rect.h))!=NULL){
-        if(SDL_SetRenderTarget(*mainRenderer,button->texture)==0){
-            if(SDL_SetRenderDrawColor(*mainRenderer,button->color.r, button->color.g, button->color.b, button->color.a )==0){
-                if(SDL_RenderClear(*mainRenderer)==0){
-                    if(SDL_SetRenderTarget(*mainRenderer,NULL)==0){
-                        if(SDL_QueryTexture(button->texture, NULL, NULL, &button->rect.w, &button->rect.h)==0){
-
-                            if(SDL_RenderCopy(*mainRenderer,button->texture,NULL,&button->rect)==0){
-                                
-                                SDL_RenderPresent(*mainRenderer);
-                                SDL_SetRenderTarget(*mainRenderer,NULL);
-                            }
-
-                            else{fprintf(stderr,"Echec lors de la copie de texture dans le rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
-                        }
-                        else{fprintf(stderr,"Echec lors de la recuperation des attribut de la texture dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
-                    }
-                    else{fprintf(stderr,"Echec lors du ciblage de la texture par le renderer dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());}
-                }
-                else{fprintf(stderr,"Echec lors du remplissage du renderer par la couleur de rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());}
-            }
-            else{fprintf(stderr,"Echec lors du reglage de la couleur de rendu dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());} 
-        }
-        else{fprintf(stderr,"Echec lors du ciblage de la texture par le renderer dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
-    }
-    else{fprintf(stderr,"Echec lors la creation de la texture dans le fichier %s ligne %d (%s)\n",__FILE__,__LINE__,SDL_GetError());}
-}  
 
 
 

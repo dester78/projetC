@@ -2,6 +2,7 @@
 #define FILEMANAGER
 #include <structures.h>
 #include <stdio.h>
+#include <SDL.h>
 
 
 //Fonction permettant d'ouvrir un fichier, en fonction de son nom complet, et son mode d'ouverture, 
@@ -13,10 +14,15 @@ FILE *openFile(char *fileName, char *openMode);
 //Elle a pour rôle supplementaire de redirige un flux vers le fichier ouvert, par defaut stderr.
 FILE *openFluxFile(char *fileName, char *openMode);
 
+
+
+void loadMetroLineColor(FILE *filePointer, char *city, SDL_Color **arrColors, unsigned short *sizeArrColor);
+
+
 //Fonction renvoyant un tableau de chaines de caractères, ce tableau stock seulement les chaines correspondant à des paramètres. 
 //Elle prend en paramètre un pointeur du fichier qui sera parcouru, un tableau contenant les informations de tailles du fichier (nb lignes / nb caractères)
 //et la longueur du dit tableau. 
-void returnFileParameters(FILE *configFile, int *lastRow,char ***arrayParameters );
+void returnConfigFileParameters(FILE *configFile, int *lastRow,char ***arrayParameters );
 
 //Fonction renvoyant un tableau contenant les informations de tailles d'un fichier (nb lignes / nb caractères), le pointeur FILE* passe en paramètre permet le parcours de ce fichier, 
 //le second paramètre est un pointeur permettant de recuperer la longueur du tableau. La valeur de retour est le nombre de paramètres presents dans le fichier.

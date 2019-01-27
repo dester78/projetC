@@ -2,15 +2,7 @@
 #define SDLCONFIGSTRUCTURES
 
 
-typedef struct SDLConfig{
 
-    
-    struct SDLWindowConfig *window;
-    struct SDLInitConfig *init;
-    struct SDLRendererConfig *renderer;
-    struct TTFConfig *ttf;
-
-}SDLConfig;
 
 
 typedef struct SDLWindowConfig{
@@ -40,12 +32,33 @@ typedef struct TTFConfig{
 
 }TTFConfig;
 
+typedef struct IMGConfig{
+
+    char *IMGDirectory;
+    char *parisMap;
+    
+}IMGConfig;
+
+
+typedef struct SDLConfig{
+
+    
+    SDLWindowConfig *window;
+    SDLInitConfig *init;
+    SDLRendererConfig *renderer;
+    TTFConfig *ttf;
+    IMGConfig *img;
+     
+
+}SDLConfig;
+
 
 int initSDLConfig(SDLConfig *SDLConfigElement,char **arrayParameters,int lastRow );
 void initSDLWindowConfig(SDLWindowConfig *windowConfigElement, char **arrayParameters,int lastRow );
 void initSDLInitConfig(SDLInitConfig *initConfigElement, char **arrayParameters,int lastRow );
 void initSDLRendererConfig(SDLRendererConfig *rendererConfigElement, char **arrayParameters,int lastRow );
 void initTTFConfig(TTFConfig *ttfConfigElement, char **arrayParameters,int lastRow );
+void initIMGConfig(IMGConfig *IMGConfigElement, char **arrayParameters,int lastRow , int windowWidth, int windowHeight);
 
 
 

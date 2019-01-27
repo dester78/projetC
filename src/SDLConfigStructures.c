@@ -55,6 +55,11 @@ int initSDLConfig(SDLConfig *SDLConfigElement,char **arrayParameters, int lastRo
         return 0;
     }
 
+    if((SDLConfigElement->img=(malloc(sizeof(IMGConfig))))==NULL){
+        createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
+        return 0;
+    }
+
     return 1;
     
     
@@ -166,7 +171,9 @@ void initTTFConfig(TTFConfig *ttfConfigElement, char **arrayParameters,int lastR
 
     int counterParameters=0;
 
-    ttfConfigElement->fontDirectory="fonts/";
+    ttfConfigElement->fontDirectory=malloc(sizeof(char)*strlen("fonts/")+1);
+
+    strcpy(ttfConfigElement->fontDirectory,"fonts/");
 
     while( counterParameters< lastRow){
 
@@ -174,7 +181,7 @@ void initTTFConfig(TTFConfig *ttfConfigElement, char **arrayParameters,int lastR
 
             free(ttfConfigElement->fontDirectory);
 
-            if((ttfConfigElement->fontDirectory = malloc( sizeof(char) * (strlen(arrayParameters[counterParameters]) - strlen("fontDirectory="))+1)) != NULL){
+            if((ttfConfigElement->fontDirectory = calloc( (strlen(arrayParameters[counterParameters]) - strlen("fontDirectory="))+1,sizeof(char))) != NULL){
                 
                 strcpy(ttfConfigElement->fontDirectory , (arrayParameters[counterParameters]+ strlen("fontDirectory=")));
                 formatFullPath(&ttfConfigElement->fontDirectory);
@@ -193,7 +200,7 @@ void initTTFConfig(TTFConfig *ttfConfigElement, char **arrayParameters,int lastR
     
         if( strncmp(arrayParameters[counterParameters], "fontMenu=" , strlen("fontMenu=")) == 0){
 
-            if((ttfConfigElement->fontMenu = malloc( sizeof(char) * strlen(arrayParameters[counterParameters]) - strlen("fontMenu=")+strlen(ttfConfigElement->fontDirectory))) != NULL){
+            if((ttfConfigElement->fontMenu = calloc(strlen(arrayParameters[counterParameters]) - strlen("fontMenu=")+strlen(ttfConfigElement->fontDirectory),sizeof(char))) != NULL){
                 strcpy(ttfConfigElement->fontMenu , ttfConfigElement->fontDirectory);
                 strcat(ttfConfigElement->fontMenu , (arrayParameters[counterParameters]+ strlen("fontMenu=")));
             }
@@ -206,6 +213,48 @@ void initTTFConfig(TTFConfig *ttfConfigElement, char **arrayParameters,int lastR
     }
 }
 
+void initIMGConfig(IMGConfig *IMGConfigElement, char **arrayParameters,int lastRow , int windowWidth, int windowHeight){
+
+    int counterParameters=0;
+    int stringDimensions[2]={0};
+
+    IMGConfigElement->IMGDirectory=malloc(sizeof(char)*strlen("img/")+1);
+    strcpy(IMGConfigElement->IMGDirectory,"img/");
+
+    while( counterParameters< lastRow){
+
+        if( strncmp(arrayParameters[counterParameters], "parisMap=" , strlen("parisMap=")) == 0){
+
+            if((IMGConfigElement->parisMap = calloc(strlen(IMGConfigElement->IMGDirectory)+strlen(arrayParameters[counterParameters]) - strlen("parisMap=")+1,sizeof(char))) != NULL){
+                extractWindowDimensionsFromString(arrayParameters[counterParameters]+ strlen("parisMap="),stringDimensions);
+
+                if(windowWidth>=stringDimensions[0] || windowHeight>=stringDimensions[1]){
+                    if(IMGConfigElement->parisMap!=NULL){
+                        free(IMGConfigElement->parisMap);
+                        if((IMGConfigElement->parisMap = calloc(strlen(IMGConfigElement->IMGDirectory)+strlen(arrayParameters[counterParameters]) - strlen("parisMap=")+1,sizeof(char))) == NULL){
+                            createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
+                        }
+                    }
+                    
+                    strcpy(IMGConfigElement->parisMap,IMGConfigElement->IMGDirectory);
+                    strcat(IMGConfigElement->parisMap , (arrayParameters[counterParameters]+ strlen("parisMap=")));  
+                    if(windowWidth==stringDimensions[0] && windowHeight==stringDimensions[1]){
+                        break;
+                    }
+                                          
+                }
+            }
+            else{
+                createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
+            }
+        }
+        counterParameters++;
+    }
+}
+
+
+
+
 
 void freeSDLConfigElement(SDLConfig *SDLConfigElement){
 
@@ -215,5 +264,9 @@ void freeSDLConfigElement(SDLConfig *SDLConfigElement){
     free(SDLConfigElement->ttf->fontDirectory);
     free(SDLConfigElement->ttf->fontMenu);
     free(SDLConfigElement->ttf);
+
+    free(SDLConfigElement->img->IMGDirectory);    
+    free(SDLConfigElement->img->parisMap);
+    free(SDLConfigElement->img);
 }
 

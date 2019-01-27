@@ -23,7 +23,11 @@
 			"sdl_version.h": "c",
 			"sdl_video.h": "c",
 			"sdldraw.h": "c",
-			"sdldrawfunctions.h": "c"
+			"sdldrawfunctions.h": "c",
+			"sdlobjectsstructures.h": "c",
+			"sdlrectpoint.h": "c",
+			"sdlcolor.h": "c",
+			"sdlbackgroundobjects.h": "c"
 		}
 	}
 }

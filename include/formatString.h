@@ -14,4 +14,7 @@ void deleteEndSpace(char **row  );
 //si s'en est un la fonction rajoute un \ si il n'y en a pas en fin de chaine.
 void formatFullPath(char ** fullPathString);
 
+void extractWindowDimensionsFromString(char *string, int *dimension);
+
+
 #endif

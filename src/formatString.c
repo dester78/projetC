@@ -33,6 +33,33 @@ sizeRow=strlen(*row);
     }
 }
 
+void extractWindowDimensionsFromString(char *string, int *dimension){
+
+    char stringDimension[5];
+    unsigned char  counterCharNumber=0;
+    
+    for(unsigned char counterChar=0; counterChar<strlen(string);counterChar++){
+
+        if(string[counterChar]>=48&&string[counterChar]<=57){
+            counterCharNumber++;
+        }
+        else if((string[counterChar]<48||string[counterChar]>57)&&counterCharNumber!=0){
+            
+            strncpy(stringDimension,string+(counterChar-counterCharNumber),counterCharNumber);
+            stringDimension[4]='\0';
+
+            counterCharNumber=0;
+
+            if(dimension[0]==0){
+                dimension[0]=atoi(stringDimension);//Stock la largeur
+            }
+            else{
+                dimension[1]=atoi(stringDimension);//Stock la hauteur
+            }
+        }
+    }
+}
+
 void formatFullPath(char ** fullPathString){
 
     int sizeString;

@@ -7,11 +7,28 @@
 #include <fileManager.h>
 
 
-Files *returnFileElement(char *fullName, char* openMode  ){
+FileIndex * initFileIndex(){
 
-    Files *fileElement;
+    FileIndex *fileIndex;
 
-    fileElement=malloc(sizeof(Files));
+    fileIndex=malloc(sizeof(FileIndex));
+
+    // fileIndex->err=returnFileElement("errorLog.txt","a+");
+    fileIndex->config=returnFileElement("popTube.cfg","r+");
+    fileIndex->config->filePointer=NULL;
+    fileIndex->metroLineColor=returnFileElement("txt/metroLineColors.txt","r");
+    fileIndex->metroLineColor->filePointer=NULL;
+
+
+    return fileIndex;
+
+}
+
+File *returnFileElement(char *fullName, char* openMode  ){
+
+    File *fileElement;
+
+    fileElement=malloc(sizeof(File));
 
     if((fileElement->fullName=malloc(sizeof(char)*(strlen( fullName )+1 ) ) ) != NULL){
 
@@ -35,11 +52,6 @@ Files *returnFileElement(char *fullName, char* openMode  ){
         createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
     }
     
-    if((fileElement->filePointer=malloc(sizeof(FILE*)))==NULL){
-
-        createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
-    }
-
     return fileElement;
 }
 
@@ -70,7 +82,7 @@ int initDbConfig(DbConfig *dbConfigElement, char **arrayParameters,int lastRow )
                 if(strcmp(dbConfigElement->user,"root")==0){
 
                     if((dbConfigElement->passwd = malloc(sizeof(char)*strlen("root")))!= NULL){
-                            strcpy(dbConfigElement->passwd,"root");
+                        strcpy(dbConfigElement->passwd,"root");
                     }
                     else{
                         createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
@@ -122,10 +134,24 @@ int initDbConfig(DbConfig *dbConfigElement, char **arrayParameters,int lastRow )
     return 1;
 }
 
-void freeFileElement(Files *fileElement){
+void freeFileIndex(FileIndex *fileIndex){
+
+    // freeFileElement(fileIndex->err);
+    freeFileElement(fileIndex->config);
+    free(fileIndex->config);
+
+    freeFileElement(fileIndex->metroLineColor);
+    free(fileIndex->metroLineColor);
+
+}
+
+
+void freeFileElement(File *fileElement){
 
     free(fileElement->fullName);
-    fclose(fileElement->filePointer);
+    if(fileElement->filePointer!=NULL){
+        fclose(fileElement->filePointer);
+    }
 }
 
 
