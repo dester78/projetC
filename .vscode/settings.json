@@ -13,7 +13,14 @@
         "sdlmain.h": "c",
         "filemanager.h": "c",
         "sdlconfigstructures.h": "c",
-        "dbmanager.h": "c"
+        "dbmanager.h": "c",
+        "sdlbackgroundobjects.h": "c",
+        "sdlmetrostation.h": "c",
+        "sdlmetroline.h": "c",
+        "sdlguiobjects.h": "c",
+        "mathcalculation.h": "c",
+        "sdldraw.h": "c",
+        "sdlobjectsstructures.h": "c"
     },
     "C_Cpp.errorSquiggles": "Enabled"
 }

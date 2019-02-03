@@ -69,14 +69,15 @@ SDLGUI *initGUILevel(SDL_Window  *mainWindow, SDLConfig *SDLConfigElement){
 }
 
 
-SDLTimer *initTimer(){
+SDLTimer *initTimer(int refreshFrequency){
 
     SDLTimer *timer;
 
     if((timer=malloc(sizeof(SDLTimer)))!=NULL){
-        timer->currentTime=SDL_GetTicks();
-        timer->pastTime=timer->currentTime;
-        timer->clickTime=timer->currentTime;
+        timer->refreshCurrentTime=SDL_GetTicks();
+        timer->refreshFrequency=refreshFrequency;
+        timer->refreshPastTime=timer->refreshCurrentTime;
+        timer->clickTime=timer->refreshCurrentTime;
         return timer;
     }
     
@@ -158,13 +159,13 @@ short initButtonSideContainerLevel(SDLContainer *container, ContainerPosition co
                 switch(counterButton){
                     case 0:
                         container->arrayButtons[counterButton]->surface=IMG_Load("img/loco60x60.png");
-                        container->arrayButtons[counterButton]->buttonName=_LOCO_;
-                        container->arrayButtons[counterButton]->text->content=malloc(sizeof(char)*backgroundLevel->sizeArrLoco);
+                        container->arrayButtons[counterButton]->buttonName=_ENGINE_BTN_;
+                        container->arrayButtons[counterButton]->text->content=malloc(sizeof(char)*backgroundLevel->sizeArrEngine);
                     break;
                     case 1:
                         container->arrayButtons[counterButton]->surface=IMG_Load("img/railcar60x60.png");
-                        container->arrayButtons[counterButton]->buttonName=_RAILCAR_;
-                        container->arrayButtons[counterButton]->text->content=malloc(sizeof(char)*backgroundLevel->sizeArrRailCar);
+                        container->arrayButtons[counterButton]->buttonName=_CAR_BTN_;
+                        container->arrayButtons[counterButton]->text->content=malloc(sizeof(char)*backgroundLevel->sizeArrCar);
                     break;               
                 }               
                 container->arrayButtons[counterButton]->insideColor=SDLChangeRGBColor(255,255,255,255);
@@ -230,7 +231,10 @@ short initButtonSideContainerLevel(SDLContainer *container, ContainerPosition co
                 }
                 container->arrayButtons[counterButton]->color=SDLChangeRGBColor(255,255,255,255);
             break;
+            default : 
+            break;
         }   
+        
         container->arrayButtons[counterButton]->savedColor=container->arrayButtons[counterButton]->insideColor;
         container->arrayButtons[counterButton]->selected=0;
     }
@@ -344,7 +348,6 @@ void initMetroStation(MetroStation *metroStation, unsigned short geometricShape,
     metroStation->centerPoint.x=rect->x+rect->w/2;
     metroStation->centerPoint.y=rect->y+rect->h/2;
     
-    metroStation->sizeArrLinkedMetroSegment=0;
     metroStation->surface=NULL;
     metroStation->texture=NULL;
     metroStation->geometricShape=geometricShape;
@@ -361,7 +364,7 @@ void initMetroStation(MetroStation *metroStation, unsigned short geometricShape,
 }
 
 
-SDLLevel *initGameLevel(LevelName levelName,char *backgroundIMGPath, unsigned short difficulty,File *metroLineColorFile, SDL_Rect *borderContainer){
+SDLLevel *initGameLevel(SDLTimer *timer,LevelName levelName,char *backgroundIMGPath, unsigned short difficulty,File *metroLineColorFile, SDL_Rect *borderContainer){
 
 
     SDLLevel *level;
@@ -376,10 +379,10 @@ SDLLevel *initGameLevel(LevelName levelName,char *backgroundIMGPath, unsigned sh
         case _PARIS_:
 
             if(level->difficulty==1){
-                level->metroStationApparitionFrequency=10;
+                timer->metroStationApparitionFrequency=1000;
                 level->satisfactionFactor=1.2;
                 level->cycleDuration=3;
-                level->background=initLevelBackground(backgroundIMGPath,metroLineColorFile,levelName,borderContainer); 
+                level->background=initLevelBackground(backgroundIMGPath,metroLineColorFile,levelName,borderContainer,3,3,10,40,20); 
                 level->background->countUnlockMetroLine=3;
             }    
         break;
@@ -388,18 +391,21 @@ SDLLevel *initGameLevel(LevelName levelName,char *backgroundIMGPath, unsigned sh
     return level;
 }
 
-SDLBackground *initLevelBackground(  char *backgroundIMGPath, File *metroLineColorFile, LevelName levelName, SDL_Rect *borderContainer){
+SDLBackground *initLevelBackground(  char *backgroundIMGPath, File *metroLineColorFile, LevelName levelName, SDL_Rect *borderContainer, unsigned short sizeArrCar, unsigned short sizeArrEngine, unsigned short sizeArrMetroStation, unsigned short sizeMetroStation, unsigned short sizeTransport ){
 
     SDLBackground *background;
 
     background=malloc(sizeof(SDLBackground));
     background->arrMetroLinesColor=malloc(sizeof(SDL_Color));
     background->sizeArrMetroLinesColor=0;
-    background->sizeArrMetroStations=10;
+    background->sizeArrMetroStations=sizeArrMetroStation;
+    background->sizeArrEngine=sizeArrEngine;
+    background->sizeArrCar=sizeArrCar;
     background->countMetroStation=0;
     background->surface=NULL;
     background->texture=NULL;
-    background->sizeMetroStation=40;
+    background->sizeMetroStation=sizeMetroStation;
+    background->sizeTransport=sizeTransport;
 
     background->arrMetroStations=calloc(background->sizeArrMetroStations,sizeof(MetroStation*));
     metroLineColorFile->filePointer=openFile(metroLineColorFile->fullName,metroLineColorFile->openMode);
@@ -412,7 +418,11 @@ SDLBackground *initLevelBackground(  char *backgroundIMGPath, File *metroLineCol
     fclose(metroLineColorFile->filePointer);
     metroLineColorFile->filePointer=NULL;
     background->sizeArrMetroLines=background->sizeArrMetroLinesColor;
+    background->metroLineThickness=background->sizeMetroStation/background->sizeArrMetroLinesColor;
     background->arrMetroLines=malloc(sizeof(MetroLine*)*background->sizeArrMetroLinesColor);
+    background->arrCar=calloc(background->sizeArrCar,sizeof(Car*));
+    background->arrEngine=calloc(background->sizeArrEngine,sizeof(Engine*));
+    
 
     background->surface=SDL_LoadBMP(backgroundIMGPath);
     background->rect=SDLChangeRect(borderContainer->w,borderContainer->w,background->surface->w-borderContainer->w,background->surface->h-borderContainer->w);
@@ -421,15 +431,22 @@ SDLBackground *initLevelBackground(  char *backgroundIMGPath, File *metroLineCol
         background->arrMetroStations[counterMetroStation]=malloc(sizeof(MetroStation));
         background->arrMetroStations[counterMetroStation]->arrOtherMetroStations=malloc((background->sizeArrMetroStations-1)*sizeof(MetroStation*));
     }
-    for(short counterMetroLine=0;counterMetroLine<background->sizeArrMetroStations;counterMetroLine++){
+
+    for(short counterCar=0; counterCar <background->sizeArrCar; counterCar++){
+        background->arrCar[counterCar]=NULL;
+    }
+
+    for(short counterEngine=0; counterEngine <background->sizeArrEngine; counterEngine++){
+        background->arrEngine[counterEngine]=NULL;
+    }
+
+    for(short counterMetroLine=0;counterMetroLine<background->sizeArrMetroLinesColor;counterMetroLine++){
         background->arrMetroLines[counterMetroLine]=malloc(sizeof(MetroLine));
+        background->arrMetroLines[counterMetroLine]->color=background->arrMetroLinesColor[counterMetroLine];
         background->arrMetroLines[counterMetroLine]->arrMetroSegment=malloc(sizeof(MetroSegment*));
         background->arrMetroLines[counterMetroLine]->sizeArrSegment=0;
     }
-
     return background;
-
-
 }
 
 
@@ -593,11 +610,6 @@ void freeMetroSegment(MetroSegment *metroSegment){
 
 
 void freeMetroStation(MetroStation *metroStation){
-
-    if(metroStation->arrLinkedMetroSegment!=NULL){
-        free(metroStation->arrLinkedMetroSegment);
-        metroStation->arrLinkedMetroSegment=NULL;
-    }   
 
     if(metroStation->arrOtherMetroStations!=NULL){
         free(metroStation->arrOtherMetroStations);

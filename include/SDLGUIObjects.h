@@ -17,4 +17,9 @@ void updateMenuButtonColor(SDL_Renderer *mainRenderer, SDLButtons* button, SDL_C
 
 void updateLevelButtonColor(SDL_Renderer *mainRenderer, SDLButtons* button);
 
+short getSelectedMetroLineCounter(SDLContainer *container);
+short getSelectedTransportButton(SDLContainer *container);
+
+void buttonEventManagerLevel(SDL_Renderer *mainRenderer, SDL_Point *mousePoint,SDLContainer *rightContainer, SDLContainer *leftContainer, short selectBool );
+
 #endif

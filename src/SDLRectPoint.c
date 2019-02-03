@@ -4,6 +4,148 @@
 
 #include <SDL.h>
 
+Orientation defineOrientation(SDL_Point *currentPoint, SDL_Point *nextPoint){
+
+    if(currentPoint->x<nextPoint->x){
+        return _LEFT_RIGHT_;
+    }
+    if(currentPoint->x>nextPoint->x){
+        return _RIGHT_LEFT_;
+    }
+    if(currentPoint->y<nextPoint->y){
+        return _TOP_BOTTOM_;
+    }
+    if(currentPoint->y>nextPoint->y){
+        return _BOTTOM_TOP_;
+    }
+}
+
+// void centerRectOnLine()
+
+void centerRectOnRect(SDL_Rect *targetRect, SDL_Rect *centeredRect, Axe axe){
+
+
+    if(axe==_X_){
+        centeredRect->x=targetRect->x+targetRect->w/2-centeredRect->w;
+    }
+
+    else if(axe==_Y_){
+        centeredRect->y=targetRect->y+targetRect->h/2-centeredRect->y;
+    }
+     
+}
+
+void centerPointOnRect(SDL_Rect *targetRect, SDL_Point *centeredPoint, Axe axe){
+
+    if(axe==_X_){
+        centeredPoint->x=targetRect->x+targetRect->w/2;
+    }
+
+    else if(axe==_Y_){
+       centeredPoint->y=targetRect->y+targetRect->h/2;
+    }
+}
+
+
+void centerRectOnPoint(SDL_Rect *centeredRect, SDL_Point *targetPoint, Axe axe){
+
+    if(axe==_X_){
+        centeredRect->x=targetPoint->x-centeredRect->w/2;
+    }
+
+    else if(axe==_Y_){
+        centeredRect->y=targetPoint->y-centeredRect->h/2;
+    }
+}
+
+
+
+void setPointsPositionInRect(SDL_Point *srcPoint, SDL_Point *dstPoint, SDL_Rect *childRect, SDL_Rect *parentRect, int translation){
+
+    SDL_Point tmpSrcPoint; 
+    SDL_Point tmpDstPoint;
+
+    if(srcPoint!=NULL){
+        tmpSrcPoint=*srcPoint;
+    }
+    if(dstPoint!=NULL){
+        tmpDstPoint=*dstPoint;
+    }
+
+
+    // printf("\n\nchildRect.x : %d, childRect.y : %d,childRect.w : %d,childRect.h : %d\n",childRect->x,childRect->y,childRect->w,childRect->h);
+    // printf("parentRect.x : %d, parentRect.y : %d,parentRect.w : %d,parentRect.h : %d\n",parentRect->x,parentRect->y,parentRect->w,parentRect->h);
+
+    // tmpDstPoint=relativePointPositionInRect(&tmpDstPoint,parentRect);
+    // tmpSrcPoint=relativePointPositionInRect(&tmpSrcPoint,childRect);
+
+    // printf("tmpSrcPoint.y : %d\n",tmpSrcPoint.y);
+    // printf("tmpSrcPoint.x : %d\n",tmpSrcPoint.x);
+    // printf("tmpDstPoint.y : %d\n",tmpDstPoint.y);
+    // printf("tmpDstPoint.x : %d\n\n",tmpDstPoint.x);
+    if(childRect->h>childRect->w){
+
+        if(tmpSrcPoint.y<tmpDstPoint.y){
+            tmpSrcPoint.y=childRect->y;
+            tmpDstPoint.y=childRect->y+childRect->h;
+        }
+        else if(tmpSrcPoint.y>tmpDstPoint.y){
+            tmpDstPoint.y=childRect->y;
+            tmpSrcPoint.y=childRect->y+childRect->h;
+        }
+        
+        // printf("AVANT CENTRAGE X tmpSrcPoint.y : %d\n",tmpSrcPoint.y);
+        // printf("AVANT CENTRAGE X tmpSrcPoint.x : %d\n",tmpSrcPoint.x);
+        // printf("AVANT CENTRAGE X tmpDstPoint.y : %d\n",tmpDstPoint.y);
+        // printf("AVANT CENTRAGE X tmpDstPoint.x : %d\n\n",tmpDstPoint.x);
+        
+        // centerPointOnRect(childRect,&tmpSrcPoint,_X_);
+        // centerPointOnRect(childRect,&tmpDstPoint,_X_);
+    }
+
+    else if(childRect->w>childRect->h){
+
+        if(tmpSrcPoint.x<tmpDstPoint.x){
+            tmpSrcPoint.x=childRect->x;
+            tmpDstPoint.x=childRect->x+childRect->w;
+        }
+        else if(tmpSrcPoint.x>tmpDstPoint.x){
+            tmpDstPoint.x=childRect->x;
+            tmpSrcPoint.x=childRect->x+childRect->w;
+        }
+        
+        // printf("AVANT CENTRAGE Y tmpSrcPoint.y : %d\n",tmpSrcPoint.y);
+        // printf("AVANT CENTRAGE Y tmpSrcPoint.x : %d\n",tmpSrcPoint.x);
+        // printf("AVANT CENTRAGE Y tmpDstPoint.y : %d\n",tmpDstPoint.y);
+        // printf("AVANT CENTRAGE Y tmpDstPoint.x : %d\n\n",tmpDstPoint.x);
+        // centerPointOnRect(childRect,&tmpSrcPoint,_Y_);
+        // centerPointOnRect(childRect,&tmpDstPoint,_Y_);
+    }
+    // printf("tmpSrcPoint.y : %d\n",tmpSrcPoint.y);
+    // printf("tmpSrcPoint.x : %d\n",tmpSrcPoint.x);
+    // printf("tmpDstPoint.y : %d\n",tmpDstPoint.y);
+    // printf("tmpDstPoint.x : %d\n\n",tmpDstPoint.x);
+    // tmpDstPoint=absolutePointPositionInRect(&tmpDstPoint,childRect);
+    // tmpSrcPoint=absolutePointPositionInRect(&tmpSrcPoint,childRect);
+    // printf("tmpSrcPoint.y : %d\n",tmpSrcPoint.y);
+    // printf("tmpSrcPoint.x : %d\n",tmpSrcPoint.x);
+    // printf("tmpDstPoint.y : %d\n",tmpDstPoint.y);
+    // printf("tmpDstPoint.x : %d\n\n",tmpDstPoint.x);
+    tmpDstPoint=absolutePointPositionInRect(&tmpDstPoint,parentRect);
+    tmpSrcPoint=absolutePointPositionInRect(&tmpSrcPoint,parentRect);
+    // printf("tmpSrcPoint.y : %d\n",tmpSrcPoint.y);
+    // printf("tmpSrcPoint.x : %d\n",tmpSrcPoint.x);
+    // printf("tmpDstPoint.y : %d\n",tmpDstPoint.y);
+    // printf("tmpDstPoint.x : %d\n\n",tmpDstPoint.x);
+
+    if(srcPoint!=NULL){
+        *srcPoint=tmpSrcPoint;
+    }
+    if(dstPoint!=NULL){
+        *dstPoint=tmpDstPoint;  
+    }
+}
+
 
 void marginAuto(SDL_Rect *parentRect, SDL_Rect *childrenRect, unsigned short childrenPosition, unsigned short childrenCount,  Axe axe ){
 
@@ -31,13 +173,54 @@ void marginAuto(SDL_Rect *parentRect, SDL_Rect *childrenRect, unsigned short chi
     
 }
 
-void resizeRect(SDL_Rect *rect, int newScale){
+// void resizeRect(SDL_Rect *rect, int newScale){
 
-    rect->x-= newScale;
-    rect->y-= newScale;
-    rect->w+= newScale/2;
-    rect->h+= newScale/2;
+//     rect->x-= newScale;
+//     rect->y-= newScale;
+//     rect->w+= newScale/2;
+//     rect->h+= newScale/2;
+// }
+
+// SDL_Rect substractRectDimensions(SDL_Rect *firstRect , SDL_Rect *secondRect){
+
+//     SDL_Rect resultRect;
+
+//     resultRect.x=firstRect->x;
+//     resultRect.y=firstRect->y;
+//     resultRect.w=firstRect->w-secondRect->w;
+//     resultRect.w=firstRect->x-secondRect->x;
+
+
+
+
+// }
+
+void setRectBehindRectWithOrientation(SDL_Rect *currentRect, SDL_Rect *nextRect, Orientation orientation){
+
+    switch(orientation){
+
+        case _BOTTOM_TOP_:
+            currentRect->x=nextRect->x;
+            currentRect->y=nextRect->y+currentRect->h;
+        break;
+
+        case _TOP_BOTTOM_:
+            currentRect->x=nextRect->x;
+            currentRect->y=nextRect->y-currentRect->h;
+        break;
+
+        case _LEFT_RIGHT_:
+            currentRect->y=nextRect->y;
+            currentRect->x=nextRect->x-currentRect->w;
+        break;
+
+        case _RIGHT_LEFT_:
+            currentRect->y=nextRect->y;
+            currentRect->x=nextRect->x+currentRect->w;
+        break;
+    }
 }
+
 
 SDL_Point createPointXY(int x , int y){
 

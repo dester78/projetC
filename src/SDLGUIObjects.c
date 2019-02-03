@@ -240,23 +240,60 @@ void updateLevelButtonColor(SDL_Renderer *mainRenderer, SDLButtons* button){
 
 
 void displayGUILevel(SDL_Renderer *mainRenderer, SDLGUI *gui){
-
-
     SDLContainer *tmpContainer;
 
     for(unsigned short counterContainer=0; counterContainer<2; counterContainer++){
-
         tmpContainer=counterContainer==0?gui->leftContainer:gui->rightContainer;
-        printf("containerPointer : %p\n",tmpContainer);
         displayContainer(mainRenderer,tmpContainer);
-        printf("okDisplayContainer\n");
          for(unsigned short counterButton=0;counterButton < tmpContainer->sizeArrayButtons ; counterButton ++){
-             printf("counterButton : %d\n",counterButton);
             if(tmpContainer->arrayButtons[counterButton]->display){
                 displayButtonInCircle(mainRenderer,tmpContainer->arrayButtons[counterButton]);
             }
         }
-        printf("okDisplayContainer2\n");
         tmpContainer=NULL;
     }
 }
+
+
+short getSelectedMetroLineCounter(SDLContainer *container){
+
+    for(int counterButtons=3; counterButtons<container->sizeArrayButtons; counterButtons++){
+        if(container->arrayButtons[counterButtons]->selected){
+            return counterButtons-3; 
+        }
+    }
+    return -1;
+}
+
+
+short getSelectedTransportButton(SDLContainer *container){
+
+    for(int counterButtons=0; counterButtons<container->sizeArrayButtons; counterButtons++){
+        if(container->arrayButtons[counterButtons]->selected){
+            return container->arrayButtons[counterButtons]->buttonName;
+        }
+    }
+    return -1;
+}
+
+void buttonEventManagerLevel(SDL_Renderer *mainRenderer, SDL_Point *mousePoint,SDLContainer *rightContainer, SDLContainer *leftContainer, short selectBool ){
+
+    for(int counterButton=3; counterButton<rightContainer->sizeArrayButtons; counterButton++){
+        if(hasIntersectPointRect(mousePoint,&rightContainer->arrayButtons[counterButton]->rect)){
+            controlSelectButton(mainRenderer, rightContainer->arrayButtons,counterButton, 3,rightContainer->sizeArrayButtons,selectBool);
+        }
+    }
+
+    for(int counterButton=0; counterButton<3; counterButton++){
+        if(hasIntersectPointRect(mousePoint,&rightContainer->arrayButtons[counterButton]->rect)){
+            controlSelectButton(mainRenderer, rightContainer->arrayButtons,counterButton, 0,3,1);
+        }
+    }       
+    for(int counterButton=0; counterButton<leftContainer->sizeArrayButtons; counterButton++){
+        if(hasIntersectPointRect(mousePoint,&leftContainer->arrayButtons[counterButton]->rect)){
+            controlSelectButton(mainRenderer, leftContainer->arrayButtons,counterButton, 0,leftContainer->sizeArrayButtons,selectBool);
+        }
+    }
+}
+
+        

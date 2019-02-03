@@ -15,7 +15,6 @@ void controlPixelPosition(Uint32 *pixel, int xPixel, int yPixel, int wSurface, i
   } 
 }
 
-
 void drawCircle(Uint32 **pixels,int xCenter, int yCenter, int radius,int wSurface, int hSurface, Uint32 pixelColor){
 
   int diameter, y, x;
@@ -90,7 +89,7 @@ void drawVariableRect(SDL_Surface **surface, int xRect,int yRect,int wRect,int h
     SDL_FillRect(*surface, &rect, colorRect);
 }
  
-int drawFillTriangle(SDL_Surface **surface, int xLeftRoot, int yLeftRoot, int wRoot, Uint32 color, TriangleOrientation triangleOrientation ){
+int drawFillTriangle(SDL_Surface **surface, int xLeftRoot, int yLeftRoot, int wRoot, Uint32 color, Orientation orientation ){
 
     int counterLine=0;
     
@@ -98,11 +97,11 @@ int drawFillTriangle(SDL_Surface **surface, int xLeftRoot, int yLeftRoot, int wR
 
     while(counterLine!=(wRoot/2 + 1 )){
 
-        if(triangleOrientation==_LEFT_RIGHT_){
+        if(orientation==_LEFT_RIGHT_){
             drawVariableRect(surface, xLeftRoot+counterLine, yLeftRoot-wRoot+counterLine, 1,wRoot-(counterLine*2), color);
             drawVariableRect(surface, xLeftRoot+counterLine, yLeftRoot-wRoot+counterLine,1, wRoot-(counterLine*2), color);
         }
-        else if(triangleOrientation==_BOTTOM_TOP_){
+        else if(orientation==_BOTTOM_TOP_){
             drawVariableRect(surface, xLeftRoot+counterLine, yLeftRoot-counterLine*2-1, wRoot-(counterLine*2),1, color);
             drawVariableRect(surface, xLeftRoot+counterLine, yLeftRoot-counterLine*2, wRoot-(counterLine*2),1, color);
         }
@@ -112,7 +111,7 @@ int drawFillTriangle(SDL_Surface **surface, int xLeftRoot, int yLeftRoot, int wR
 }
 
 
-void drawGeometricShapeInGeometricShape(SDL_Surface *surface,SDL_Rect *rect,  Uint32 color, Uint32 insideColor, GeometricShape geometricShape, unsigned short centeringFactor, TriangleOrientation triangleOrientation){
+void drawGeometricShapeInGeometricShape(SDL_Surface *surface,SDL_Rect *rect,  Uint32 color, Uint32 insideColor, GeometricShape geometricShape, unsigned short centeringFactor, Orientation orientation){
 
     SDL_Rect tmpRect;
 
@@ -135,7 +134,7 @@ void drawGeometricShapeInGeometricShape(SDL_Surface *surface,SDL_Rect *rect,  Ui
         break;
 
         case 2 :
-            drawFillTriangle(&surface,(shiftCounter*rect->w/centeringFactor)/2,tmpRect.h+(shiftCounter*rect->h/centeringFactor)/2,tmpRect.w,color, triangleOrientation);
+            drawFillTriangle(&surface,(shiftCounter*rect->w/centeringFactor)/2,tmpRect.h+(shiftCounter*rect->h/centeringFactor)/2,tmpRect.w,color, orientation);
         break;
         }
     }

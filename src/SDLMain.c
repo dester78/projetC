@@ -10,6 +10,7 @@
 #include <SDLColor.h>
 #include <SDLObjects.h>
 #include <SDLBackgroundObjects.h>
+#include <SDLMetroStation.h>
 #include <SDLGUIObjects.h>
 #include <SDLRectPoint.h>
 
@@ -36,8 +37,8 @@ int SDLMainMenuLoop(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer, SDLConf
     printf("OKBackground");
 
     environment->background=initBackgroundHostMenu(mainWindow);
-    environment->timer=initTimer();
-
+    environment->timer=initTimer(1);
+    environment->timer->metroStationApparitionFrequency=1000;
     SDLCreateBackgroundHostMenu(mainRenderer,environment->background);
 
     for(int counterButton=0; counterButton<environment->gui->container->sizeArrayButtons; counterButton++){
@@ -80,7 +81,7 @@ int SDLMainMenuLoop(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer, SDLConf
                 if(hasIntersectPointRect(&mousePoint,&environment->gui->container->arrayButtons[1]->rect)){  
                     freeBackground(environment->background);   
                     freeSDLGUI(environment->gui);  
-                    launchLevel(environment,SDLConfigElement,fileIndex,_PARIS_,1);            
+                    levelLoop(environment,SDLConfigElement,fileIndex,_PARIS_,1);            
                 }
 
                 else if(hasIntersectPointRect(&mousePoint,&environment->gui->container->arrayButtons[3]->rect)){                  
@@ -105,8 +106,8 @@ int SDLMainMenuLoop(SDL_Window  *mainWindow, SDL_Renderer *mainRenderer, SDLConf
 void addMetroLineAndStationMenu( SDLBackground *backgroundMenu,SDLButtons **buttonsHostMenu, unsigned short sizeArrayButtons){
 
     SDLCreateMetroStations(backgroundMenu,_MENU_ );  
-    fillArrayMetroStationPoints(backgroundMenu->arrMetroStations,backgroundMenu->sizeArrMetroStations);     
-    sortArrayMetroStationPoints(backgroundMenu->arrMetroStations,backgroundMenu->sizeArrMetroStations);
+    fillArrayMetroStation(backgroundMenu->arrMetroStations,backgroundMenu->sizeArrMetroStations);     
+    sortArrayMetroStationByDistance(backgroundMenu->arrMetroStations,backgroundMenu->sizeArrMetroStations);
 
     SDLCreateMetroLineMenu(backgroundMenu); 
     SDLCreateMetroSegmentMenu(backgroundMenu);
@@ -114,7 +115,7 @@ void addMetroLineAndStationMenu( SDLBackground *backgroundMenu,SDLButtons **butt
 
 
 
-short launchLevel(SDLEnvironment *environment, SDLConfig *SDLConfigElement,FileIndex *FileIndex, LevelName levelName, unsigned short difficulty){
+short levelLoop(SDLEnvironment *environment, SDLConfig *SDLConfigElement,FileIndex *FileIndex, LevelName levelName, unsigned short difficulty){
 
     short levelLoop;
     SDL_Point mousePoint;
@@ -126,14 +127,14 @@ short launchLevel(SDLEnvironment *environment, SDLConfig *SDLConfigElement,FileI
     //Nouvelle partie : 
     switch(levelName){
         case _PARIS_:
-            environment->level=initGameLevel( levelName,SDLConfigElement->img->parisMap,difficulty,FileIndex->metroLineColor,&environment->gui->leftContainer->rect);
+            environment->level=initGameLevel( environment->timer,levelName,SDLConfigElement->img->parisMap,difficulty,FileIndex->metroLineColor,&environment->gui->leftContainer->rect);
             environment->gui->rightContainer=initContainer(environment->mainWindow,_RIGHT_,environment->level->background->sizeArrMetroLinesColor+3);
         break;
     }
     SDLCreateBackgroundLevel(environment->mainRenderer,environment->level->background,environment->mainWindow);
     SDLCreateMetroStations(environment->level->background,_LEVEL_);
-    fillArrayMetroStationPoints(environment->level->background->arrMetroStations,environment->level->background->sizeArrMetroStations);     
-    sortArrayMetroStationPoints(environment->level->background->arrMetroStations,environment->level->background->sizeArrMetroStations);
+    fillArrayMetroStation(environment->level->background->arrMetroStations,environment->level->background->sizeArrMetroStations);     
+    sortArrayMetroStationByDistance(environment->level->background->arrMetroStations,environment->level->background->sizeArrMetroStations);
 
 
     if(initButtonSideContainerLevel(environment->gui->leftContainer,  _LEFT_, SDLConfigElement->ttf->fontMenu, environment->level->background)==0){
@@ -144,6 +145,8 @@ short launchLevel(SDLEnvironment *environment, SDLConfig *SDLConfigElement,FileI
         createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
         return 0;
     }    
+
+    // printf("background->texture apres :%p \n",environment->level->background->texture);
     printf("apres init");
     displayGUILevel(environment->mainRenderer,environment->gui);
 
@@ -166,55 +169,22 @@ short launchLevel(SDLEnvironment *environment, SDLConfig *SDLConfigElement,FileI
                         select=0;
                     break;
                 }
-                    if(controlUserEventTime(environment)){
+                if(controlUserEventTime(environment)){
                     mousePoint=createPointXY(environment->event.button.x,environment->event.button.y);
-                    // environment->timer
+                    //   
                     
-                    for(int counterMetroStation=0; counterMetroStation<environment->level->background->sizeArrMetroStations; counterMetroStation++){
-                        if(hasIntersectPointRect(&mousePoint,&environment->level->background->arrMetroStations[counterMetroStation]->rect) && environment->level->background->arrMetroStations[counterMetroStation]->display){
-                            printf("toto");
-                            short counterTest=controlSelectedMetroStation(environment->mainRenderer, environment->level->background->arrMetroStations,counterMetroStation, environment->level->background->sizeArrMetroStations,select);
-                            printf("counterTest : %d",counterTest);
-                            if(counterTest==2){
-                                short metroLineCounter=getSelectedMetroLineCounter(environment->gui->rightContainer);
-                                createMetroSegmentLevel(&environment->level->background->arrMetroLines[metroLineCounter],environment->level->background->arrMetroStations,environment->level->background->sizeArrMetroStations,metroLineCounter,environment->level->background->metroLineThickness);
-                                
-                                for(int i = 0 ; i<environment->level->background->arrMetroLines[metroLineCounter]->sizeArrSegment;i++){
-                                    printf("Counter : %d",i);
-                                }
-                            }
-                        }
-                    } 
-                    for(int counterButton=3; counterButton<environment->gui->rightContainer->sizeArrayButtons; counterButton++){
-                        if(hasIntersectPointRect(&mousePoint,&environment->gui->rightContainer->arrayButtons[counterButton]->rect)){
-                            controlSelectButton(environment->mainRenderer, environment->gui->rightContainer->arrayButtons,counterButton, 3,environment->gui->rightContainer->sizeArrayButtons,select);
-                        }
-                    }
-                    for(int counterButton=0; counterButton<3; counterButton++){
-                        if(hasIntersectPointRect(&mousePoint,&environment->gui->rightContainer->arrayButtons[counterButton]->rect)){
-                            controlSelectButton(environment->mainRenderer, environment->gui->rightContainer->arrayButtons,counterButton, 0,3,1);
-                        }
-                    }   
-                    for(int counterButton=0; counterButton<environment->gui->leftContainer->sizeArrayButtons; counterButton++){
-                        if(hasIntersectPointRect(&mousePoint,&environment->gui->leftContainer->arrayButtons[counterButton]->rect)){
-                            controlSelectButton(environment->mainRenderer, environment->gui->leftContainer->arrayButtons,counterButton, 0,environment->gui->leftContainer->sizeArrayButtons,select);
-                        }
-                    }
-                    
-                    
-                    // for(short i=0;i<environment->background->sizeArrMetroStations;i++){
-                    //     printf("station : %d",i);
-                    //     printf("station : %d , selected : %d \n",i,environment->level->background->arrMetroStations[i]->selected);
-                    // }
-                    // if(select==0){
-                    //     controlSelectedMetroStation(environment->mainRenderer, environment->level->background->arrMetroStations,0, environment->level->background->sizeArrMetroStations,select);
-                    // }
+
+                    buttonEventManagerLevel(environment->mainRenderer,&mousePoint,environment->gui->rightContainer,environment->gui->leftContainer,select);
+                    metroLineEventManagerLevel(environment->mainRenderer, environment->level->background, environment->gui->rightContainer,environment->level->background->arrMetroLines,environment->level->background->arrMetroStations,environment->level->background->sizeArrMetroLines, environment->level->background->sizeArrMetroStations,environment->level->background->metroLineThickness,&mousePoint,select,_RIGHT_);
+
+                    transportEventManager(environment->mainRenderer,&mousePoint,environment->gui->leftContainer,environment->gui->rightContainer, &environment->level->background->arrMetroLines, &environment->level->background->arrCar, &environment->level->background->arrEngine,environment->level->background->sizeArrMetroLines,&environment->level->background->sizeArrCar, &environment->level->background->sizeArrEngine, environment->level->background->sizeTransport, &mousePoint,environment->level->background->metroLineThickness, select);
                 }
                 
             break; 
                                 
         }
-
+        // printf("background->texture : %p\n",environment->level->background->texture);
+        
         refreshBackground(environment,_LEVEL_);
         SDL_RenderPresent(environment->mainRenderer);
 
@@ -222,4 +192,6 @@ short launchLevel(SDLEnvironment *environment, SDLConfig *SDLConfigElement,FileI
     return 0;
 
 }
+
+
 

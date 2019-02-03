@@ -1,5 +1,8 @@
 #include <SDLObjectsStructures.h>
-#include <SDLBackgroundObjects.h>
+#include <SDLMetroStation.h>
+#include <SDLMetroLine.h>
+#include <SDLTransport.h>
+
 
 #include<SDL.h>
 
@@ -7,61 +10,70 @@
 
 
 
-void refreshBackgroundHostMenu(SDLEnvironment *environment){
+// void refreshBackgroundHostMenu(SDLEnvironment *environment){
 
-    environment->timer->currentTime = SDL_GetTicks();
-        if (environment->timer->currentTime - environment->timer->pastTime > 1000) /* Si 30 ms se sont écoulées depuis le dernier tour de boucle */{
+//     environment->timer->refreshCurrentTime = SDL_GetTicks();
+//         if (environment->timer->refreshCurrentTime - environment->timer->refreshPastTime > 1000) /* Si 30 ms se sont écoulées depuis le dernier tour de boucle */{
             
-            if(environment->background->countMetroStation<environment->background->sizeArrMetroStations){
-                environment->background->countMetroStation++; 
-            }
-            updateDisplayMetroLineMenu(environment->mainRenderer, environment->background,environment->gui->container->arrayButtons,environment->gui->container->sizeArrayButtons);
-            updateDisplayMetroStations(environment->mainRenderer,environment->background,environment->gui->container->arrayButtons,environment->gui->container->sizeArrayButtons,_MENU_);
+//             if(environment->background->countMetroStation<environment->background->sizeArrMetroStations){
+//                 environment->background->countMetroStation++; 
+//             }
+//             updateDisplayMetroLineMenu(environment->mainRenderer, environment->background,environment->gui->container->arrayButtons,environment->gui->container->sizeArrayButtons);
+//             updateDisplayMetroStations(environment->mainRenderer,environment->background,environment->gui->container->arrayButtons,environment->gui->container->sizeArrayButtons,_MENU_);
 
-             environment->timer->pastTime = environment->timer->currentTime ; 
-        }
-}
+//              environment->timer->refreshPastTime = environment->timer->refreshCurrentTime ; 
+//         }
+// }
 
 void refreshBackground(SDLEnvironment *environment,MenuLevel menuOrLevel){
 
     SDLBackground *background;
-    int frequency;
+    // int frequency;
 
     background=menuOrLevel==_LEVEL_?environment->level->background:environment->background;
-    frequency=menuOrLevel==_LEVEL_?environment->level->metroStationApparitionFrequency:1000;
+    // frequency=menuOrLevel==_LEVEL_?environment->timer->refreshFrequency:1000;
 
-    environment->timer->currentTime = SDL_GetTicks();
-        if (environment->timer->currentTime - environment->timer->pastTime > frequency){
+    environment->timer->refreshCurrentTime = SDL_GetTicks();
+    environment->timer->addMetroStationCurrentTime = SDL_GetTicks();
+        if (environment->timer->refreshCurrentTime - environment->timer->refreshPastTime > environment->timer->refreshFrequency){
             
-            if(background->countMetroStation<background->sizeArrMetroStations){
-                background->countMetroStation++; 
+            if(environment->timer->addMetroStationCurrentTime - environment->timer->addMetroStationPastTime > environment->timer->metroStationApparitionFrequency){
+
+
+                if(background->countMetroStation<background->sizeArrMetroStations){
+                        background->countMetroStation++; 
+                        environment->timer->addMetroStationPastTime=environment->timer->addMetroStationCurrentTime;
+                        // updateDisplayMetroStations(environment->mainRenderer,background,environment->gui->container->arrayButtons,environment->gui->container->sizeArrayButtons,_MENU_);
+                    }
+                
+                if(menuOrLevel==_MENU_){
+                    updateDisplayMetroLineMenu(environment->mainRenderer, background,environment->gui->container->arrayButtons,environment->gui->container->sizeArrayButtons);
+                    updateDisplayMetroStations(environment->mainRenderer,background,environment->gui->container->arrayButtons,environment->gui->container->sizeArrayButtons,_MENU_);
+                    
+                }
+                
+                
             }
-
-            if(menuOrLevel==_MENU_){
-                updateDisplayMetroLineMenu(environment->mainRenderer, background,environment->gui->container->arrayButtons,environment->gui->container->sizeArrayButtons);
-                updateDisplayMetroStations(environment->mainRenderer,background,environment->gui->container->arrayButtons,environment->gui->container->sizeArrayButtons,_MENU_);
-            }
-
-            else{
-                // printf("metroLine1 : %p\n",environment->level->background->arrMetroLines[0]);
-                // printf("arrMetroLine : %p\n",environment->level->background->arrMetroLines);
-
-                // printf("SIZE AR SGEMENT : %d",environment->level->background->arrMetroLines[0]->sizeArrSegment);
-                updateDisplayMetroLineLevel(environment->mainRenderer, &environment->level->background->arrMetroLines,&environment->level->background->arrMetroStations, environment->level->background->sizeArrMetroLines, environment->level->background->sizeArrMetroStations );
-
+            if(menuOrLevel==_LEVEL_){
+                    
+                updateDisplayMetroLineLevel(environment->mainRenderer, &background->arrMetroLines,&background->arrMetroStations, background->sizeArrMetroLines, background->sizeArrMetroStations );
                 updateDisplayMetroStations(environment->mainRenderer,background,NULL,NULL,_LEVEL_);
-            }
-            // updateDisplayMetroLineMenu(environment->mainRenderer, background,environment->gui->container->arrayButtons,environment->gui->container->sizeArrayButtons);
-           
+                updateDisplayEngines(environment->mainRenderer,background,&background->arrEngine,&background->arrMetroLines,&background->arrMetroStations,background->sizeArrEngine,background->sizeArrMetroLines,background->sizeArrMetroStations,background->metroLineThickness);
+                // updateDisplayEngines(environment->mainRenderer, environment->level->background,environment->level->background->arrEngine, MetroLine **arrMetroLine, MetroStation **arrMetroStation,unsigned short sizeArrEngine, unsigned short sizeArrMetroLine, int sizeArrMetroStation ){
 
-            environment->timer->pastTime = environment->timer->currentTime ; 
+                // updateColorMetroStation(environment->mainRenderer,environment->level->background->arrMetroStations,environment->level->background->sizeArrMetroStations);
+            }
+        
+                
+            environment->timer->refreshPastTime = environment->timer->refreshCurrentTime ; 
         }
 }
 
+//Permet de gérer la durée des évenements provenant des utilisateurs
 short controlUserEventTime(SDLEnvironment *environment){
 
 
-    environment->timer->currentTime = SDL_GetTicks();
+    environment->timer->userEventCurrentTime = SDL_GetTicks();
 
     switch(environment->event.type){
 
@@ -78,3 +90,4 @@ short controlUserEventTime(SDLEnvironment *environment){
     return 0;
 }
 // SDL_Event
+
