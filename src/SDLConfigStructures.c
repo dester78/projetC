@@ -1,5 +1,6 @@
 #include <stdlib.h>
 #include <string.h>
+#include <errno.h>
 
 #include <SDLConfigStructures.h>
 #include <fileManager.h>
@@ -7,73 +8,71 @@
 
 #include <SDL.h>
 
+/*
+ * ─── FONCTIONS D'INITIALISATION DE STRUCTURES ────────────────────────────────────
+ */
 
 
-int initSDLConfig(SDLConfig *SDLConfigElement,char **arrayParameters, int lastRow ){
+short initSDLConfig(SDLConfig *SDLConfigElement,char **arrayParameters, int lastRow ){
 
-    if((SDLConfigElement->window=(malloc(sizeof(SDLWindowConfig))))!=NULL){
-
-        initSDLWindowConfig(SDLConfigElement->window ,arrayParameters, lastRow);
+    if((SDLConfigElement->window=(malloc(sizeof(SDLWindowConfig))))==NULL){
+        createErrorReport("Echec d'allocation memoire.",__FILE__,__LINE__,__DATE__,__TIME__);
+        return 0;    
+    }
+    if(initSDLWindowConfig(SDLConfigElement->window ,arrayParameters, lastRow)==0){
+        createErrorReport("Echec lors de l'initialisation de la configuration de la fenetre.",__FILE__,__LINE__,__DATE__,__TIME__);
+        return 0;    
     }
 
-    else{
-        createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
-        return 0;
+    if((SDLConfigElement->init=(malloc(sizeof(SDLInitConfig))))==NULL){
+        createErrorReport("Echec d'allocation memoire.",__FILE__,__LINE__,__DATE__,__TIME__);
+        return 0;  
+    }
+
+    initSDLInitConfig(SDLConfigElement->init ,arrayParameters, lastRow);
+
+
+
+    if((SDLConfigElement->renderer=(malloc(sizeof(SDLRendererConfig))))==NULL){
+        createErrorReport("Echec d'allocation memoire.",__FILE__,__LINE__,__DATE__,__TIME__);
+        return 0;    
+
     }
     
+    initSDLRendererConfig(SDLConfigElement->renderer ,arrayParameters, lastRow);
 
-    if((SDLConfigElement->init=(malloc(sizeof(SDLInitConfig))))!=NULL){
 
-        initSDLInitConfig(SDLConfigElement->init ,arrayParameters, lastRow);
-
-    }
-
-    else{
-        createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
-        return 0;
-    }
-
-    if((SDLConfigElement->renderer=(malloc(sizeof(SDLRendererConfig))))!=NULL){
-
-        initSDLRendererConfig(SDLConfigElement->renderer ,arrayParameters, lastRow);
+    if((SDLConfigElement->ttf=(malloc(sizeof(TTFConfig))))==NULL){
+        createErrorReport("Echec d'allocation memoire.",__FILE__,__LINE__,__DATE__,__TIME__);
+        return 0;   
+        
 
     }
-
-    else{
-        createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
-        return 0;
+    if(initTTFConfig(SDLConfigElement->ttf ,arrayParameters, lastRow)==0){
+        createErrorReport("Echec lors de l'initialisation de la configuration de la SDL TFF.",__FILE__,__LINE__,__DATE__,__TIME__);
+        return 0; 
     }
 
-    if((SDLConfigElement->ttf=(malloc(sizeof(TTFConfig))))!=NULL){
-
-        initTTFConfig(SDLConfigElement->ttf ,arrayParameters, lastRow);
-
-    }
-
-    else{
-        createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
-        return 0;
-    }
 
     if((SDLConfigElement->img=(malloc(sizeof(IMGConfig))))==NULL){
-        createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
-        return 0;
+        createErrorReport("Echec d'allocation memoire.",__FILE__,__LINE__,__DATE__,__TIME__);
+        return 0;  
     }
 
     return 1;
-    
-    
+
 }
 
-void initSDLWindowConfig(SDLWindowConfig *windowConfigElement, char **arrayParameters, int lastRow ){
+short initSDLWindowConfig(SDLWindowConfig *windowConfigElement, char **arrayParameters, int lastRow ){
 
     int counterParameters=0;
     windowConfigElement->windowFlag=0x00000000;
     windowConfigElement->windowHeight=0;
     windowConfigElement->windowWidth=0;
+    
 
     while( counterParameters<lastRow ){
-
+        errno=0;
         if( strncmp(arrayParameters[counterParameters], "SDL_WindowFlags=" , strlen("SDL_WindowFlags=")) == 0){
 
             if(strstr(arrayParameters[counterParameters],"SDL_WINDOW_FULLSCREEN")!=NULL){
@@ -93,38 +92,15 @@ void initSDLWindowConfig(SDLWindowConfig *windowConfigElement, char **arrayParam
             
             windowConfigElement->windowWidth=atoi( arrayParameters[counterParameters]+ strlen("windowWidth="));
         }
-        counterParameters++;
-    }
-
-}
-
-void initSDLRendererConfig(SDLRendererConfig *rendererConfigElement, char **arrayParameters, int lastRow ){
-
-    int counterParameters=0;
-    rendererConfigElement->rendererFlag=0x00000000;
-    
-    while( counterParameters<lastRow ){
-
-        if( strncmp(arrayParameters[counterParameters], "SDL_RendererFlags=" , strlen("SDL_RendererFlags=")) == 0){
-
-            if(strstr(arrayParameters[counterParameters],"SDL_RENDERER_ACCELERATED")!=NULL){
-                rendererConfigElement->rendererFlag=rendererConfigElement->rendererFlag|SDL_RENDERER_ACCELERATED;
-            }
-            else if(strstr(arrayParameters[counterParameters],"SDL_RENDERER_PRESENTVSYNC")!=NULL){
-                rendererConfigElement->rendererFlag=rendererConfigElement->rendererFlag|SDL_RENDERER_PRESENTVSYNC;
-            }
-            else if(strstr(arrayParameters[counterParameters],"SDL_RENDERER_TARGETTEXTURE")!=NULL){
-                rendererConfigElement->rendererFlag=rendererConfigElement->rendererFlag|SDL_RENDERER_TARGETTEXTURE;
-            }
-            else if(strstr(arrayParameters[counterParameters],"SDL_RENDERER_SOFTWARE")!=NULL){
-                rendererConfigElement->rendererFlag=rendererConfigElement->rendererFlag|SDL_RENDERER_SOFTWARE;
-            }
+        if(errno==ERANGE){
+            createErrorReport("La taille de la fenetre du fichier de configuration depasse les valeurs admise par ce programme",__FILE__,__LINE__,__DATE__,__TIME__);
+            return 0;
         }
-
         counterParameters++;
     }
-}
+    return 1;
 
+}
 
 void initSDLInitConfig(SDLInitConfig *initConfigElement, char **arrayParameters, int lastRow){
 
@@ -167,13 +143,46 @@ void initSDLInitConfig(SDLInitConfig *initConfigElement, char **arrayParameters,
     }
 }
 
-void initTTFConfig(TTFConfig *ttfConfigElement, char **arrayParameters,int lastRow ){
+void initSDLRendererConfig(SDLRendererConfig *rendererConfigElement, char **arrayParameters, int lastRow ){
+
+    int counterParameters=0;
+    rendererConfigElement->rendererFlag=0x00000000;
+    
+    while( counterParameters<lastRow ){
+
+        errno=0;
+        if( strncmp(arrayParameters[counterParameters], "SDL_RendererFlags=" , strlen("SDL_RendererFlags=")) == 0){
+
+            if(strstr(arrayParameters[counterParameters],"SDL_RENDERER_ACCELERATED")!=NULL){
+                rendererConfigElement->rendererFlag=rendererConfigElement->rendererFlag|SDL_RENDERER_ACCELERATED;
+            }
+            else if(strstr(arrayParameters[counterParameters],"SDL_RENDERER_PRESENTVSYNC")!=NULL){
+                rendererConfigElement->rendererFlag=rendererConfigElement->rendererFlag|SDL_RENDERER_PRESENTVSYNC;
+            }
+            else if(strstr(arrayParameters[counterParameters],"SDL_RENDERER_TARGETTEXTURE")!=NULL){
+                rendererConfigElement->rendererFlag=rendererConfigElement->rendererFlag|SDL_RENDERER_TARGETTEXTURE;
+            }
+            else if(strstr(arrayParameters[counterParameters],"SDL_RENDERER_SOFTWARE")!=NULL){
+                rendererConfigElement->rendererFlag=rendererConfigElement->rendererFlag|SDL_RENDERER_SOFTWARE;
+            }
+        }
+        counterParameters++;
+    }
+}
+
+short initTTFConfig(TTFConfig *ttfConfigElement, char **arrayParameters,int lastRow ){
 
     int counterParameters=0;
 
-    ttfConfigElement->fontDirectory=malloc(sizeof(char)*strlen("fonts/")+1);
+    if((ttfConfigElement->fontDirectory=malloc(sizeof(char)*strlen("fonts/")+1))==NULL){
+        createErrorReport("Echec d'allocation memoire.",__FILE__,__LINE__,__DATE__,__TIME__);
+        return 0;   
+    }
 
-    strcpy(ttfConfigElement->fontDirectory,"fonts/");
+    if(strcpy(ttfConfigElement->fontDirectory,"fonts/")==NULL){
+        createErrorReport("Echec lors de la copie d'une chaine de caractere",__FILE__,__LINE__,__DATE__,__TIME__);
+        return 0;
+    }
 
     while( counterParameters< lastRow){
 
@@ -181,14 +190,17 @@ void initTTFConfig(TTFConfig *ttfConfigElement, char **arrayParameters,int lastR
 
             free(ttfConfigElement->fontDirectory);
 
-            if((ttfConfigElement->fontDirectory = calloc( (strlen(arrayParameters[counterParameters]) - strlen("fontDirectory="))+1,sizeof(char))) != NULL){
-                
-                strcpy(ttfConfigElement->fontDirectory , (arrayParameters[counterParameters]+ strlen("fontDirectory=")));
-                formatFullPath(&ttfConfigElement->fontDirectory);
+            if((ttfConfigElement->fontDirectory = calloc( (strlen(arrayParameters[counterParameters]) - strlen("fontDirectory="))+1,sizeof(char))) == NULL){
+                createErrorReport("Echec d'allocation memoire.",__FILE__,__LINE__,__DATE__,__TIME__);
+                return 0;   
             }
-
-            else{
-                createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
+            if((strcpy(ttfConfigElement->fontDirectory , (arrayParameters[counterParameters]+ strlen("fontDirectory="))))==NULL){
+                createErrorReport("Echec lors de la copie d'une chaine de caractere",__FILE__,__LINE__,__DATE__,__TIME__);
+                return 0;
+            }
+            if(formatFullPath(&ttfConfigElement->fontDirectory)==0){
+                createErrorReport("Echec lors du formatage d'un chemin absolue.",__FILE__,__LINE__,__DATE__,__TIME__);
+                return 0;
             }
         }
         counterParameters++;
@@ -200,60 +212,82 @@ void initTTFConfig(TTFConfig *ttfConfigElement, char **arrayParameters,int lastR
     
         if( strncmp(arrayParameters[counterParameters], "fontMenu=" , strlen("fontMenu=")) == 0){
 
-            if((ttfConfigElement->fontMenu = calloc(strlen(arrayParameters[counterParameters]) - strlen("fontMenu=")+strlen(ttfConfigElement->fontDirectory),sizeof(char))) != NULL){
-                strcpy(ttfConfigElement->fontMenu , ttfConfigElement->fontDirectory);
-                strcat(ttfConfigElement->fontMenu , (arrayParameters[counterParameters]+ strlen("fontMenu=")));
+            if((ttfConfigElement->fontMenu = calloc(strlen(arrayParameters[counterParameters]) - strlen("fontMenu=")+strlen(ttfConfigElement->fontDirectory),sizeof(char))) == NULL){
+                createErrorReport("Echec d'allocation memoire.",__FILE__,__LINE__,__DATE__,__TIME__);
+                return 0;   
+            }        
+            if(strcpy(ttfConfigElement->fontMenu , ttfConfigElement->fontDirectory)==NULL){
+                createErrorReport("Echec lors de la copie d'une chaine de caractere",__FILE__,__LINE__,__DATE__,__TIME__);
+                return 0;
             }
-
-            else{
-                createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
+            if(strcat(ttfConfigElement->fontMenu , (arrayParameters[counterParameters]+ strlen("fontMenu=")))==NULL){
+                createErrorReport("Echec lors de la concatenation de deux chaines de caracteres",__FILE__,__LINE__,__DATE__,__TIME__);
+                return 0;
             }
         }
         counterParameters++;
     }
+    return 1;
 }
 
-void initIMGConfig(IMGConfig *IMGConfigElement, char **arrayParameters,int lastRow , int windowWidth, int windowHeight){
+short initIMGConfig(IMGConfig *IMGConfigElement, char **arrayParameters,int lastRow , int windowWidth, int windowHeight){
 
     int counterParameters=0;
     int stringDimensions[2]={0};
 
-    IMGConfigElement->IMGDirectory=malloc(sizeof(char)*strlen("img/")+1);
-    strcpy(IMGConfigElement->IMGDirectory,"img/");
+    if((IMGConfigElement->IMGDirectory=malloc(sizeof(char)*strlen("img/")+1))==NULL){
+        createErrorReport("Echec d'allocation memoire.",__FILE__,__LINE__,__DATE__,__TIME__);
+        return 0;   
+    }
+    if(strcpy(IMGConfigElement->IMGDirectory,"img/")==NULL){
+        createErrorReport("Echec lors de la copie d'une chaine de caractere",__FILE__,__LINE__,__DATE__,__TIME__);
+        return 0;
+    }
 
     while( counterParameters< lastRow){
 
         if( strncmp(arrayParameters[counterParameters], "parisMap=" , strlen("parisMap=")) == 0){
 
-            if((IMGConfigElement->parisMap = calloc(strlen(IMGConfigElement->IMGDirectory)+strlen(arrayParameters[counterParameters]) - strlen("parisMap=")+1,sizeof(char))) != NULL){
-                extractWindowDimensionsFromString(arrayParameters[counterParameters]+ strlen("parisMap="),stringDimensions);
-
-                if(windowWidth>=stringDimensions[0] || windowHeight>=stringDimensions[1]){
-                    if(IMGConfigElement->parisMap!=NULL){
-                        free(IMGConfigElement->parisMap);
-                        if((IMGConfigElement->parisMap = calloc(strlen(IMGConfigElement->IMGDirectory)+strlen(arrayParameters[counterParameters]) - strlen("parisMap=")+1,sizeof(char))) == NULL){
-                            createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
-                        }
-                    }
-                    
-                    strcpy(IMGConfigElement->parisMap,IMGConfigElement->IMGDirectory);
-                    strcat(IMGConfigElement->parisMap , (arrayParameters[counterParameters]+ strlen("parisMap=")));  
-                    if(windowWidth==stringDimensions[0] && windowHeight==stringDimensions[1]){
-                        break;
-                    }
-                                          
-                }
+            if((IMGConfigElement->parisMap = calloc(strlen(IMGConfigElement->IMGDirectory)+strlen(arrayParameters[counterParameters]) - strlen("parisMap=")+1,sizeof(char))) == NULL){
+                createErrorReport("Echec d'allocation memoire.",__FILE__,__LINE__,__DATE__,__TIME__);
+                return 0;
             }
-            else{
-                createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
+            if(extractWindowDimensionsFromString(arrayParameters[counterParameters]+ strlen("parisMap="),stringDimensions)==0){
+                createErrorReport("Erreur lors de l'extraction des dimensions de d'une image dans le fichier de configuration",__FILE__,__LINE__,__DATE__,__TIME__);
+                return 0;
+            }
+            //Trouve l'image ayant les dimensions les plus proches de celles de la fenêtre
+            if(windowWidth>=stringDimensions[0] || windowHeight>=stringDimensions[1]){
+                if(IMGConfigElement->parisMap!=NULL){
+                    free(IMGConfigElement->parisMap);
+                    if((IMGConfigElement->parisMap = calloc(strlen(IMGConfigElement->IMGDirectory)+strlen(arrayParameters[counterParameters]) - strlen("parisMap=")+1,sizeof(char))) == NULL){
+                        createErrorReport("Echec d'allocation memoire.",__FILE__,__LINE__,__DATE__,__TIME__);
+                        return 0;
+                    }
+                }
+                
+                if(strcpy(IMGConfigElement->parisMap,IMGConfigElement->IMGDirectory)==NULL){
+                    createErrorReport("Echec lors de la copie d'une chaine de caractere",__FILE__,__LINE__,__DATE__,__TIME__);
+                    return 0;
+                }
+
+                if(strcat(IMGConfigElement->parisMap , (arrayParameters[counterParameters]+ strlen("parisMap=")))==NULL){
+                    createErrorReport("Echec lors de la concatenation de deux chaines de caracteres",__FILE__,__LINE__,__DATE__,__TIME__);
+                    return 0;
+                }  
+                if(windowWidth==stringDimensions[0] && windowHeight==stringDimensions[1]){
+                    break;
+                }                
             }
         }
         counterParameters++;
     }
+    return 1;
 }
 
-
-
+/*
+ * ─── FONCTIONS DE LIBERATION D'ALLOCATION ────────────────────────────────────
+ */
 
 
 void freeSDLConfigElement(SDLConfig *SDLConfigElement){

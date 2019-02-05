@@ -6,9 +6,6 @@
 
 #include <SDL.h>
 
-// void refreshBackgroundHostMenu(SDLEnvironment *environment);
-// void refreshBackgroundLevel(SDLEnvironment *environment);
-
 //Fonction chargée de rafraichir le background du jeu selon une fréquence de raffraichissement, la fonction est utilisée dans le cas du menu ou d'un niveau. 
 void refreshBackground(SDLEnvironment *environment,MenuLevel menuOrLevel);
 

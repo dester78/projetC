@@ -5,6 +5,9 @@
 
 #include <SDL.h>
 
+//
+// ─── FONCTIONS DE CALCULS MATHEMATIQUES ───────────────────────────────────────────
+//
 
 int distanceBetweenTwoPoint(SDL_Point *firstPoint, SDL_Point *secondPoint){
 

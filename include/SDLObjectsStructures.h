@@ -2,12 +2,12 @@
 #define SDLOBJECTSSTRUCTURES
 
 #include<SDLConfigStructures.h>
+#include <fileManager.h>
 
 #include <SDL.h>
-#include <SDLColor.h>
 #include <mysql.h>
 #include <SDL_ttf.h>
-#include <fileManager.h>
+
 
 //Enumération utilisée principalement pour dessiner des formes géométriques
 typedef enum GeometricShape {_CIRCLE_, _SQUARE_, _TRIANGLE_} GeometricShape;
@@ -274,7 +274,11 @@ typedef struct SDLEnvironment{
 
 }SDLEnvironment;
 
-//Fonctions d'initialisation de structures
+
+/*
+ * ─── FONCTIONS D'INITIALISATION DE STRUCTURES ────────────────────────────────────
+ */
+
 SDLEnvironment *initSDLEnvironment( SDL_Window *mainWindow,SDL_Renderer *mainRenderer);
 SDLGUI *initGUIHostMenu(SDL_Window  *mainWindow, SDLConfig *SDLConfigElement,MYSQL *dbConnection);
 SDLGUI *initGUILevel(SDL_Window  *mainWindow, SDLConfig *SDLConfigElement);
@@ -289,7 +293,10 @@ SDLLevel *initGameLevel(SDLTimer *timer, LevelName levelName,char *backgroundIMG
 SDLBackground *initLevelBackground(  char *backgroundIMGPath, File *metroLineColorFile, LevelName levelName, SDL_Rect *borderContainer, unsigned short sizeArrCar, unsigned short sizeArrEngine, unsigned short sizeArrMetroStation, unsigned short sizeMetroStation, unsigned short sizeTransport );
 
 
-//Fonctions de libération mémoire des structures
+/*
+ * ─── FONCTIONS DE LIBERATION D'ALLOCATION ────────────────────────────────────────
+ */
+
 void freeSDLLevel(SDLLevel *level);
 void freeSDLContainer(SDLContainer *container);
 void freeSDLButton(SDLButtons *sdlButtonElement);
@@ -300,10 +307,6 @@ void freeMetroSegment(MetroSegment *metroSegment);
 void freeMetroStation(MetroStation *metroStation);
 void freeSDLGUI(SDLGUI *gui);
 void freeSDLEnvironment(SDLEnvironment *environment);
+void freeEngine(Engine *engine);
 
-
-
-
-// void initBackgroundHostMenu(SDL_Window *mainWindow,SDLBackground *backgroundHostMenu);
-// SDLBackground *initLevelBackground(char *backgroundIMGPath,  File *metroLineColorFile, LevelName levelName, SDL_Rect *borderContainer);
 #endif

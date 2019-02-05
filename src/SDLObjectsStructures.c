@@ -17,12 +17,18 @@
 #include <mysql.h>
 
 
+/*
+ * ─── FONCTIONS D'INITIALISATION DE STRUCTURES ────────────────────────────────────
+ */
 
 SDLEnvironment *initSDLEnvironment( SDL_Window *mainWindow,SDL_Renderer *mainRenderer){
 
     SDLEnvironment *environment;
 
-    environment=malloc(sizeof(SDLEnvironment));
+    if((environment=malloc(sizeof(SDLEnvironment)))==NULL){
+        createErrorReport("Echec lors d'une allocation de memoire",__FILE__,__LINE__,__DATE__,__TIME__);
+        return NULL;
+    }
     
     environment->timer=NULL;
     environment->background=NULL;
@@ -38,21 +44,23 @@ SDLGUI *initGUIHostMenu(SDL_Window  *mainWindow, SDLConfig *SDLConfigElement,MYS
     SDLGUI *guiHostMenu;
     short connectionState=(mysql_get_host_info(dbConnection)!=NULL);//Status de connexion vaut 1 si fonction retourne une valeur différente à NULL
 
-    if((guiHostMenu=malloc(sizeof(SDLGUI)))!=NULL){
-        guiHostMenu->rightContainer=NULL;
-        guiHostMenu->leftContainer=NULL;
-        guiHostMenu->container=initContainer(mainWindow,_CENTER_,4);
-
-        if(initButtonsHostMenu(guiHostMenu->container,guiHostMenu->container->arrayButtons,SDLConfigElement->ttf->fontMenu,guiHostMenu->container->sizeArrayButtons,connectionState)){
-            return guiHostMenu;
-        }
-        createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
+    if((guiHostMenu=malloc(sizeof(SDLGUI)))==NULL){
+        createErrorReport("Echec lors d'une allocation memoire",__FILE__,__LINE__,__DATE__,__TIME__);
         return NULL;
     }
-    else{
-        createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
+
+    guiHostMenu->rightContainer=NULL;
+    guiHostMenu->leftContainer=NULL;
+    if((guiHostMenu->container=initContainer(mainWindow,_CENTER_,4))==NULL){
+        createErrorReport("Echec lors de l'initialisation d'un conteneur",__FILE__,__LINE__,__DATE__,__TIME__);
+        return NULL; 
+    }
+
+    if(initButtonsHostMenu(guiHostMenu->container,guiHostMenu->container->arrayButtons,SDLConfigElement->ttf->fontMenu,guiHostMenu->container->sizeArrayButtons,connectionState)==0){
+        createErrorReport("Echec lors de l'initialisation des boutons d'un conteneur du menu",__FILE__,__LINE__,__DATE__,__TIME__);
         return NULL;
     }  
+    return guiHostMenu;
 }
 
 
@@ -60,12 +68,15 @@ SDLGUI *initGUILevel(SDL_Window  *mainWindow, SDLConfig *SDLConfigElement){
 
     SDLGUI *guiLevel;
 
-    if((guiLevel=malloc(sizeof(SDLGUI)))!=NULL){
-        guiLevel->leftContainer=initContainer(mainWindow,_LEFT_,2);
-        return guiLevel;
+    if((guiLevel=malloc(sizeof(SDLGUI)))==NULL){
+        createErrorReport("Echec lors d'une allocation memoire",__FILE__,__LINE__,__DATE__,__TIME__);
+        return NULL; 
     }
-    createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
-    return NULL;
+    if((guiLevel->leftContainer=initContainer(mainWindow,_LEFT_,2))==NULL){
+        createErrorReport("Echec lors de l'initialisation d'un conteneur",__FILE__,__LINE__,__DATE__,__TIME__);
+        return NULL; 
+    }
+    return guiLevel;
 }
 
 
@@ -73,16 +84,15 @@ SDLTimer *initTimer(int refreshFrequency){
 
     SDLTimer *timer;
 
-    if((timer=malloc(sizeof(SDLTimer)))!=NULL){
-        timer->refreshCurrentTime=SDL_GetTicks();
-        timer->refreshFrequency=refreshFrequency;
-        timer->refreshPastTime=timer->refreshCurrentTime;
-        timer->clickTime=timer->refreshCurrentTime;
-        return timer;
+    if((timer=malloc(sizeof(SDLTimer)))==NULL){
+        createErrorReport("Echec lors d'une allocation memoire",__FILE__,__LINE__,__DATE__,__TIME__);
+        return NULL; 
     }
-    
-    createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
-    return NULL;  
+    timer->refreshCurrentTime=SDL_GetTicks();
+    timer->refreshFrequency=refreshFrequency;
+    timer->refreshPastTime=timer->refreshCurrentTime;
+    timer->clickTime=timer->refreshCurrentTime;
+    return timer;
 }
 
 short initButtonsHostMenu( SDLContainer *containerHostMenu,SDLButtons** buttonsHostMenu, char *fontPath, unsigned short sizeArrayButtons, short connectionState){
@@ -94,8 +104,8 @@ short initButtonsHostMenu( SDLContainer *containerHostMenu,SDLButtons** buttonsH
             case 0 : 
                 buttonsHostMenu[counterButton]->color=connectionState==1?SDLChangeRGBColor(242,201,49,255):SDLChangeRGBColor(0,0,0,255);
                 if((buttonsHostMenu[counterButton]->text->content=malloc(sizeof(char)*(strlen("CONNEXION") + 1)))==NULL){
-                    createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
-                    return 0;  
+                    createErrorReport("Echec lors d'une allocation memoire",__FILE__,__LINE__,__DATE__,__TIME__);
+                    return 0; 
                 }
                 strcpy(buttonsHostMenu[counterButton]->text->content,"CONNEXION");
             break;
@@ -103,7 +113,7 @@ short initButtonsHostMenu( SDLContainer *containerHostMenu,SDLButtons** buttonsH
             case 1 : 
                 buttonsHostMenu[counterButton]->color=SDLChangeRGBColor(137,199,214,255);
                 if((buttonsHostMenu[counterButton]->text->content=malloc(sizeof(char)*(strlen("JOUER") + 1)))==NULL){
-                    createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);                    
+                    createErrorReport("Echec lors d'une allocation memoire",__FILE__,__LINE__,__DATE__,__TIME__);
                     return 0;  
                 }
                 strcpy(buttonsHostMenu[counterButton]->text->content,"JOUER");
@@ -112,7 +122,7 @@ short initButtonsHostMenu( SDLContainer *containerHostMenu,SDLButtons** buttonsH
             case 2 : 
                 buttonsHostMenu[counterButton]->color=SDLChangeRGBColor(50,142,91,255);
                 if((buttonsHostMenu[counterButton]->text->content=malloc(sizeof(char)*(strlen("PARAMETRES") + 1)))==NULL){
-                    createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);                    
+                    createErrorReport("Echec lors d'une allocation memoire",__FILE__,__LINE__,__DATE__,__TIME__);
                     return 0; 
                 }
                 strcpy(buttonsHostMenu[counterButton]->text->content,"PARAMETRES");
@@ -121,7 +131,7 @@ short initButtonsHostMenu( SDLContainer *containerHostMenu,SDLButtons** buttonsH
             case 3 : 
                 buttonsHostMenu[counterButton]->color=SDLChangeRGBColor(222,139,83,255);
                 if((buttonsHostMenu[counterButton]->text->content=malloc(sizeof(char)*(strlen("QUITTER") + 1)))==NULL){
-                    createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);                    
+                    createErrorReport("Echec lors d'une allocation memoire",__FILE__,__LINE__,__DATE__,__TIME__);
                     return 0; 
                 }
                 strcpy(buttonsHostMenu[counterButton]->text->content,"QUITTER");
@@ -135,8 +145,8 @@ short initButtonsHostMenu( SDLContainer *containerHostMenu,SDLButtons** buttonsH
         marginAuto(&containerHostMenu->rect,&containerHostMenu->arrayButtons[counterButton]->rect,0,1,_X_);
 
         if((buttonsHostMenu[counterButton]->text->fontPath=malloc(sizeof(char)*(strlen(fontPath)+1)))==NULL){
-            createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);                    
-            return 0; 
+            createErrorReport("Echec lors d'une allocation memoire",__FILE__,__LINE__,__DATE__,__TIME__);
+            return 0;
         }
         strcpy(buttonsHostMenu[counterButton]->text->fontPath,fontPath);
         buttonsHostMenu[counterButton]->text->color=SDLChangeRGBColor(255,255,255,255);
@@ -158,14 +168,26 @@ short initButtonSideContainerLevel(SDLContainer *container, ContainerPosition co
             case _LEFT_:               
                 switch(counterButton){
                     case 0:
-                        container->arrayButtons[counterButton]->surface=IMG_Load("img/loco60x60.png");
+                        if((container->arrayButtons[counterButton]->surface=IMG_Load("img/loco60x60.png"))==NULL){
+                            createErrorReport("Echec lors du chargement d'une image",__FILE__,__LINE__,__DATE__,__TIME__);
+                            return 0;
+                        }
                         container->arrayButtons[counterButton]->buttonName=_ENGINE_BTN_;
-                        container->arrayButtons[counterButton]->text->content=malloc(sizeof(char)*backgroundLevel->sizeArrEngine);
+                        if((container->arrayButtons[counterButton]->text->content=malloc(sizeof(char)*backgroundLevel->sizeArrEngine))==NULL){
+                            createErrorReport("Echec lors d'une allocation memoire",__FILE__,__LINE__,__DATE__,__TIME__);
+                            return 0;
+                        }
                     break;
                     case 1:
-                        container->arrayButtons[counterButton]->surface=IMG_Load("img/railcar60x60.png");
+                        if((container->arrayButtons[counterButton]->surface=IMG_Load("img/railcar60x60.png"))==NULL){
+                            createErrorReport("Echec lors du chargement d'une image",__FILE__,__LINE__,__DATE__,__TIME__);
+                            return 0;
+                        }
                         container->arrayButtons[counterButton]->buttonName=_CAR_BTN_;
-                        container->arrayButtons[counterButton]->text->content=malloc(sizeof(char)*backgroundLevel->sizeArrCar);
+                        if((container->arrayButtons[counterButton]->text->content=malloc(sizeof(char)*backgroundLevel->sizeArrCar))==NULL){
+                            createErrorReport("Echec lors d'une allocation memoire",__FILE__,__LINE__,__DATE__,__TIME__);
+                            return 0;
+                        }
                     break;               
                 }               
                 container->arrayButtons[counterButton]->insideColor=SDLChangeRGBColor(255,255,255,255);
@@ -182,7 +204,7 @@ short initButtonSideContainerLevel(SDLContainer *container, ContainerPosition co
                     case 0:
                         container->arrayButtons[counterButton]->buttonName=_PLAY_;
                         if((container->arrayButtons[counterButton]->surface=IMG_Load("img/play40x40.png"))==NULL){
-                            createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
+                            createErrorReport("Echec lors du chargement d'une image",__FILE__,__LINE__,__DATE__,__TIME__);
                             return 0;
                         }
                         container->arrayButtons[counterButton]->insideColor=SDLChangeRGBColor(8,133,0,255);
@@ -191,7 +213,7 @@ short initButtonSideContainerLevel(SDLContainer *container, ContainerPosition co
                     case 1:
                         container->arrayButtons[counterButton]->buttonName=_PAUSE_;
                         if((container->arrayButtons[counterButton]->surface=IMG_Load("img/pause40x40.png"))==NULL){
-                            createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
+                            createErrorReport("Echec lors du chargement d'une image",__FILE__,__LINE__,__DATE__,__TIME__);
                             return 0;
                         }   
                         container->arrayButtons[counterButton]->insideColor=SDLChangeRGBColor(243,232,71,255);
@@ -200,7 +222,7 @@ short initButtonSideContainerLevel(SDLContainer *container, ContainerPosition co
                     case 2:
                         container->arrayButtons[counterButton]->buttonName=_FASTER_;
                         if((container->arrayButtons[counterButton]->surface=IMG_Load("img/faster40x40.png"))==NULL){
-                            createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
+                            createErrorReport("Echec lors du chargement d'une image",__FILE__,__LINE__,__DATE__,__TIME__);
                             return 0;
                         }
                         container->arrayButtons[counterButton]->insideColor=SDLChangeRGBColor(33,68,162,255);
@@ -247,11 +269,13 @@ SDLContainer *initContainer(SDL_Window *mainWindow, ContainerPosition containerP
     SDLContainer *container;
     int wWindow,hWindow;
 
-    container=malloc(sizeof(SDLContainer));
+    if((container=malloc(sizeof(SDLContainer)))==NULL){
+        createErrorReport("Echec lors d'une allocation de memoire",__FILE__,__LINE__,__DATE__,__TIME__);
+        return NULL;
+    }
     container->color=SDLChangeRGBColor(20,20,20,50);
     container->sizeArrayText=0;
     
-
     SDL_GetWindowSize(mainWindow,&wWindow,&hWindow);//Récupère les dimensions de la fenêtre pour le centrage du conteneur
 
     switch(containerPosition){
@@ -281,16 +305,25 @@ SDLContainer *initContainer(SDL_Window *mainWindow, ContainerPosition containerP
     }
 
     if(container->sizeArrayButtons!=0){
-        container->arrayButtons=malloc(sizeof(SDLButtons*)*container->sizeArrayButtons);
+        if((container->arrayButtons=malloc(sizeof(SDLButtons*)*container->sizeArrayButtons))==NULL){
+            createErrorReport("Echec lors d'une allocation de memoire",__FILE__,__LINE__,__DATE__,__TIME__);
+            return NULL;
+        }
         for(unsigned short counterButton=0; counterButton<container->sizeArrayButtons; counterButton++){
             
-            container->arrayButtons[counterButton]=malloc(sizeof(SDLButtons));
+            if((container->arrayButtons[counterButton]=malloc(sizeof(SDLButtons)))==NULL){
+                createErrorReport("Echec lors d'une allocation de memoire",__FILE__,__LINE__,__DATE__,__TIME__);
+                return NULL;
+            }
             container->arrayButtons[counterButton]->surface=NULL;
             container->arrayButtons[counterButton]->texture=NULL;
             container->arrayButtons[counterButton]->backgroundSurface=NULL;
             container->arrayButtons[counterButton]->backgroundTexture=NULL;
             container->arrayButtons[counterButton]->display=0;
-            container->arrayButtons[counterButton]->text=malloc(sizeof(SDLText));
+            if((container->arrayButtons[counterButton]->text=malloc(sizeof(SDLText)))==NULL){
+                createErrorReport("Echec lors d'une allocation de memoire",__FILE__,__LINE__,__DATE__,__TIME__);
+                return NULL;
+            }
         } 
     }
     return container;
@@ -303,7 +336,10 @@ SDLBackground *initBackgroundHostMenu(SDL_Window *mainWindow){
 
     SDLBackground *backgroundHostMenu;
 
-    backgroundHostMenu=malloc(sizeof(SDLBackground));
+    if((backgroundHostMenu=malloc(sizeof(SDLBackground)))==NULL){
+        createErrorReport("Echec lors d'une allocation de memoire",__FILE__,__LINE__,__DATE__,__TIME__);
+        return NULL;
+    }
 
     SDL_Color backgroundColor={0,0,0,255};
     backgroundHostMenu->color=backgroundColor;
@@ -323,14 +359,23 @@ SDLBackground *initBackgroundHostMenu(SDL_Window *mainWindow){
     backgroundHostMenu->rect.x = 0;
     backgroundHostMenu->rect.y = 0;
 
-    
     backgroundHostMenu->arrMetroStations=calloc(backgroundHostMenu->sizeArrMetroStations,sizeof(MetroStation*));
     backgroundHostMenu->arrMetroLinesColor=calloc(backgroundHostMenu->sizeArrMetroLinesColor,sizeof(SDL_Color));
     backgroundHostMenu->arrMetroLines=calloc(backgroundHostMenu->sizeArrMetroLines,sizeof(MetroLine*));
 
+    if(backgroundHostMenu->arrMetroStations==NULL||backgroundHostMenu->arrMetroLinesColor==NULL||backgroundHostMenu->arrMetroLines==NULL){
+        createErrorReport("Echec lors d'une allocation de memoire",__FILE__,__LINE__,__DATE__,__TIME__);
+        return NULL;
+    }
     for(short counterMetroStation=0;counterMetroStation<backgroundHostMenu->sizeArrMetroStations;counterMetroStation++){
-        backgroundHostMenu->arrMetroStations[counterMetroStation]=malloc(sizeof(MetroStation));
-        backgroundHostMenu->arrMetroStations[counterMetroStation]->arrOtherMetroStations=malloc((backgroundHostMenu->sizeArrMetroStations-1)*sizeof(MetroStation*));
+        if((backgroundHostMenu->arrMetroStations[counterMetroStation]=malloc(sizeof(MetroStation)))==NULL){
+            createErrorReport("Echec lors d'une allocation de memoire",__FILE__,__LINE__,__DATE__,__TIME__);
+            return NULL;
+        }
+        if((backgroundHostMenu->arrMetroStations[counterMetroStation]->arrOtherMetroStations=malloc((backgroundHostMenu->sizeArrMetroStations-1)*sizeof(MetroStation*)))==NULL){
+            createErrorReport("Echec lors d'une allocation de memoire",__FILE__,__LINE__,__DATE__,__TIME__);
+            return NULL;
+        }
     }
 
     returnRandomColor(&backgroundHostMenu->arrMetroLinesColor,backgroundHostMenu->sizeArrMetroLinesColor);
@@ -369,7 +414,10 @@ SDLLevel *initGameLevel(SDLTimer *timer,LevelName levelName,char *backgroundIMGP
 
     SDLLevel *level;
 
-    level=malloc(sizeof(SDLLevel));
+    if((level=malloc(sizeof(SDLLevel)))==NULL){
+        createErrorReport("Echec lors d'une allocation de memoire",__FILE__,__LINE__,__DATE__,__TIME__);
+        return NULL;
+    }
     level->cycleCounter=0;
     level->cycleProgression=0;
     level->passengersCount=0;
@@ -382,12 +430,13 @@ SDLLevel *initGameLevel(SDLTimer *timer,LevelName levelName,char *backgroundIMGP
                 timer->metroStationApparitionFrequency=1000;
                 level->satisfactionFactor=1.2;
                 level->cycleDuration=3;
-                level->background=initLevelBackground(backgroundIMGPath,metroLineColorFile,levelName,borderContainer,3,3,10,40,20); 
+                if((level->background=initLevelBackground(backgroundIMGPath,metroLineColorFile,levelName,borderContainer,3,3,10,40,20))==NULL){
+                    return NULL;
+                } 
                 level->background->countUnlockMetroLine=3;
             }    
         break;
     }
-
     return level;
 }
 
@@ -395,8 +444,17 @@ SDLBackground *initLevelBackground(  char *backgroundIMGPath, File *metroLineCol
 
     SDLBackground *background;
 
-    background=malloc(sizeof(SDLBackground));
-    background->arrMetroLinesColor=malloc(sizeof(SDL_Color));
+    
+    if((background=malloc(sizeof(SDLBackground)))==NULL){
+        createErrorReport("Echec lors d'une allocation de memoire",__FILE__,__LINE__,__DATE__,__TIME__);
+        return NULL;
+    }
+    
+    if((background->arrMetroLinesColor=malloc(sizeof(SDL_Color)))==NULL){
+        createErrorReport("Echec lors d'une allocation de memoire",__FILE__,__LINE__,__DATE__,__TIME__);
+        return NULL;
+    }
+
     background->sizeArrMetroLinesColor=0;
     background->sizeArrMetroStations=sizeArrMetroStation;
     background->sizeArrEngine=sizeArrEngine;
@@ -406,30 +464,54 @@ SDLBackground *initLevelBackground(  char *backgroundIMGPath, File *metroLineCol
     background->texture=NULL;
     background->sizeMetroStation=sizeMetroStation;
     background->sizeTransport=sizeTransport;
-
-    background->arrMetroStations=calloc(background->sizeArrMetroStations,sizeof(MetroStation*));
-    metroLineColorFile->filePointer=openFile(metroLineColorFile->fullName,metroLineColorFile->openMode);
-
+    
+    if((metroLineColorFile->filePointer=openFile(metroLineColorFile->fullName,metroLineColorFile->openMode))==NULL){
+        createErrorReport("Echec lors de l'ouverture d'un fichier de couleurs de lignes de metro",__FILE__,__LINE__,__DATE__,__TIME__);
+        return NULL;
+    }
     switch(levelName){
         case _PARIS_:
-            loadMetroLineColor(metroLineColorFile->filePointer,"PARIS",&background->arrMetroLinesColor,&background->sizeArrMetroLinesColor);
+            if(loadMetroLineColor(metroLineColorFile->filePointer,"PARIS",&background->arrMetroLinesColor,&background->sizeArrMetroLinesColor)==0){
+                createErrorReport("Echec lors de la lecture du fichier de couleurs de lignes de metro",__FILE__,__LINE__,__DATE__,__TIME__);
+                return NULL;
+            }
         break;
     }
-    fclose(metroLineColorFile->filePointer);
+    if(fclose(metroLineColorFile->filePointer)==EOF){
+        createErrorReport("Echec lors de la fermeture d'un fichier de couleur de lignes de metro",__FILE__,__LINE__,__DATE__,__TIME__);
+        return NULL;
+    }
+
     metroLineColorFile->filePointer=NULL;
     background->sizeArrMetroLines=background->sizeArrMetroLinesColor;
     background->metroLineThickness=background->sizeMetroStation/background->sizeArrMetroLinesColor;
+
+    background->arrMetroStations=calloc(background->sizeArrMetroStations,sizeof(MetroStation*));
     background->arrMetroLines=malloc(sizeof(MetroLine*)*background->sizeArrMetroLinesColor);
     background->arrCar=calloc(background->sizeArrCar,sizeof(Car*));
     background->arrEngine=calloc(background->sizeArrEngine,sizeof(Engine*));
-    
 
-    background->surface=SDL_LoadBMP(backgroundIMGPath);
+
+    if(background->arrMetroStations==NULL||background->arrMetroLines==NULL||background->arrCar==NULL||background->arrEngine==NULL){
+        createErrorReport("Echec lors d'une allocation de memoire",__FILE__,__LINE__,__DATE__,__TIME__);
+        return NULL;
+    }
+
+    if((background->surface=SDL_LoadBMP(backgroundIMGPath))==NULL){
+        fprintf(stderr,"Echec lors du chargement d'un BitMap dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());
+        return NULL;
+    }
     background->rect=SDLChangeRect(borderContainer->w,borderContainer->w,background->surface->w-borderContainer->w,background->surface->h-borderContainer->w);
 
     for(short counterMetroStation=0;counterMetroStation<background->sizeArrMetroStations;counterMetroStation++){
-        background->arrMetroStations[counterMetroStation]=malloc(sizeof(MetroStation));
-        background->arrMetroStations[counterMetroStation]->arrOtherMetroStations=malloc((background->sizeArrMetroStations-1)*sizeof(MetroStation*));
+        if((background->arrMetroStations[counterMetroStation]=malloc(sizeof(MetroStation)))==NULL){
+            createErrorReport("Echec lors d'une allocation de memoire",__FILE__,__LINE__,__DATE__,__TIME__);
+            return NULL;
+        }
+        if((background->arrMetroStations[counterMetroStation]->arrOtherMetroStations=malloc((background->sizeArrMetroStations-1)*sizeof(MetroStation*)))==NULL){
+            createErrorReport("Echec lors d'une allocation de memoire",__FILE__,__LINE__,__DATE__,__TIME__);
+            return NULL;
+        }
     }
 
     for(short counterCar=0; counterCar <background->sizeArrCar; counterCar++){
@@ -441,14 +523,25 @@ SDLBackground *initLevelBackground(  char *backgroundIMGPath, File *metroLineCol
     }
 
     for(short counterMetroLine=0;counterMetroLine<background->sizeArrMetroLinesColor;counterMetroLine++){
-        background->arrMetroLines[counterMetroLine]=malloc(sizeof(MetroLine));
+        if((background->arrMetroLines[counterMetroLine]=malloc(sizeof(MetroLine)))==NULL){
+            createErrorReport("Echec lors d'une allocation de memoire",__FILE__,__LINE__,__DATE__,__TIME__);
+            return NULL;
+        }
         background->arrMetroLines[counterMetroLine]->color=background->arrMetroLinesColor[counterMetroLine];
-        background->arrMetroLines[counterMetroLine]->arrMetroSegment=malloc(sizeof(MetroSegment*));
+
+        if((background->arrMetroLines[counterMetroLine]->arrMetroSegment=malloc(sizeof(MetroSegment*)))==NULL){
+            createErrorReport("Echec lors d'une allocation de memoire",__FILE__,__LINE__,__DATE__,__TIME__);
+            return NULL;
+        }
         background->arrMetroLines[counterMetroLine]->sizeArrSegment=0;
     }
     return background;
 }
 
+
+/*
+ * ─── FONCTIONS DE LIBERATION D'ALLOCATION ────────────────────────────────────────
+ */
 
 void freeSDLEnvironment(SDLEnvironment *environment){
 
@@ -565,6 +658,19 @@ unsigned short counter;
         free(background->arrMetroLines);
         background->arrMetroLines=NULL;
     }
+
+    if(background->arrEngine!=NULL){
+        for(counter=0;counter<background->sizeArrEngine;counter++){
+            if(background->arrEngine[counter]!=NULL){
+                freeEngine(background->arrEngine[counter]);
+                free(background->arrEngine[counter]);
+                background->arrEngine[counter]=NULL;
+            } 
+        }
+        free(background->arrEngine);
+        background->arrEngine=NULL;
+    }
+
     if(background->arrMetroLinesColor!=NULL){
         free(background->arrMetroLinesColor);
         background->arrMetroLinesColor=NULL;
@@ -624,3 +730,14 @@ void freeMetroStation(MetroStation *metroStation){
     }
 
 }
+
+void freeEngine(Engine *engine){
+
+    if(engine->surface!=NULL){
+        SDL_FreeSurface(engine->surface);
+    }
+    if(engine->texture){
+        SDL_DestroyTexture(engine->texture);
+    }
+}
+

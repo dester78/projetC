@@ -7,14 +7,6 @@
 
 #include <SDL.h>
 
-
-void controlPixelPosition(Uint32 *pixel, int xPixel, int yPixel, int wSurface, int hSurface, Uint32 pixelColor){
-
-  if (xPixel >= 0 && xPixel <= wSurface && yPixel >= 0 && yPixel <= hSurface){
-      *pixel=pixelColor;
-  } 
-}
-
 void drawCircle(Uint32 **pixels,int xCenter, int yCenter, int radius,int wSurface, int hSurface, Uint32 pixelColor){
 
   int diameter, y, x;
@@ -46,9 +38,7 @@ void drawCircle(Uint32 **pixels,int xCenter, int yCenter, int radius,int wSurfac
   }
 }
 
-
-
-void drawFillCircle(SDL_Surface **surface, int xCenter, int yCenter, int radius, Uint32 color){
+short drawFillCircle(SDL_Surface **surface, int xCenter, int yCenter, int radius, Uint32 color){
 
     int diameter, y, x;
     
@@ -58,10 +48,10 @@ void drawFillCircle(SDL_Surface **surface, int xCenter, int yCenter, int radius,
 
     while (y >= x) {
 
-        drawVariableRect(surface, xCenter - x, yCenter - y, 2 * x + 1,1, color);
-        drawVariableRect(surface, xCenter - x, yCenter + y, 2 * x + 1,1, color);
-        drawVariableRect(surface, xCenter - y, yCenter - x, 2 * y + 1,1, color);
-        drawVariableRect(surface, xCenter - y, yCenter + x, 2 * y + 1,1, color);
+        if(drawVariableRect(surface, xCenter - x, yCenter - y, 2 * x + 1,1, color)==0||drawVariableRect(surface, xCenter - x, yCenter + y, 2 * x + 1,1, color)==0||drawVariableRect(surface, xCenter - y, yCenter - x, 2 * y + 1,1, color)==0||drawVariableRect(surface, xCenter - y, yCenter + x, 2 * y + 1,1, color)==0){
+            createErrorReport("Echec lors du remplissage d'un rectangle de taille variable",__FILE__,__LINE__,__DATE__,__TIME__);
+            return 0;
+        }
     
         if (diameter < 0){
             diameter = diameter + (4 * x) + 6;
@@ -74,10 +64,11 @@ void drawFillCircle(SDL_Surface **surface, int xCenter, int yCenter, int radius,
     
         x++;
     }
+    return 1;
 }
 
 
-void drawVariableRect(SDL_Surface **surface, int xRect,int yRect,int wRect,int hRect, Uint32 colorRect){
+short drawVariableRect(SDL_Surface **surface, int xRect,int yRect,int wRect,int hRect, Uint32 colorRect){
 
     SDL_Rect rect;
 
@@ -86,10 +77,15 @@ void drawVariableRect(SDL_Surface **surface, int xRect,int yRect,int wRect,int h
     rect.w = wRect;
     rect.h = hRect;
 
-    SDL_FillRect(*surface, &rect, colorRect);
+    if(SDL_FillRect(*surface, &rect, colorRect)!=0){
+        fprintf(stderr,"Echec lors du remplissage d'un rectangle dans le fichier %s ligne %d  (%s)\n",__FILE__,__LINE__,SDL_GetError());
+        return 0;
+    }
+    return 1;
 }
  
-int drawFillTriangle(SDL_Surface **surface, int xLeftRoot, int yLeftRoot, int wRoot, Uint32 color, Orientation orientation ){
+
+short drawFillTriangle(SDL_Surface **surface, int xLeftRoot, int yLeftRoot, int wRoot, Uint32 color, Orientation orientation ){
 
     int counterLine=0;
     
@@ -98,20 +94,24 @@ int drawFillTriangle(SDL_Surface **surface, int xLeftRoot, int yLeftRoot, int wR
     while(counterLine!=(wRoot/2 + 1 )){
 
         if(orientation==_LEFT_RIGHT_){
-            drawVariableRect(surface, xLeftRoot+counterLine, yLeftRoot-wRoot+counterLine, 1,wRoot-(counterLine*2), color);
-            drawVariableRect(surface, xLeftRoot+counterLine, yLeftRoot-wRoot+counterLine,1, wRoot-(counterLine*2), color);
+            if(drawVariableRect(surface, xLeftRoot+counterLine, yLeftRoot-wRoot+counterLine, 1,wRoot-(counterLine*2), color)==0|| drawVariableRect(surface, xLeftRoot+counterLine, yLeftRoot-wRoot+counterLine,1, wRoot-(counterLine*2), color)==0){
+                createErrorReport("Echec lors du remplissage d'un rectangle de taille variable",__FILE__,__LINE__,__DATE__,__TIME__);
+                return 0;
+            }
         }
         else if(orientation==_BOTTOM_TOP_){
-            drawVariableRect(surface, xLeftRoot+counterLine, yLeftRoot-counterLine*2-1, wRoot-(counterLine*2),1, color);
-            drawVariableRect(surface, xLeftRoot+counterLine, yLeftRoot-counterLine*2, wRoot-(counterLine*2),1, color);
+            if(drawVariableRect(surface, xLeftRoot+counterLine, yLeftRoot-counterLine*2-1, wRoot-(counterLine*2),1, color)==0||drawVariableRect(surface, xLeftRoot+counterLine, yLeftRoot-counterLine*2, wRoot-(counterLine*2),1, color)==0){
+                createErrorReport("Echec lors du remplissage d'un rectangle de taille variable",__FILE__,__LINE__,__DATE__,__TIME__);
+                return 0;
+            }
         }
         counterLine++;
     }
-    return counterLine;
+    return 1;
 }
 
 
-void drawGeometricShapeInGeometricShape(SDL_Surface *surface,SDL_Rect *rect,  Uint32 color, Uint32 insideColor, GeometricShape geometricShape, unsigned short centeringFactor, Orientation orientation){
+short drawGeometricShapeInGeometricShape(SDL_Surface *surface,SDL_Rect *rect,  Uint32 color, Uint32 insideColor, GeometricShape geometricShape, unsigned short centeringFactor, Orientation orientation){
 
     SDL_Rect tmpRect;
 
@@ -126,66 +126,46 @@ void drawGeometricShapeInGeometricShape(SDL_Surface *surface,SDL_Rect *rect,  Ui
         switch(geometricShape){
 
         case 0 : 
-            drawFillCircle(&surface,tmpRect.w/2+(shiftCounter*rect->w/centeringFactor)/2,tmpRect.h/2+(shiftCounter*rect->h/centeringFactor)/2,tmpRect.w/2,color);
+            if(drawFillCircle(&surface,tmpRect.w/2+(shiftCounter*rect->w/centeringFactor)/2,tmpRect.h/2+(shiftCounter*rect->h/centeringFactor)/2,tmpRect.w/2,color)==0){
+                createErrorReport("Echec lors de la création d'un cercle rempli",__FILE__,__LINE__,__DATE__,__TIME__);
+                return 0;
+            }
         break;
 
         case 1 :
-            drawVariableRect(&surface,(shiftCounter*rect->w/centeringFactor)/2,(shiftCounter*rect->w/centeringFactor)/2,tmpRect.w,tmpRect.h,color);
+            if(drawVariableRect(&surface,(shiftCounter*rect->w/centeringFactor)/2,(shiftCounter*rect->w/centeringFactor)/2,tmpRect.w,tmpRect.h,color)==0){
+                createErrorReport("Echec lors de la création d'un rectangle rempli",__FILE__,__LINE__,__DATE__,__TIME__);
+                return 0;
+            }
         break;
 
         case 2 :
-            drawFillTriangle(&surface,(shiftCounter*rect->w/centeringFactor)/2,tmpRect.h+(shiftCounter*rect->h/centeringFactor)/2,tmpRect.w,color, orientation);
+            if(drawFillTriangle(&surface,(shiftCounter*rect->w/centeringFactor)/2,tmpRect.h+(shiftCounter*rect->h/centeringFactor)/2,tmpRect.w,color, orientation)==0){
+                createErrorReport("Echec lors de la création d'un triangle rempli",__FILE__,__LINE__,__DATE__,__TIME__);
+                return 0;
+            }
         break;
         }
     }
-    
+    return 1;
 }
 
-// void drawTimeButton(SDL_Surface *surface,SDL_Rect *rect,  SDL_Color *color,  ButtonName  buttonName){
+void controlPixelPosition(Uint32 *pixel, int xPixel, int yPixel, int wSurface, int hSurface, Uint32 pixelColor){
 
-//     Uint32 tmpColor=SDL_MapRGBA(surface->format,color->r,color->g,color->b,color->a);
-//     printf("rect.x : %d , rect.y: %d , rect.w: %d rect.h:%d\n",rect->x,rect->y,rect->w,rect->h);
-
-//     printf("PAS PLAY");
-//     switch(buttonName){
-
-//         case _PLAY_:
-//         printf("PLAYYYYY");
-//         printf("\nrect->w : %d rect->y:%d,rect->w:%d,rect->h:%d\n",rect->x,rect->y,rect->w,rect->h);
-//             drawFillTriangle(&surface,rect->w/2.25,rect->h/1.15,rect->w/1.25,tmpColor, _LEFT_RIGHT_);
-//         break;
-//     }
-// }
+  if (xPixel >= 0 && xPixel <= wSurface && yPixel >= 0 && yPixel <= hSurface){
+      *pixel=pixelColor;
+  } 
+}
 
 
-// void changeOverlapColorSurfaces(SDL_Rect *foreGroundRect, SDL_Surface *backgroundSurface, SDL_Rect *backGroundRect, Uint32 overlapColor){
 
-//     Uint32 *backGroundPixels;
-//     Uint32 pixel;
-    
-//     if(SDL_LockSurface(backGroundSurface)!=0){
-//         printf("bug");
-//     }
 
-//     backGroundPixels = backGroundSurface->pixels;
 
-//     for(size_t yCounterForeground = foreGroundRect->y ; yCounterForeground<(size_t)foreGroundRect->y + foreGroundRect->h ; yCounterForeground++ ){
-//         for(size_t xCounterForeground = foreGroundRect->x ; xCounterForeground<(size_t)foreGroundRect->x + foreGroundRect->w ; xCounterForeground++){
-            
-//             for(size_t yCounterBackground = backGroundRect->y ; yCounterBackground <(size_t) backGroundRect->y + backGroundRect->h ; yCounterBackground++ ){
-//                 for(size_t xCounterBackground = backGroundRect->x ; xCounterBackground <(size_t) backGroundRect->x + backGroundRect->w ; xCounterBackground++){
 
-//                     if(yCounterForeground == yCounterBackground &&  xCounterForeground == xCounterBackground){
 
-//                         pixel=(yCounterBackground-backGroundRect->y) * (*backGroundSurface)->w + xCounterBackground-backGroundRect->x;
-//                         backGroundPixels[pixel]=overlapColor;
-//                     }
-//                 }
-//             }
-//         }
-//     }    	
-//     SDL_UnlockSurface(*backGroundSurface);
-// }
+
+
+
 
 
 

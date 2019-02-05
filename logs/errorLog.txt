@@ -1,0 +1,8 @@
+| Echec lors de l'affichage de texte dans un bouton | file src/SDLGUIObjects.c | line 275 | date Feb  5 2019 | time 17:41:08 |: No error
+| Echec lors du changment de couleur d'un bouton | file src/SDLMetroStation.c | line 136 | date Feb  5 2019 | time 17:43:04 |: No error
+| Echec lors de la mise à jour de l'affichage des stations de metro | file src/SDLTimer.c | line 33 | date Feb  5 2019 | time 17:43:04 |: No error
+| Echec lors de l'affichage de texte dans un bouton | file src/SDLGUIObjects.c | line 275 | date Feb  5 2019 | time 17:41:08 |: No error
+| Echec lors du changment de couleur d'un bouton | file src/SDLMetroStation.c | line 136 | date Feb  5 2019 | time 17:43:04 |: No error
+| Echec lors de la mise à jour de l'affichage des stations de metro | file src/SDLTimer.c | line 33 | date Feb  5 2019 | time 17:43:04 |: No error
+Echec lors la creation la création de la surface de texte dans le fichier src/SDLGUIObjects.c ligne 23 (Out of memory)
+Echec lors la creation la création de la surface de texte dans le fichier src/SDLGUIObjects.c ligne 23 (Out of memory)

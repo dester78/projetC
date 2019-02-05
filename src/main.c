@@ -31,43 +31,45 @@ int main(int argc, char **argv) {
     DbConfig dbConfigElement;
     FileIndex *fileIndex;
 
-    fileIndex=initFileIndex();
+    if((fileIndex=initFileIndex())==NULL){
+        createErrorReport("Erreur lors de la creation d'un index de fichier",__FILE__,__LINE__,__DATE__,__TIME__);
+        return 0;
+    }
 
+    if((fileIndex->err->filePointer=openFluxFile(fileIndex->err->fullName,fileIndex->err->openMode))==NULL){
+        createErrorReport("Echec lors de la redirection de sortie d'erreur",__FILE__,__LINE__,__DATE__,__TIME__);
+        return 0;            
+    }    
+
+    if((fileIndex->config->filePointer=openFile(fileIndex->config->fullName,fileIndex->config->openMode))==NULL){
+        createErrorReport("Echec lors de l'ouverture d'un fichier de configuration",__FILE__,__LINE__,__DATE__,__TIME__);
+        return 0;            
+    }        
     
-    // arrayFiles[0]=returnFileElement("errorLog.txt","a+");
-
-    // printf("%d",)
-    // arrayFiles[1].filePointer=malloc(sizeof(FILE*));
-
-    //if((arrayFiles[0].filePointer=openFluxFile(arrayFiles[0].fullName,arrayFiles[0].openMode))!=NULL){
-        
-        if((fileIndex->config->filePointer=openFile(fileIndex->config->fullName,fileIndex->config->openMode))!=NULL){
-            returnConfigFileParameters(fileIndex->config->filePointer,&lastRow,&arrayParameters); 
-            fclose(fileIndex->config->filePointer);
-            fileIndex->config->filePointer=NULL;
-        }        
-
-        else{
-            printf("toto");
-            createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__);
-            return 0;    
-        }   
-   // }
+    if(returnConfigFileParameters(fileIndex->config->filePointer,&lastRow,&arrayParameters)==0){
+        createErrorReport("Echec lors de la lecture des parametres d'un fichier de configuration",__FILE__,__LINE__,__DATE__,__TIME__);
+        return 0;  
+    }
     
-    if(initDbConfig(&dbConfigElement,arrayParameters,lastRow)!=-1){
-        
+    if(fclose(fileIndex->config->filePointer)==EOF){
+        createErrorReport("Echec lors de la fermeture d'un fichier de configuration",__FILE__,__LINE__,__DATE__,__TIME__);
+        return 0;     
+    }
+    fileIndex->config->filePointer=NULL;
+    
+    if(initDbConfig(&dbConfigElement,arrayParameters,lastRow)==-1){
+        createErrorReport("Echec lors de l'initialisation de la configuration de base de donnee'",__FILE__,__LINE__,__DATE__,__TIME__);
+        return 0;  
+    }
 
-        if(initSDLConfig(&SDLConfigElement,arrayParameters,lastRow)){
+    if(initSDLConfig(&SDLConfigElement,arrayParameters,lastRow)==0){
+        createErrorReport("Echec lors de l'initialisation de la configuration SDL'",__FILE__,__LINE__,__DATE__,__TIME__);
+        return 0;  
+    }
 
-            if(createMysqlConnection(&dbConfigElement,&dbConnection)){
-            
- 
-            }
-
-            else{
-                
-            }
-        }
+    if(createMysqlConnection(&dbConfigElement,&dbConnection)==0){
+        createErrorReport("Echec lors de la connexion a la base de donnee",__FILE__,__LINE__,__DATE__,__TIME__);
+        return 0;  
     }
 
     if (SDL_Init( SDLConfigElement.init->initFlag ) != 0 ){
@@ -86,31 +88,35 @@ int main(int argc, char **argv) {
 
     while(SDLLoop!=-1){
 
-        if((mainWindow=SDLCreateMainWindow(SDLConfigElement.window))!=NULL){
+        if((mainWindow=SDLCreateMainWindow(SDLConfigElement.window))==NULL){
+            createErrorReport("Echec lors de la creation de la fenetre principale",__FILE__,__LINE__,__DATE__,__TIME__);
+            return 0;
+        }
 
-            initIMGConfig(SDLConfigElement.img,arrayParameters,lastRow,SDLConfigElement.window->windowWidth,SDLConfigElement.window->windowWidth);
+        if(initIMGConfig(SDLConfigElement.img,arrayParameters,lastRow,SDLConfigElement.window->windowWidth,SDLConfigElement.window->windowWidth)==0){
+            createErrorReport("Echec lors de l'initialisation de la configuration d'image",__FILE__,__LINE__,__DATE__,__TIME__);
+            return 0;
+        }
 
-            if((mainRenderer=SDLCreateMainRenderer(mainWindow,SDLConfigElement.renderer->rendererFlag))!=NULL){
 
-                SDLLoop=SDLMainMenuLoop(mainWindow,mainRenderer,&SDLConfigElement,&dbConfigElement,&dbConnection,fileIndex);
-                SDL_DestroyWindow(mainWindow);
-                SDL_DestroyRenderer(mainRenderer);
-            }
-        }  
+        if((mainRenderer=SDLCreateMainRenderer(mainWindow,SDLConfigElement.renderer->rendererFlag))==NULL){
+            createErrorReport("Echec lors de la creation du moteur de rendu principal",__FILE__,__LINE__,__DATE__,__TIME__);
+            return 0;
+        }
+
+        SDLLoop=SDLMainMenuLoop(mainWindow,mainRenderer,&SDLConfigElement,&dbConfigElement,&dbConnection,fileIndex);
+        SDL_DestroyWindow(mainWindow);
+        SDL_DestroyRenderer(mainRenderer);  
     }
         
 
     
     freeDbConfigElement(&dbConfigElement);  
     freeSDLConfigElement(&SDLConfigElement);   
-    printf("avant free fileindex");
-
     freeFileIndex(fileIndex);
-    printf("apre");
-    
-    // freeFileElement(arrayFiles[1]);
-    // perror(createErrorReport(__FILE__,__LINE__,__DATE__,__TIME__));
+
     free(fileIndex);
+
     freeCharArray(&arrayParameters,lastRow);
     mysql_close(&dbConnection);
     IMG_Quit();
@@ -118,7 +124,5 @@ int main(int argc, char **argv) {
     SDL_Quit();
     mysql_library_end();
   
-
     return 0;
-
 }

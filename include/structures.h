@@ -32,17 +32,21 @@ typedef struct DbConfig{
 
 }DbConfig;
 
+/*
+ * ─── FONCTIONS D'INITIALISATION DE STRUCTURES ────────────────────────────────────
+ */
+//Initialisation de la structure de configuration de base de donnée    
+short initDbConfig(DbConfig *dbConfigElement, char **arrayParameters,int lastRow );
 
-
-//Fonctions d'initialisation de structures : 
-int initDbConfig(DbConfig *dbConfigElement, char **arrayParameters,int lastRow );
+//Initialisation de la structure index de fichier
 FileIndex * initFileIndex();
 
-
-
+//Créer un élément fichier 
 File *returnFileElement(char *fullName, char* openMode);
 
-//Fonctions de liberation d'allocations de structures
+/*
+ * ─── FONCTIONS DE LIBERATION D'ALLOCATION ────────────────────────────────────────
+ */
 void freeDbConfigElement(DbConfig *dbConfigElement );
 void freeFileIndex(FileIndex *fileIndex);
 void freeFileElement(File *fileElement);
